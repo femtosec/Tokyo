@@ -1,0 +1,7 @@
+[
+  { "name": "strategyTypeId",     "type": "int" },
+  { "name": "symbolList",         "type": "list" },
+  { "name": "micList",            "type": "list" },
+  { "name": "priceLimitList",     "type": "list" },
+  { "name": "orderQuantityList",  "type": "list" }
+]

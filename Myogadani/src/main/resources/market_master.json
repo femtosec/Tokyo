@@ -1,0 +1,5 @@
+[
+  { "id": 0,    "marketTypeString": "CryptoCurrencyExchange",   "name": "bitFlyer",   "mic": "BFL" },
+  { "id": 1,    "marketTypeString": "CryptoCurrencyExchange",   "name": "Coincheck",  "mic": "CCH" },
+  { "id": 2,    "marketTypeString": "CryptoCurrencyExchange",   "name": "Zaif",       "mic": "ZAI" }
+]
