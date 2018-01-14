@@ -21,7 +21,7 @@ public abstract class AbstractMasterDataStore<T extends IStoredObject> extends B
     public void init(IConfigAccessor configAccessor) throws Exception {
         String jsonFileLocation = configAccessor.getString("masterdata." + getClass().getSimpleName().toLowerCase() + ".jsonFileLocation", null);
         if (jsonFileLocation == null) {
-            throw new Exception("the json file is not available. jsonFileLocation: " + jsonFileLocation);
+            throw new Exception("the json file is not available.");
         }
 
         ArrayList<Map<String, Object>> root;

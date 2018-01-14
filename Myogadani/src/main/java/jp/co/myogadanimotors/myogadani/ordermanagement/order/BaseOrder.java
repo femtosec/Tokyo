@@ -19,6 +19,7 @@ public class BaseOrder implements IOrder {
     protected BigDecimal cancelledQuantity;
     protected BigDecimal expiredQuantity;
     protected BigDecimal rejectedQuantity;
+    protected BigDecimal exposedQuantity;
     protected BigDecimal priceLimit;
 
     public BaseOrder(long orderId,
@@ -31,6 +32,7 @@ public class BaseOrder implements IOrder {
                      BigDecimal cancelledQuantity,
                      BigDecimal expiredQuantity,
                      BigDecimal rejectedQuantity,
+                     BigDecimal exposedQuantity,
                      BigDecimal priceLimit) {
         this.orderId = orderId;
         this.accountId = accountId;
@@ -42,6 +44,7 @@ public class BaseOrder implements IOrder {
         this.cancelledQuantity = cancelledQuantity;
         this.expiredQuantity = expiredQuantity;
         this.rejectedQuantity = rejectedQuantity;
+        this.exposedQuantity = exposedQuantity;
         this.priceLimit = priceLimit;
     }
 
@@ -106,8 +109,18 @@ public class BaseOrder implements IOrder {
     }
 
     @Override
+    public BigDecimal getExposedQuantity() {
+        return exposedQuantity;
+    }
+
+    @Override
     public BigDecimal getRemainingQuantity() {
         return getOrderQuantity().subtract(getExecQuantity());
+    }
+
+    @Override
+    public BigDecimal getAvailableQuantity() {
+        return getRemainingQuantity().subtract(getExposedQuantity());
     }
 
     @Override
@@ -128,6 +141,7 @@ public class BaseOrder implements IOrder {
                 .append(", cancelledQuantity: ").append(cancelledQuantity)
                 .append(", expiredQuantity: ").append(expiredQuantity)
                 .append(", rejectedQuantity: ").append(rejectedQuantity)
+                .append(", exposedQuantity: ").append(exposedQuantity)
                 .append(", remainingQuantity: ").append(getRemainingQuantity())
                 .append(", priceLimit: ").append(priceLimit);
         return sb.toString();

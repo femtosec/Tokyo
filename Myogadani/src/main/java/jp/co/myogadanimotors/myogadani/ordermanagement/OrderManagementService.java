@@ -21,7 +21,6 @@ import jp.co.myogadanimotors.myogadani.strategy.IStrategy;
 import jp.co.myogadanimotors.myogadani.strategy.IStrategyFactory;
 import jp.co.myogadanimotors.myogadani.strategy.context.OrderView;
 import jp.co.myogadanimotors.myogadani.strategy.strategyevent.IStrategyEvent;
-import jp.co.myogadanimotors.myogadani.strategy.strategyevent.StrategyEventType;
 import jp.co.myogadanimotors.myogadani.strategy.strategyevent.childorder.*;
 import jp.co.myogadanimotors.myogadani.strategy.strategyevent.childorderfill.StrategyChildOrderFill;
 import jp.co.myogadanimotors.myogadani.strategy.strategyevent.order.*;
@@ -93,7 +92,7 @@ public final class OrderManagementService implements IOrderEventListener, IFillE
         Order newOrder = createNewOrder(orderEvent);
 
         // sanity check
-        if (!isValidNewOrderEvent(orderEvent)) {
+        if (!isValidNewOrderEvent(orderEvent, newOrder)) {
             // todo: send reject to orderer
             logger.warn("invalid order event. (orderEvent: {})", orderEvent);
             return;
@@ -123,8 +122,8 @@ public final class OrderManagementService implements IOrderEventListener, IFillE
         // find order object by order id and check order state
         Order currentOrder = findAndCheckOrder(orderEvent.getOrderId());
         if (currentOrder == null) {
-            logger.warn("stop processing. (orderEvent: {})", orderEvent);
             // todo: send reject to orderer
+            logger.warn("stop processing. (orderEvent: {})", orderEvent);
             return;
         }
 
@@ -132,6 +131,13 @@ public final class OrderManagementService implements IOrderEventListener, IFillE
         if (!isValidAmendOrderEvent(orderEvent, currentOrder)) {
             // todo: send reject to orderer
             logger.warn("invalid amend order event. (amendOrderEvent: {})", orderEvent);
+            return;
+        }
+
+        // order state check
+        if (!currentOrder.getOrderState().isAmendable()) {
+            // todo: send reject to orderer
+            logger.info("amend order not acceptable. (orderState: {})", currentOrder.getOrderState());
             return;
         }
 
@@ -170,9 +176,16 @@ public final class OrderManagementService implements IOrderEventListener, IFillE
         }
 
         // sanity check
-        if (orderEvent.getRequestId() < 0) {
+        if (!isValidCancelOrderEvent(orderEvent, currentOrder)) {
             // todo: send reject to orderer
             logger.warn("invalid cancel order event. (cancelOrderEvent: {})", orderEvent);
+            return;
+        }
+
+        // order state check
+        if (!currentOrder.getOrderState().isCancellable()) {
+            // todo: send reject to orderer
+            logger.info("cancel order not acceptable. (orderState: {})", currentOrder.getOrderState());
             return;
         }
 
@@ -195,7 +208,7 @@ public final class OrderManagementService implements IOrderEventListener, IFillE
         }
     }
 
-    private boolean isValidNewOrderEvent(OrderEvent orderEvent) {
+    private boolean isValidNewOrderEvent(OrderEvent orderEvent, Order newOrder) {
         if (orderEvent.getSymbol() == null) {
             logger.warn("symbol is not set. (orderEvent: {})", orderEvent);
             return false;
@@ -223,6 +236,11 @@ public final class OrderManagementService implements IOrderEventListener, IFillE
 
         if (orderEvent.getRequestId() < 0) {
             logger.warn("request id is not set. (orderEvent: {})", orderEvent);
+            return false;
+        }
+
+        if (newOrder.isStrategyOrder() && newOrder.getStrategy() == null) {
+            logger.warn("strategy type invalid.");
             return false;
         }
 
@@ -268,6 +286,15 @@ public final class OrderManagementService implements IOrderEventListener, IFillE
         return true;
     }
 
+    private boolean isValidCancelOrderEvent(OrderEvent cancelOrderEvent, Order currentOrder) {
+        if (cancelOrderEvent.getRequestId() < 0) {
+            logger.warn("invalid cancel order event. (cancelOrderEvent: {})", cancelOrderEvent);
+            return false;
+        }
+
+        return true;
+    }
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     // report event processing
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -286,14 +313,18 @@ public final class OrderManagementService implements IOrderEventListener, IFillE
 
         // send report to orderer
         if (order.getOrderer() == Orderer.Strategy) {
-            if (order.getParentStrategyOrder() == null) {
+            Order parentStrategyOrder = order.getParentStrategyOrder();
+            if (parentStrategyOrder == null) {
                 logger.warn("parent order not found. ({})", reportEvent);
                 return;
             }
 
+            // update parent strategy order
+            parentStrategyOrder.setExposedQuantity(parentStrategyOrder.getExposedQuantity().add(order.getOrderQuantity()));
+
             // return child order report to parent strategy
-            IStrategyEvent strategyEvent = new StrategyChildOrderNewAck(new OrderView(order), reportEvent.getMessage());
-            sendStrategyInvoker(order.getParentStrategyOrder(), strategyEvent);
+            IStrategyEvent strategyEvent = new StrategyChildOrderNewAck(new OrderView(parentStrategyOrder), reportEvent.getMessage());
+            sendStrategyInvoker(parentStrategyOrder, strategyEvent);
         } else {
             // send report event to ems
             sendEmsReport(reportEvent);
@@ -316,19 +347,20 @@ public final class OrderManagementService implements IOrderEventListener, IFillE
         }
 
         // update stored order
-        order.setRejectedQuantity(new BigDecimal(0));
+        order.setRejectedQuantity(order.getOrderQuantity());
         order.setOrderState(OrderState.NewReject);
 
         // send report to orderer
         if (order.getOrderer() == Orderer.Strategy) {
-            if (order.getParentStrategyOrder() == null) {
+            Order parentStrategyOrder = order.getParentStrategyOrder();
+            if (parentStrategyOrder == null) {
                 logger.warn("parent order not found. ({})", reportEvent);
                 return;
             }
 
             // return child order report to parent strategy
-            IStrategyEvent strategyEvent = new StrategyChildOrderNewReject(new OrderView(order), reportEvent.getMessage());
-            sendStrategyInvoker(order, strategyEvent);
+            IStrategyEvent strategyEvent = new StrategyChildOrderNewReject(new OrderView(parentStrategyOrder), reportEvent.getMessage());
+            sendStrategyInvoker(parentStrategyOrder, strategyEvent);
         } else {
             // send report event to ems
             sendEmsReport(reportEvent);
@@ -356,12 +388,13 @@ public final class OrderManagementService implements IOrderEventListener, IFillE
         // find stored amend order by request id
         Order amendOrder = amendOrdersByRequestId.get(reportEvent.getRequestId());
         if (amendOrder == null) {
-            logger.warn("amend order not found. ({})", amendOrder);
+            logger.warn("amend order not found. ({})", reportEvent);
             return;
         }
 
         // update stored order
-        order.setCancelledQuantity(order.getOrderQuantity().subtract(amendOrder.getOrderQuantity()));
+        BigDecimal orderQtyDiff = amendOrder.getOrderQuantity().subtract(order.getOrderQuantity());
+        order.setCancelledQuantity(order.getCancelledQuantity().subtract(orderQtyDiff));
         order.setOrderQuantity(amendOrder.getOrderQuantity());
         order.setPriceLimit(amendOrder.getPriceLimit());
         order.setExtendedAttributes(amendOrder.getExtendedAttributes());
@@ -377,14 +410,18 @@ public final class OrderManagementService implements IOrderEventListener, IFillE
 
         // send report to orderer
         if (order.getOrderer() == Orderer.Strategy) {
-            if (order.getParentStrategyOrder() == null) {
+            Order parentStrategyOrder = order.getParentStrategyOrder();
+            if (parentStrategyOrder == null) {
                 logger.warn("parent order not found. ({})", reportEvent);
                 return;
             }
 
+            // update parent strategy order
+            parentStrategyOrder.setExposedQuantity(parentStrategyOrder.getExposedQuantity().add(orderQtyDiff));
+
             // return child order report to parent strategy
-            IStrategyEvent strategyEvent = new StrategyChildOrderAmendAck(new OrderView(order), reportEvent.getMessage());
-            sendStrategyInvoker(order.getParentStrategyOrder(), strategyEvent);
+            IStrategyEvent strategyEvent = new StrategyChildOrderAmendAck(new OrderView(parentStrategyOrder), reportEvent.getMessage());
+            sendStrategyInvoker(parentStrategyOrder, strategyEvent);
         } else {
             // send report event to ems
             sendEmsReport(reportEvent);
@@ -409,7 +446,7 @@ public final class OrderManagementService implements IOrderEventListener, IFillE
         // find stored amend order by request id
         Order amendOrder = amendOrdersByRequestId.get(reportEvent.getRequestId());
         if (amendOrder == null) {
-            logger.warn("amend order not found. ({})", amendOrder);
+            logger.warn("amend order not found. ({})", reportEvent);
             return;
         }
 
@@ -421,14 +458,15 @@ public final class OrderManagementService implements IOrderEventListener, IFillE
 
         // send report to orderer
         if (order.getOrderer() == Orderer.Strategy) {
-            if (order.getParentStrategyOrder() == null) {
+            Order parentStrategyOrder = order.getParentStrategyOrder();
+            if (parentStrategyOrder == null) {
                 logger.warn("parent order not found. ({})", reportEvent);
                 return;
             }
 
             // return child order report to parent strategy
-            IStrategyEvent strategyEvent = new StrategyChildOrderAmendReject(new OrderView(order), reportEvent.getMessage());
-            sendStrategyInvoker(order.getParentStrategyOrder(), strategyEvent);
+            IStrategyEvent strategyEvent = new StrategyChildOrderAmendReject(new OrderView(parentStrategyOrder), reportEvent.getMessage());
+            sendStrategyInvoker(parentStrategyOrder, strategyEvent);
         } else {
             // send report event to ems
             sendEmsReport(reportEvent);
@@ -451,21 +489,26 @@ public final class OrderManagementService implements IOrderEventListener, IFillE
         }
 
         // update stored order
-        order.setOrderState(OrderState.CancelAck);
-        order.setCancelledQuantity(order.getOrderQuantity());
-        order.setOrderQuantity(new BigDecimal(0));
+        BigDecimal orderQtyDiff = BigDecimal.ZERO.subtract(order.getOrderQuantity());
+        order.setCancelledQuantity(order.getCancelledQuantity().subtract(orderQtyDiff));
+        order.setOrderQuantity(BigDecimal.ZERO);
         order.incrementVersion();
+        order.setOrderState(OrderState.CancelAck);
 
         // send report to orderer
         if (order.getOrderer() == Orderer.Strategy) {
-            if (order.getParentStrategyOrder() == null) {
+            Order parentStrategyOrder = order.getParentStrategyOrder();
+            if (parentStrategyOrder == null) {
                 logger.warn("parent order not found. ({})", reportEvent);
                 return;
             }
 
+            // update parent strategy order
+            parentStrategyOrder.setExposedQuantity(parentStrategyOrder.getExposedQuantity().add(orderQtyDiff));
+
             // return child order report to parent strategy
-            IStrategyEvent strategyEvent = new StrategyChildOrderCancelAck(new OrderView(order), reportEvent.getMessage());
-            sendStrategyInvoker(order.getParentStrategyOrder(), strategyEvent);
+            IStrategyEvent strategyEvent = new StrategyChildOrderCancelAck(new OrderView(parentStrategyOrder), reportEvent.getMessage());
+            sendStrategyInvoker(parentStrategyOrder, strategyEvent);
         } else {
             // send report event to ems
             sendEmsReport(reportEvent);
@@ -495,14 +538,15 @@ public final class OrderManagementService implements IOrderEventListener, IFillE
 
         // send report to orderer
         if (order.getOrderer() == Orderer.Strategy) {
-            if (order.getParentStrategyOrder() == null) {
+            Order parentStrategyOrder = order.getParentStrategyOrder();
+            if (parentStrategyOrder == null) {
                 logger.warn("parent order not found. ({})", reportEvent);
                 return;
             }
 
             // return child order report to parent strategy
-            IStrategyEvent strategyEvent = new StrategyChildOrderCancelReject(new OrderView(order), reportEvent.getMessage());
-            sendStrategyInvoker(order.getParentStrategyOrder(), strategyEvent);
+            IStrategyEvent strategyEvent = new StrategyChildOrderCancelReject(new OrderView(parentStrategyOrder), reportEvent.getMessage());
+            sendStrategyInvoker(parentStrategyOrder, strategyEvent);
         } else {
             // send report event to ems
             sendEmsReport(reportEvent);
@@ -525,21 +569,26 @@ public final class OrderManagementService implements IOrderEventListener, IFillE
         }
 
         // update stored order
-        order.setOrderState(OrderState.UnsolicitedCancel);
-        order.setCancelledQuantity(order.getOrderQuantity());
-        order.setOrderQuantity(new BigDecimal(0));
+        BigDecimal orderQtyDiff = BigDecimal.ZERO.subtract(order.getOrderQuantity());
+        order.setCancelledQuantity(order.getCancelledQuantity().subtract(orderQtyDiff));
+        order.setOrderQuantity(BigDecimal.ZERO);
         order.incrementVersion();
+        order.setOrderState(OrderState.UnsolicitedCancel);
 
         // send report to orderer
         if (order.getOrderer() == Orderer.Strategy) {
-            if (order.getParentStrategyOrder() == null) {
+            Order parentStrategyOrder = order.getParentStrategyOrder();
+            if (parentStrategyOrder == null) {
                 logger.warn("parent order not found. ({})", reportEvent);
                 return;
             }
 
+            // update parent strategy order
+            parentStrategyOrder.setExposedQuantity(parentStrategyOrder.getExposedQuantity().add(orderQtyDiff));
+
             // return child order report to parent strategy
-            IStrategyEvent strategyEvent = new StrategyChildOrderUnsolicitedCancel(new OrderView(order), reportEvent.getMessage());
-            sendStrategyInvoker(order.getParentStrategyOrder(), strategyEvent);
+            IStrategyEvent strategyEvent = new StrategyChildOrderUnsolicitedCancel(new OrderView(parentStrategyOrder), reportEvent.getMessage());
+            sendStrategyInvoker(parentStrategyOrder, strategyEvent);
         } else {
             // send report event to ems
             sendEmsReport(reportEvent);
@@ -589,8 +638,8 @@ public final class OrderManagementService implements IOrderEventListener, IFillE
             }
 
             // return child order report to parent strategy
-            IStrategyEvent strategyEvent = new StrategyChildOrderFill(new OrderView(order));
-            sendStrategyInvoker(order.getParentStrategyOrder(), strategyEvent);
+            IStrategyEvent strategyEvent = new StrategyChildOrderFill(new OrderView(parentStrategyOrder));
+            sendStrategyInvoker(parentStrategyOrder, strategyEvent);
         } else {
             // send fill event to ems
             sendEmsFill(fillEvent);

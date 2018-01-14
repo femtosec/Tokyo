@@ -105,8 +105,7 @@ public final class OrderEvent extends AbstractEvent {
     }
 
     public Map<String, String> getExtendedAttributes() {
-        Map<String, String> copy = new ConcurrentHashMap<>(extendedAttributes);
-        return copy;
+        return new ConcurrentHashMap<>(extendedAttributes);
     }
 
     @Override

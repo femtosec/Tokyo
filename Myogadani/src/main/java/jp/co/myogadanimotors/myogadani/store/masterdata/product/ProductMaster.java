@@ -11,7 +11,7 @@ public class ProductMaster extends AbstractMasterDataStore<Product> {
 
     public Product getBySymbol(String symbol) {
         for (Product product : objectsById.values()) {
-            if (product.getSymbol() == symbol) return product;
+            if (product.getSymbol().equals(symbol)) return product;
         }
 
         return null;

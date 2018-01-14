@@ -33,7 +33,7 @@ public class FillSender extends AbstractEventSender<FillEvent> {
         );
     }
 
-    public void sendFill(long orderId, BigDecimal execQuantity, Orderer orderer, OrderDestination orderDestination) {
+    public void sendFill(long orderId, BigDecimal execQuantity, Orderer orderer, OrderDestination destination) {
         this.orderId = orderId;
         this.execQuantity = execQuantity;
         this.orderer = orderer;

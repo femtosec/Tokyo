@@ -37,10 +37,11 @@ public final class Order extends BaseOrder {
                 mic,
                 orderSide,
                 orderQuantity,
-                new BigDecimal(0),
-                new BigDecimal(0),
-                new BigDecimal(0),
-                new BigDecimal(0),
+                BigDecimal.ZERO,
+                BigDecimal.ZERO,
+                BigDecimal.ZERO,
+                BigDecimal.ZERO,
+                BigDecimal.ZERO,
                 priceLimit
         );
         this.orderer = orderer;
@@ -74,6 +75,10 @@ public final class Order extends BaseOrder {
         this.rejectedQuantity = rejectedQuantity;
     }
 
+    public void setExposedQuantity(BigDecimal exposedQuantity) {
+        this.exposedQuantity = exposedQuantity;
+    }
+
     public void setPriceLimit(BigDecimal priceLimit) {
         this.priceLimit = priceLimit;
     }
@@ -87,8 +92,8 @@ public final class Order extends BaseOrder {
     }
 
     public void setExtendedAttributes(Map<String, String> extendedAttributes) {
-        extendedAttributes.clear();
-        extendedAttributes.putAll(extendedAttributes);
+        this.extendedAttributes.clear();
+        this.extendedAttributes.putAll(extendedAttributes);
     }
 
     public void incrementVersion() {
@@ -108,7 +113,7 @@ public final class Order extends BaseOrder {
     }
 
     public boolean isStrategyOrder() {
-        return (destination == OrderDestination.Strategy);
+        return (destination != null && destination == OrderDestination.Strategy);
     }
 
     public Order getParentStrategyOrder() {
@@ -124,7 +129,6 @@ public final class Order extends BaseOrder {
     }
 
     public Map<String, String> getExtendedAttributes() {
-        Map<String, String> copy = new ConcurrentHashMap<>(extendedAttributes);
-        return copy;
+        return new ConcurrentHashMap<>(extendedAttributes);
     }
 }

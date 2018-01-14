@@ -25,7 +25,7 @@ class MasterDataTest {
         assertMarket(marketMaster.get(2L), MarketType.CryptoCurrencyExchange, "Zaif", "ZAI")
     }
 
-    private void assertMarket(IMarket market, MarketType marketType, String name, String mic) {
+    private static void assertMarket(IMarket market, MarketType marketType, String name, String mic) {
         assert market.getMarketType() == marketType
         assert market.getName() == name
         assert market.getMic() == mic
@@ -47,7 +47,7 @@ class MasterDataTest {
         assertProduct(productMaster.get(5L), ProductType.CryptoCurrency, "ETH/JPY", 2L, "Ethereum @ Zaif")
     }
 
-    private void assertProduct(IProduct product, ProductType productType, String symbol, long marketId, String description) {
+    private static void assertProduct(IProduct product, ProductType productType, String symbol, long marketId, String description) {
         assert product.getProductType() == productType
         assert product.getSymbol() == symbol
         assert product.getMarketId() == marketId

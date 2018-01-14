@@ -26,7 +26,7 @@ public abstract class AbstractStrategy implements IStrategy {
 
     private final int strategyTypeId;
     private final StrategyContext context;
-    private List<IValidator> validators = new ArrayList<>();
+    private final List<IValidator> validators = new ArrayList<>();
 
     public AbstractStrategy(int strategyTypeId, StrategyContext context) {
         this.strategyTypeId = strategyTypeId;

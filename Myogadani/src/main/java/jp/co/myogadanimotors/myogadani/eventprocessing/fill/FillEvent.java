@@ -51,10 +51,9 @@ public final class FillEvent extends AbstractEvent {
 
     @Override
     public StringBuilder toStringBuilder() {
-        StringBuilder sb = super.toStringBuilder()
+        return super.toStringBuilder()
                 .append(", orderId: ").append(orderId)
                 .append(", orderer: ").append(orderer)
                 .append(", destination: ").append(destination);
-        return sb;
     }
 }

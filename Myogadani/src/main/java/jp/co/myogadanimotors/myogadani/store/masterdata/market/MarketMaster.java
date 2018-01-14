@@ -11,7 +11,7 @@ public final class MarketMaster extends AbstractMasterDataStore<StoredMarket> {
 
     public StoredMarket getByMic(String mic) {
         for (StoredMarket market : objectsById.values()) {
-            if (market.getMic() == mic) return market;
+            if (market.getMic().equals(mic)) return market;
         }
 
         return null;

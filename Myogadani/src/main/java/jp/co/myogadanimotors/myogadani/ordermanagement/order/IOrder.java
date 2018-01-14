@@ -1,7 +1,6 @@
 package jp.co.myogadanimotors.myogadani.ordermanagement.order;
 
 import jp.co.myogadanimotors.myogadani.common.OrderSide;
-import jp.co.myogadanimotors.myogadani.store.IStoredObject;
 
 import java.math.BigDecimal;
 
@@ -18,6 +17,8 @@ public interface IOrder {
     BigDecimal getCancelledQuantity();
     BigDecimal getExpiredQuantity();
     BigDecimal getRejectedQuantity();
+    BigDecimal getExposedQuantity();
     BigDecimal getRemainingQuantity();
+    BigDecimal getAvailableQuantity();
     BigDecimal getPriceLimit();
 }

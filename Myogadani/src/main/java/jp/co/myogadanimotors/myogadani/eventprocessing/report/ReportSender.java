@@ -7,9 +7,6 @@ import jp.co.myogadanimotors.myogadani.eventprocessing.orderevent.OrderDestinati
 import jp.co.myogadanimotors.myogadani.eventprocessing.orderevent.Orderer;
 import jp.co.myogadanimotors.myogadani.timesource.ITimeSource;
 
-import java.math.BigDecimal;
-import java.math.BigInteger;
-
 public final class ReportSender extends AbstractEventSender<ReportEvent> {
 
     private ReportType reportType;

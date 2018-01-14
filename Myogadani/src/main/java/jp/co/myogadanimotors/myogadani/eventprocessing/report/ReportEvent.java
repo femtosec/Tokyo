@@ -5,8 +5,6 @@ import jp.co.myogadanimotors.myogadani.eventprocessing.EventType;
 import jp.co.myogadanimotors.myogadani.eventprocessing.orderevent.OrderDestination;
 import jp.co.myogadanimotors.myogadani.eventprocessing.orderevent.Orderer;
 
-import java.math.BigDecimal;
-
 public final class ReportEvent extends AbstractEvent {
 
     private final ReportType reportType;
@@ -65,13 +63,12 @@ public final class ReportEvent extends AbstractEvent {
 
     @Override
     public StringBuilder toStringBuilder() {
-        StringBuilder sb = super.toStringBuilder()
+        return super.toStringBuilder()
                 .append(", orderId: ").append(orderId)
                 .append(", requestId: ").append(requestId)
                 .append(", reportType: ").append(reportType)
                 .append(", message: ").append(message)
                 .append(", orderer: ").append(orderer)
                 .append(", destination: ").append(destination);
-        return sb;
     }
 }

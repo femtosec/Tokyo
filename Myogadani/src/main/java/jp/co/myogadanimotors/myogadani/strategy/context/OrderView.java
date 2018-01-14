@@ -17,6 +17,7 @@ public final class OrderView extends BaseOrder {
                 order.getCancelledQuantity(),
                 order.getExpiredQuantity(),
                 order.getRejectedQuantity(),
+                order.getExposedQuantity(),
                 order.getPriceLimit()
         );
         orderState = order.getOrderState();
