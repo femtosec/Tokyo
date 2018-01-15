@@ -88,7 +88,7 @@ public abstract class AbstractStrategy implements IStrategy {
             case ChildOrderCancelReject:        processStrategyChildOrderCancelReject((StrategyChildOrderCancelReject) strategyEvent); break;
             case ChildOrderFill:                processStrategyChildOrderFill((StrategyChildOrderFill) strategyEvent); break;
             case ChildOrderExpire:              processStrategyChildOrderExpire((StrategyChildOrderExpire) strategyEvent); break;
-            case ChildOrderUnsolicitedCancel:   break;
+            case ChildOrderUnsolicitedCancel:   processStrategyChildOrderUnsolicitedCancel((StrategyChildOrderUnsolicitedCancel) strategyEvent); break;
             case MarketData:                    processStrategyMarketDataEvent((StrategyMarketDataEvent) strategyEvent); break;
             case Timer:                         processStrategyTimerEvent((StrategyTimerEvent) strategyEvent); break;
         }
@@ -233,14 +233,21 @@ public abstract class AbstractStrategy implements IStrategy {
 
     }
 
-    private void processStrategyChildOrderFill(StrategyChildOrderFill strategyChildOrderFill) {
-
-    }
-
     private void processStrategyChildOrderExpire(StrategyChildOrderExpire strategyChildOrderExpire) {
 
     }
 
+    private void processStrategyChildOrderUnsolicitedCancel(StrategyChildOrderUnsolicitedCancel strategyChildOrderUnsolicitedCancel) {
+
+    }
+
+    //////////////////////////////////////////////////
+    // child order fill
+    //////////////////////////////////////////////////
+
+    private void processStrategyChildOrderFill(StrategyChildOrderFill strategyChildOrderFill) {
+        // todo: report fill to parent order
+    }
 
     //////////////////////////////////////////////////
     // market data event

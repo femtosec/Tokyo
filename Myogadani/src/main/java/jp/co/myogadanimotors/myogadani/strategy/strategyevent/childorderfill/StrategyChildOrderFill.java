@@ -7,9 +7,11 @@ import jp.co.myogadanimotors.myogadani.strategy.strategyevent.StrategyEventType;
 public final class StrategyChildOrderFill implements IStrategyEvent {
 
     private final OrderView orderView;
+    private final OrderView childOrderView;
 
-    public StrategyChildOrderFill(OrderView orderView) {
+    public StrategyChildOrderFill(OrderView orderView, OrderView childOrderView) {
         this.orderView = orderView;
+        this.childOrderView = childOrderView;
     }
 
     @Override
@@ -19,5 +21,9 @@ public final class StrategyChildOrderFill implements IStrategyEvent {
 
     public final OrderView getOrderView() {
         return orderView;
+    }
+
+    public final OrderView getChildOrderView() {
+        return childOrderView;
     }
 }

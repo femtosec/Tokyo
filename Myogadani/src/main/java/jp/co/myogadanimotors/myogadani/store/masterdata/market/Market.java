@@ -2,17 +2,21 @@ package jp.co.myogadanimotors.myogadani.store.masterdata.market;
 
 import jp.co.myogadanimotors.myogadani.common.Constants;
 
-public class BaseMarket implements IMarket {
+public class Market implements IMarket {
 
-    protected long id = Constants.NOT_SET_ID_LONG;
-    protected MarketType marketType;
-    protected String name;
-    protected String mic;
-    protected MarketState marketState;
+    private long id = Constants.NOT_SET_ID_LONG;
+    private MarketType marketType;
+    private String name;
+    private String mic;
+    private MarketState marketState;
 
     @Override
     public long getId() {
         return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
     }
 
     @Override
@@ -20,9 +24,21 @@ public class BaseMarket implements IMarket {
         return marketType;
     }
 
+    public String getMarketTypeString() {
+        return marketType.toString();
+    }
+
+    public void setMarketTypeString(String marketTypeString) {
+        marketType = MarketType.valueOf(marketTypeString);
+    }
+
     @Override
     public String getName() {
         return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     @Override
@@ -30,9 +46,17 @@ public class BaseMarket implements IMarket {
         return mic;
     }
 
+    public void setMic(String mic) {
+        this.mic = mic;
+    }
+
     @Override
     public MarketState getMarketState() {
         return marketState;
+    }
+
+    public void setMarketState(MarketState marketState) {
+        this.marketState = marketState;
     }
 
     @Override

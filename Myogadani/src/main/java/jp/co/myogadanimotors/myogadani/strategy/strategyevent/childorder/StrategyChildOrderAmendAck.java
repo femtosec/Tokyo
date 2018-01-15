@@ -5,8 +5,8 @@ import jp.co.myogadanimotors.myogadani.strategy.strategyevent.StrategyEventType;
 
 public final class StrategyChildOrderAmendAck extends AbstractStrategyChildOrderReport {
 
-    public StrategyChildOrderAmendAck(OrderView orderView, String message) {
-        super(orderView, message);
+    public StrategyChildOrderAmendAck(OrderView orderView, OrderView childOrderView, String message) {
+        super(orderView, childOrderView, message);
     }
 
     @Override

@@ -33,7 +33,7 @@ import java.math.BigDecimal;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public final class OrderManagementService implements IOrderEventListener, IFillEventListener, IReportEventListener, ITimerEventListener {
+public final class OrderManager implements IOrderEventListener, IFillEventListener, IReportEventListener, ITimerEventListener {
 
     private final Logger logger = LogManager.getLogger(getClass().getName());
 
@@ -49,11 +49,11 @@ public final class OrderManagementService implements IOrderEventListener, IFillE
 
     private int lastThreadId = 0;
 
-    public OrderManagementService(IEventRelay emsReportRelay,
-                                  IEventRelay exchangeOrderRelay,
-                                  IStrategyFactory strategyFactory,
-                                  ITimeSource timeSource,
-                                  StrategyInvokerSender... strategyInvokerSenders) {
+    public OrderManager(IEventRelay emsReportRelay,
+                        IEventRelay exchangeOrderRelay,
+                        IStrategyFactory strategyFactory,
+                        ITimeSource timeSource,
+                        StrategyInvokerSender... strategyInvokerSenders) {
         this.emsReportRelay = emsReportRelay;
         this.exchangeOrderRelay = exchangeOrderRelay;
         this.strategyFactory = strategyFactory;
@@ -323,7 +323,7 @@ public final class OrderManagementService implements IOrderEventListener, IFillE
             parentStrategyOrder.setExposedQuantity(parentStrategyOrder.getExposedQuantity().add(order.getOrderQuantity()));
 
             // return child order report to parent strategy
-            IStrategyEvent strategyEvent = new StrategyChildOrderNewAck(new OrderView(parentStrategyOrder), reportEvent.getMessage());
+            IStrategyEvent strategyEvent = new StrategyChildOrderNewAck(new OrderView(parentStrategyOrder), new OrderView(order), reportEvent.getMessage());
             sendStrategyInvoker(parentStrategyOrder, strategyEvent);
         } else {
             // send report event to ems
@@ -359,7 +359,7 @@ public final class OrderManagementService implements IOrderEventListener, IFillE
             }
 
             // return child order report to parent strategy
-            IStrategyEvent strategyEvent = new StrategyChildOrderNewReject(new OrderView(parentStrategyOrder), reportEvent.getMessage());
+            IStrategyEvent strategyEvent = new StrategyChildOrderNewReject(new OrderView(parentStrategyOrder), new OrderView(order), reportEvent.getMessage());
             sendStrategyInvoker(parentStrategyOrder, strategyEvent);
         } else {
             // send report event to ems
@@ -372,7 +372,7 @@ public final class OrderManagementService implements IOrderEventListener, IFillE
             sendStrategyInvoker(order, strategyEvent);
         }
 
-        // mover order to terminated order list
+        // move order to terminated order list
         moveOrderToTerminatedOrderList(order);
     }
 
@@ -420,7 +420,7 @@ public final class OrderManagementService implements IOrderEventListener, IFillE
             parentStrategyOrder.setExposedQuantity(parentStrategyOrder.getExposedQuantity().add(orderQtyDiff));
 
             // return child order report to parent strategy
-            IStrategyEvent strategyEvent = new StrategyChildOrderAmendAck(new OrderView(parentStrategyOrder), reportEvent.getMessage());
+            IStrategyEvent strategyEvent = new StrategyChildOrderAmendAck(new OrderView(parentStrategyOrder), new OrderView(order), reportEvent.getMessage());
             sendStrategyInvoker(parentStrategyOrder, strategyEvent);
         } else {
             // send report event to ems
@@ -465,7 +465,7 @@ public final class OrderManagementService implements IOrderEventListener, IFillE
             }
 
             // return child order report to parent strategy
-            IStrategyEvent strategyEvent = new StrategyChildOrderAmendReject(new OrderView(parentStrategyOrder), reportEvent.getMessage());
+            IStrategyEvent strategyEvent = new StrategyChildOrderAmendReject(new OrderView(parentStrategyOrder), new OrderView(order), reportEvent.getMessage());
             sendStrategyInvoker(parentStrategyOrder, strategyEvent);
         } else {
             // send report event to ems
@@ -507,7 +507,7 @@ public final class OrderManagementService implements IOrderEventListener, IFillE
             parentStrategyOrder.setExposedQuantity(parentStrategyOrder.getExposedQuantity().add(orderQtyDiff));
 
             // return child order report to parent strategy
-            IStrategyEvent strategyEvent = new StrategyChildOrderCancelAck(new OrderView(parentStrategyOrder), reportEvent.getMessage());
+            IStrategyEvent strategyEvent = new StrategyChildOrderCancelAck(new OrderView(parentStrategyOrder), new OrderView(order), reportEvent.getMessage());
             sendStrategyInvoker(parentStrategyOrder, strategyEvent);
         } else {
             // send report event to ems
@@ -545,7 +545,7 @@ public final class OrderManagementService implements IOrderEventListener, IFillE
             }
 
             // return child order report to parent strategy
-            IStrategyEvent strategyEvent = new StrategyChildOrderCancelReject(new OrderView(parentStrategyOrder), reportEvent.getMessage());
+            IStrategyEvent strategyEvent = new StrategyChildOrderCancelReject(new OrderView(parentStrategyOrder), new OrderView(order), reportEvent.getMessage());
             sendStrategyInvoker(parentStrategyOrder, strategyEvent);
         } else {
             // send report event to ems
@@ -587,7 +587,7 @@ public final class OrderManagementService implements IOrderEventListener, IFillE
             parentStrategyOrder.setExposedQuantity(parentStrategyOrder.getExposedQuantity().add(orderQtyDiff));
 
             // return child order report to parent strategy
-            IStrategyEvent strategyEvent = new StrategyChildOrderUnsolicitedCancel(new OrderView(parentStrategyOrder), reportEvent.getMessage());
+            IStrategyEvent strategyEvent = new StrategyChildOrderUnsolicitedCancel(new OrderView(parentStrategyOrder), new OrderView(order), reportEvent.getMessage());
             sendStrategyInvoker(parentStrategyOrder, strategyEvent);
         } else {
             // send report event to ems
@@ -638,7 +638,7 @@ public final class OrderManagementService implements IOrderEventListener, IFillE
             }
 
             // return child order report to parent strategy
-            IStrategyEvent strategyEvent = new StrategyChildOrderFill(new OrderView(parentStrategyOrder));
+            IStrategyEvent strategyEvent = new StrategyChildOrderFill(new OrderView(parentStrategyOrder), new OrderView(order));
             sendStrategyInvoker(parentStrategyOrder, strategyEvent);
         } else {
             // send fill event to ems

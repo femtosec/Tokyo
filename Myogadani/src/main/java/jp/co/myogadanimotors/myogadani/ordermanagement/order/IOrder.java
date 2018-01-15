@@ -18,7 +18,11 @@ public interface IOrder {
     BigDecimal getExpiredQuantity();
     BigDecimal getRejectedQuantity();
     BigDecimal getExposedQuantity();
-    BigDecimal getRemainingQuantity();
-    BigDecimal getAvailableQuantity();
+    default BigDecimal getRemainingQuantity() {
+        return getOrderQuantity().subtract(getExecQuantity());
+    }
+    default BigDecimal getAvailableQuantity() {
+        return getRemainingQuantity().subtract(getExposedQuantity());
+    }
     BigDecimal getPriceLimit();
 }

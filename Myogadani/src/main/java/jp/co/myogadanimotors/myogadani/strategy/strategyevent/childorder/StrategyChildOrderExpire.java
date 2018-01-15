@@ -5,8 +5,8 @@ import jp.co.myogadanimotors.myogadani.strategy.strategyevent.StrategyEventType;
 
 public final class StrategyChildOrderExpire extends AbstractStrategyChildOrderReport {
 
-    public StrategyChildOrderExpire(OrderView orderView, String message) {
-        super(orderView, message);
+    public StrategyChildOrderExpire(OrderView orderView, OrderView childOrderView, String message) {
+        super(orderView, childOrderView, message);
     }
 
     @Override

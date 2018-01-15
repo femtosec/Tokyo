@@ -5,8 +5,8 @@ import jp.co.myogadanimotors.myogadani.strategy.strategyevent.StrategyEventType;
 
 public final class StrategyChildOrderCancelReject extends AbstractStrategyChildOrderReport {
 
-    public StrategyChildOrderCancelReject(OrderView orderView, String message) {
-        super(orderView, message);
+    public StrategyChildOrderCancelReject(OrderView orderView, OrderView childOrderView, String message) {
+        super(orderView, childOrderView, message);
     }
 
     @Override

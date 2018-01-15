@@ -5,8 +5,8 @@ import jp.co.myogadanimotors.myogadani.strategy.strategyevent.StrategyEventType;
 
 public class StrategyChildOrderUnsolicitedCancel extends AbstractStrategyChildOrderReport {
 
-    public StrategyChildOrderUnsolicitedCancel(OrderView orderView, String message) {
-        super(orderView, message);
+    public StrategyChildOrderUnsolicitedCancel(OrderView orderView, OrderView childOrderView, String message) {
+        super(orderView, childOrderView, message);
     }
 
     @Override
