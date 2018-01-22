@@ -61,12 +61,12 @@ public class Market implements IMarket {
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("marketId: ").append(id)
+        return new StringBuilder()
+                .append("marketId: ").append(id)
                 .append(", marketType: ").append(marketType)
                 .append(", name: ").append(name)
                 .append(", mic: ").append(mic)
-                .append(", marketState: ").append(marketState);
-        return sb.toString();
+                .append(", marketState: ").append(marketState)
+                .toString();
     }
 }

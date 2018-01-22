@@ -218,8 +218,8 @@ public final class Order implements IOrder {
     @Override
     public String toString() {
         // todo: add more
-        StringBuilder sb = new StringBuilder();
-        sb.append("orderId: ").append(orderId)
+        return new StringBuilder()
+                .append("orderId: ").append(orderId)
                 .append(", accountId: ").append(accountId)
                 .append(", symbol: ").append(symbol)
                 .append(", mic: ").append(mic)
@@ -231,7 +231,7 @@ public final class Order implements IOrder {
                 .append(", rejectedQuantity: ").append(rejectedQuantity)
                 .append(", exposedQuantity: ").append(exposedQuantity)
                 .append(", remainingQuantity: ").append(getRemainingQuantity())
-                .append(", priceLimit: ").append(priceLimit);
-        return sb.toString();
+                .append(", priceLimit: ").append(priceLimit)
+                .toString();
     }
 }

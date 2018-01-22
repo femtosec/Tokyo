@@ -62,12 +62,12 @@ public class Product implements IProduct {
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("productId: ").append(id)
+        return new StringBuilder()
+                .append("productId: ").append(id)
                 .append(", productType: ").append(productType)
                 .append(", symbol: ").append(symbol)
                 .append(", marketId: ").append(marketId)
-                .append(" description: ").append(description);
-        return sb.toString();
+                .append(" description: ").append(description)
+                .toString();
     }
 }
