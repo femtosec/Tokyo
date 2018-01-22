@@ -44,6 +44,10 @@ public abstract class AbstractStrategy implements IStrategy {
         addValidator(new StrategyStateValidator());
     }
 
+    protected void terminate(String message) {
+        log.info("terminating strategy. ({})", message);
+    }
+
     protected IStrategyPendingAmendContext createPendingAmendContext() {
         return new StrategyPendingAmendContext();
     }
@@ -54,10 +58,6 @@ public abstract class AbstractStrategy implements IStrategy {
 
     protected IStrategyPendingCancelProcessor createPendingCancelProcessor(long requestId) {
         return new StrategyPendingCancelProcessor(requestId);
-    }
-
-    protected void terminate(String message) {
-        log.info("terminating strategy. ({})", message);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////

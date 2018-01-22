@@ -8,6 +8,8 @@ import jp.co.myogadanimotors.myogadani.store.masterdata.market.MarketType
 import jp.co.myogadanimotors.myogadani.store.masterdata.product.IProduct
 import jp.co.myogadanimotors.myogadani.store.masterdata.product.ProductMaster
 import jp.co.myogadanimotors.myogadani.store.masterdata.product.ProductType
+import jp.co.myogadanimotors.myogadani.store.masterdata.strategy.IStrategyDescriptor
+import jp.co.myogadanimotors.myogadani.store.masterdata.strategy.StrategyMaster
 import org.junit.Test
 
 class MasterDataTest {
@@ -27,8 +29,8 @@ class MasterDataTest {
 
     private static void assertMarket(IMarket market, MarketType marketType, String name, String mic) {
         assert market.getMarketType() == marketType
-        assert market.getName() == name
-        assert market.getMic() == mic
+        assert market.getName().equals(name)
+        assert market.getMic().equals(mic)
     }
 
     @Test
@@ -52,5 +54,22 @@ class MasterDataTest {
         assert product.getSymbol() == symbol
         assert product.getMarketId() == marketId
         assert product.getDescription() == description
+    }
+
+    @Test
+    void testStrategyMaster() {
+        def config = new ConfigAccessor()
+        config.parse("development", Constants.CONFIG_FILE_NAME)
+
+        def strategyMaster = new StrategyMaster()
+        strategyMaster.init(config)
+
+        assertStrategyDescriptor(strategyMaster.get(0L), "Peg", "This strategy places market making orders pegging at the near touch price.")
+        assertStrategyDescriptor(strategyMaster.get(1L), "Arbitrage", "Test")
+    }
+
+    private static void assertStrategyDescriptor(IStrategyDescriptor sd, String name, String description) {
+        assert sd.getName() == name
+        assert sd.getDescription() == description
     }
 }

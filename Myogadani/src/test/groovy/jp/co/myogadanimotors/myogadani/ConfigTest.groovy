@@ -10,6 +10,5 @@ class ConfigTest {
         def config = new ConfigAccessor()
         config.parse("development", "configuration.groovy")
         assert config.getInt("myogadani.numberOfStrategyThreads", -1) == 2
-        assert config.getBoolean("strategy.*.test", false)
     }
 }
