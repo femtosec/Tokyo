@@ -8,7 +8,9 @@ public enum StrategyState {
     UnsolicitedCancel(true),
     PendingNew(false),
     PendingAmend(false),
-    PendingCancel(false);
+    PendingCancel(false),
+    PostAmend(false),
+    PostCancel(false);
 
     private final boolean isTerminalState;
 

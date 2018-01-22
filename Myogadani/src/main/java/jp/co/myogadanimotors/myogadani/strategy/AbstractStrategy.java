@@ -1,9 +1,7 @@
 package jp.co.myogadanimotors.myogadani.strategy;
 
-import jp.co.myogadanimotors.myogadani.strategy.context.IStrategyPendingAmendContext;
-import jp.co.myogadanimotors.myogadani.strategy.context.IStrategyPendingAmendProcessor;
-import jp.co.myogadanimotors.myogadani.strategy.context.IStrategyPendingCancelProcessor;
-import jp.co.myogadanimotors.myogadani.strategy.context.StrategyContext;
+import jp.co.myogadanimotors.myogadani.ordermanagement.order.OrderState;
+import jp.co.myogadanimotors.myogadani.strategy.context.*;
 import jp.co.myogadanimotors.myogadani.strategy.strategyevent.childorder.*;
 import jp.co.myogadanimotors.myogadani.strategy.strategyevent.childorderfill.StrategyChildOrderFill;
 import jp.co.myogadanimotors.myogadani.strategy.strategyevent.marketdata.StrategyMarketDataEvent;
@@ -47,18 +45,19 @@ public abstract class AbstractStrategy implements IStrategy {
     }
 
     protected IStrategyPendingAmendContext createPendingAmendContext() {
-        // todo: to be implemented
-        return null;
+        return new StrategyPendingAmendContext();
     }
 
-    protected IStrategyPendingAmendProcessor createPendingAmendProcessor(IStrategyPendingAmendContext pendingAmendContext) {
-        // todo: to be implemented
-        return null;
+    protected IStrategyPendingAmendProcessor createPendingAmendProcessor(long requestId) {
+        return new StrategyPendingAmendProcessor(requestId);
     }
 
-    protected IStrategyPendingCancelProcessor createPendingCancelProcessor() {
-        // todo: to be implemented
-        return null;
+    protected IStrategyPendingCancelProcessor createPendingCancelProcessor(long requestId) {
+        return new StrategyPendingCancelProcessor(requestId);
+    }
+
+    protected void terminate(String message) {
+        log.info("terminating strategy. ({})", message);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -80,7 +79,7 @@ public abstract class AbstractStrategy implements IStrategy {
     //////////////////////////////////////////////////
 
     @Override
-    public void processStrategyNew(StrategyNew strategyNew) {
+    public final void processStrategyNew(StrategyNew strategyNew) {
         // update context
         context.setOrder(strategyNew.getOrderView());
 
@@ -98,25 +97,26 @@ public abstract class AbstractStrategy implements IStrategy {
     }
 
     @Override
-    public void processStrategyAmend(StrategyAmend strategyAmend) {
+    public final void processStrategyAmend(StrategyAmend strategyAmend) {
         // update context
         context.setOrder(strategyAmend.getOrderView());
 
         // create pending amend context
         IStrategyPendingAmendContext pac = createPendingAmendContext();
 
+
         // validate report amend report request
         List<RejectMessage> rejectMessages = new ArrayList<>();
         if (isValid(validators, (validator) -> validator.isValidStrategyRequestAmend(strategyAmend, context, pac, rejectMessages))) {
             context.setStrategyState(StrategyState.PendingAmend);
-            context.setStrategyPendingAmendProcessor(createPendingAmendProcessor(pac));
+            context.setStrategyPendingAmendProcessor(createPendingAmendProcessor(strategyAmend.getRequestId()));
         } else {
             context.getReportSender().sendAmendReject(context.getOrder().getOrderId(), strategyAmend.getRequestId(), combineRejectMessages(rejectMessages));
         }
     }
 
     @Override
-    public void processStrategyCancel(StrategyCancel strategyCancel) {
+    public final void processStrategyCancel(StrategyCancel strategyCancel) {
         // update context
         context.setOrder(strategyCancel.getOrderView());
 
@@ -124,7 +124,7 @@ public abstract class AbstractStrategy implements IStrategy {
         List<RejectMessage> rejectMessages = new ArrayList<>();
         if (isValid(validators, (validator) -> validator.isValidStrategyRequestCancel(strategyCancel, context, rejectMessages))) {
             context.setStrategyState(StrategyState.PendingCancel);
-            context.setStrategyPendingCancelProcessor(createPendingCancelProcessor());
+            context.setStrategyPendingCancelProcessor(createPendingCancelProcessor(strategyCancel.getRequestId()));
         } else {
             context.getReportSender().sendCancelReject(context.getOrder().getOrderId(), strategyCancel.getRequestId(), combineRejectMessages(rejectMessages));
         }
@@ -135,45 +135,52 @@ public abstract class AbstractStrategy implements IStrategy {
     //////////////////////////////////////////////////
 
     @Override
-    public void processStrategyNewAck(StrategyNewAck strategyNewAck) {
+    public final void processStrategyNewAck(StrategyNewAck strategyNewAck) {
         // update context
         context.setOrder(strategyNewAck.getOrderView());
+        context.setStrategyState(StrategyState.Working);
     }
 
     @Override
-    public void processStrategyNewReject(StrategyNewReject strategyNewReject) {
+    public final void processStrategyNewReject(StrategyNewReject strategyNewReject) {
         // update context
         context.setOrder(strategyNewReject.getOrderView());
+        context.setStrategyState(StrategyState.Rejected);
     }
 
     @Override
-    public void processStrategyAmendAck(StrategyAmendAck strategyAmendAck) {
+    public final void processStrategyAmendAck(StrategyAmendAck strategyAmendAck) {
         // update context
         context.setOrder(strategyAmendAck.getOrderView());
+        context.setStrategyState(StrategyState.Working);
     }
 
     @Override
-    public void processStrategyAmendReject(StrategyAmendReject strategyAmendReject) {
+    public final void processStrategyAmendReject(StrategyAmendReject strategyAmendReject) {
         // update context
         context.setOrder(strategyAmendReject.getOrderView());
+        context.setStrategyState(StrategyState.Working);
     }
 
     @Override
-    public void processStrategyCancelAck(StrategyCancelAck strategyCancelAck) {
+    public final void processStrategyCancelAck(StrategyCancelAck strategyCancelAck) {
         // update context
         context.setOrder(strategyCancelAck.getOrderView());
+        context.setStrategyState(StrategyState.Cancelled);
     }
 
     @Override
-    public void processStrategyCancelReject(StrategyCancelReject strategyCancelReject) {
+    public final void processStrategyCancelReject(StrategyCancelReject strategyCancelReject) {
         // update context
         context.setOrder(strategyCancelReject.getOrderView());
+        context.setStrategyState(StrategyState.Working);
     }
 
     @Override
-    public void processStrategyUnsolicitedCancel(StrategyUnsolicitedCancel strategyUnsolicitedCancel) {
+    public final void processStrategyUnsolicitedCancel(StrategyUnsolicitedCancel strategyUnsolicitedCancel) {
         // update context
         context.setOrder(strategyUnsolicitedCancel.getOrderView());
+        context.setStrategyState(StrategyState.UnsolicitedCancel);
     }
 
     //////////////////////////////////////////////////
@@ -181,43 +188,51 @@ public abstract class AbstractStrategy implements IStrategy {
     //////////////////////////////////////////////////
 
     @Override
-    public void processStrategyChildOrderNewAck(StrategyChildOrderNewAck strategyChildOrderNewAck) {
-
+    public final void processStrategyChildOrderNewAck(StrategyChildOrderNewAck strategyChildOrderNewAck) {
+        // update context
+        context.setOrder(strategyChildOrderNewAck.getOrderView());
     }
 
     @Override
-    public void processStrategyChildOrderNewReject(StrategyChildOrderNewReject strategyChildOrderNewReject) {
-
+    public final void processStrategyChildOrderNewReject(StrategyChildOrderNewReject strategyChildOrderNewReject) {
+        // update context
+        context.setOrder(strategyChildOrderNewReject.getOrderView());
     }
 
     @Override
-    public void processStrategyChildOrderAmendAck(StrategyChildOrderAmendAck strategyChildOrderAmendAck) {
-
+    public final void processStrategyChildOrderAmendAck(StrategyChildOrderAmendAck strategyChildOrderAmendAck) {
+        // update context
+        context.setOrder(strategyChildOrderAmendAck.getOrderView());
     }
 
     @Override
-    public void processStrategyChildOrderAmendReject(StrategyChildOrderAmendReject strategyChildOrderAmendReject) {
-
+    public final void processStrategyChildOrderAmendReject(StrategyChildOrderAmendReject strategyChildOrderAmendReject) {
+        // update context
+        context.setOrder(strategyChildOrderAmendReject.getOrderView());
     }
 
     @Override
-    public void processStrategyChildOrderCancelAck(StrategyChildOrderCancelAck strategyChildOrderCancelAck) {
-
+    public final void processStrategyChildOrderCancelAck(StrategyChildOrderCancelAck strategyChildOrderCancelAck) {
+        // update context
+        context.setOrder(strategyChildOrderCancelAck.getOrderView());
     }
 
     @Override
-    public void processStrategyChildOrderCancelReject(StrategyChildOrderCancelReject strategyChildOrderCancelReject) {
-
+    public final void processStrategyChildOrderCancelReject(StrategyChildOrderCancelReject strategyChildOrderCancelReject) {
+        // update context
+        context.setOrder(strategyChildOrderCancelReject.getOrderView());
     }
 
     @Override
-    public void processStrategyChildOrderExpire(StrategyChildOrderExpire strategyChildOrderExpire) {
-
+    public final void processStrategyChildOrderExpire(StrategyChildOrderExpire strategyChildOrderExpire) {
+        // update context
+        context.setOrder(strategyChildOrderExpire.getOrderView());
     }
 
     @Override
-    public void processStrategyChildOrderUnsolicitedCancel(StrategyChildOrderUnsolicitedCancel strategyChildOrderUnsolicitedCancel) {
-
+    public final void processStrategyChildOrderUnsolicitedCancel(StrategyChildOrderUnsolicitedCancel strategyChildOrderUnsolicitedCancel) {
+        // update context
+        context.setOrder(strategyChildOrderUnsolicitedCancel.getOrderView());
     }
 
     //////////////////////////////////////////////////
@@ -225,8 +240,13 @@ public abstract class AbstractStrategy implements IStrategy {
     //////////////////////////////////////////////////
 
     @Override
-    public void processStrategyChildOrderFill(StrategyChildOrderFill strategyChildOrderFill) {
-        // todo: report fill to parent order
+    public final void processStrategyChildOrderFill(StrategyChildOrderFill strategyChildOrderFill) {
+        // update context
+        context.setOrder(strategyChildOrderFill.getOrderView());
+        if (context.getOrder().getOrderState() == OrderState.FullyFilled) context.setStrategyState(StrategyState.FullyFilled);
+
+        // send fill event to parent order
+        context.getFillSender().sendFill(context.getOrder().getOrderId(), strategyChildOrderFill.getExecQuantity());
     }
 
     //////////////////////////////////////////////////
@@ -234,8 +254,8 @@ public abstract class AbstractStrategy implements IStrategy {
     //////////////////////////////////////////////////
 
     @Override
-    public void processStrategyMarketDataEvent(StrategyMarketDataEvent strategyMarketDataEvent) {
-
+    public final void processStrategyMarketDataEvent(StrategyMarketDataEvent strategyMarketDataEvent) {
+        log.trace("processing market data.");
     }
 
     //////////////////////////////////////////////////
@@ -243,8 +263,8 @@ public abstract class AbstractStrategy implements IStrategy {
     //////////////////////////////////////////////////
 
     @Override
-    public void processStrategyTimerEvent(StrategyTimerEvent strategyTimerEvent) {
-
+    public final void processStrategyTimerEvent(StrategyTimerEvent strategyTimerEvent) {
+        log.trace("processing timer event.");
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -254,49 +274,90 @@ public abstract class AbstractStrategy implements IStrategy {
     private void processStrategyState() {
         switch (context.getStrategyState()) {
             case Working:           processStrategyStateWorking(); break;
-            case Rejected:          processStrategyStateReject(); break;
+            case Rejected:          processStrategyStateRejected(); break;
             case FullyFilled:       processStrategyStateFullyFilled(); break;
             case Cancelled:         processStrategyStateCancelled(); break;
             case UnsolicitedCancel: processStrategyStateUnsolicitedCancel(); break;
             case PendingNew:        break; // not doing anything
             case PendingAmend:      processStrategyStatePendingAmend(); break;
             case PendingCancel:     processStrategyStatePendingCancel(); break;
+            case PostAmend:         processStrategyStatePostAmend(); break;
+            case PostCancel:        processStrategyStatePostCancel(); break;
         }
     }
 
     private void processStrategyStateWorking() {
-
+        log.trace("processing working state.");
     }
 
-    private void processStrategyStateReject() {
-
+    private void processStrategyStateRejected() {
+        terminate("new order is rejected.");
     }
 
     private void processStrategyStateFullyFilled() {
-
+        terminate("new order is fully filled.");
     }
 
     private void processStrategyStateCancelled() {
-
+        terminate("new order is cancelled.");
     }
 
     private void processStrategyStateUnsolicitedCancel() {
-
+        terminate("new order is unsolicited cancelled.");
     }
 
     private void processStrategyStatePendingAmend() {
+        log.trace("processing pending amend.");
 
+        IStrategyPendingAmendProcessor pap = context.getStrategyPendingAmendProcessor();
+        pap.process(context.getStrategyPendingAmendContext());
+
+        if (pap.getResult() == PendingAmendCancelResult.Working) {
+            return;
+        }
+
+        context.setStrategyState(StrategyState.PostAmend);
+
+        if (pap.getResult() == PendingAmendCancelResult.Succeeded) {
+            log.info("PendingAmendProcessor succeeded.");
+            context.getReportSender().sendAmendAck(context.getOrder().getOrderId(), pap.getRequestId());
+        } else if (pap.getResult() == PendingAmendCancelResult.Failed) {
+            log.info("PendingAmendProcessor failed.");
+            context.getReportSender().sendAmendReject(context.getOrder().getOrderId(), pap.getRequestId(), pap.getMessage());
+        }
     }
 
     private void processStrategyStatePendingCancel() {
+        log.trace("processing pending cancel.");
 
+        IStrategyPendingCancelProcessor pcp = context.getStrategyPendingCancelProcessor();
+        pcp.process();
+
+        if (pcp.getResult() == PendingAmendCancelResult.Working) {
+            return;
+        }
+
+        context.setStrategyState(StrategyState.PostCancel);
+
+        if (pcp.getResult() == PendingAmendCancelResult.Succeeded) {
+            log.info("PendingCancelProcessor succeeded.");
+            context.getReportSender().sendCancelAck(context.getOrder().getOrderId(), pcp.getRequestId());
+        } else if (pcp.getResult() == PendingAmendCancelResult.Failed) {
+            log.info("PendingCancelProcessor failed.");
+            context.getReportSender().sendCancelReject(context.getOrder().getOrderId(), pcp.getRequestId(), pcp.getMessage());
+        }
     }
 
-    private void checkFullyFilled() {
-        // todo: if report is fully filled, change strategy state to "FullyFilled"
+    private void processStrategyStatePostAmend() {
+        log.trace("not doing anything");
+    }
+
+    private void processStrategyStatePostCancel() {
+        log.trace("not doing anything");
     }
 
     private void checkSpamming() {
+        log.trace("checking spamming.");
         // todo: if spamming happened, change strategy state to "UnsolicitedCancel"
     }
 

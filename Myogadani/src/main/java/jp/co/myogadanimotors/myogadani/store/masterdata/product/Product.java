@@ -5,7 +5,6 @@ import jp.co.myogadanimotors.myogadani.common.Constants;
 public class Product implements IProduct {
 
     private long id = Constants.NOT_SET_ID_LONG;
-    private String productTypeString;
     private ProductType productType;
     private String symbol;
     private long marketId = Constants.NOT_SET_ID_LONG;

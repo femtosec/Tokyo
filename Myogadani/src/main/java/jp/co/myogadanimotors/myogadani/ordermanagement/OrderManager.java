@@ -839,6 +839,7 @@ public final class OrderManager implements IAsyncOrderListener, IAsyncReportList
                             eventIdGenerator.generateEventId(),
                             timeSource.getCurrentTime(),
                             order.getStrategy(),
+                            fillEvent.getExecQuantity(),
                             new OrderView(parentStrategyOrder),
                             new OrderView(order)
                     )

@@ -3,7 +3,7 @@ package jp.co.myogadanimotors.myogadani.strategy.context;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class StrategyPendingCancelProcessor implements IStrategyPendingCancelProcessor {
+public class StrategyPendingAmendProcessor implements IStrategyPendingAmendProcessor {
 
     protected final Logger logger = LogManager.getLogger(getClass().getName());
 
@@ -11,7 +11,7 @@ public class StrategyPendingCancelProcessor implements IStrategyPendingCancelPro
     private String message;
     private PendingAmendCancelResult result = PendingAmendCancelResult.Working;
 
-    public StrategyPendingCancelProcessor(long requestId) {
+    public StrategyPendingAmendProcessor(long requestId) {
         this.requestId = requestId;
     }
 
@@ -31,7 +31,7 @@ public class StrategyPendingCancelProcessor implements IStrategyPendingCancelPro
     }
 
     @Override
-    public void process() {
-        logger.trace("processing pending cancel state.");
+    public void process(IStrategyPendingAmendContext pendingAmendContext) {
+        logger.trace("processing pending amend state.");
     }
 }

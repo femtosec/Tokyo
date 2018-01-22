@@ -1,5 +1,6 @@
 package jp.co.myogadanimotors.myogadani.strategy.context;
 
+import jp.co.myogadanimotors.myogadani.eventprocessing.report.FillSender;
 import jp.co.myogadanimotors.myogadani.eventprocessing.report.ReportSender;
 import jp.co.myogadanimotors.myogadani.ordermanagement.order.IOrder;
 import jp.co.myogadanimotors.myogadani.store.masterdata.market.IMarket;
@@ -11,22 +12,26 @@ import jp.co.myogadanimotors.myogadani.timesource.ITimeSource;
 public final class StrategyContext implements IStrategyContext {
 
     private final ReportSender reportSender;
+    private final FillSender fillSender;
     private final ITimeSource timeSource;
     private final OrderView orderView;
     private final MarketView marketView;
     private final IProduct product;
 
     private StrategyState strategyState;
+    private IStrategyPendingAmendContext pendingAmendContext;
     private IStrategyPendingAmendProcessor pendingAmendProcessor;
     private IStrategyPendingCancelProcessor pendingCancelProcessor;
     private long currentTime;
 
     public StrategyContext(ReportSender reportSender,
+                           FillSender fillSender,
                            ITimeSource timeSource,
                            IOrder order,
                            IMarket market,
                            IProduct product) {
         this.reportSender = reportSender;
+        this.fillSender = fillSender;
         this.timeSource = timeSource;
         this.orderView = new OrderView(order);
         this.marketView = new MarketView(market);
@@ -55,6 +60,10 @@ public final class StrategyContext implements IStrategyContext {
         marketView.setMarketState(marketState);
     }
 
+    public void setStrategyPendingAmendContext(IStrategyPendingAmendContext pendingAmendContext) {
+        this.pendingAmendContext = pendingAmendContext;
+    }
+
     public void setStrategyPendingAmendProcessor(IStrategyPendingAmendProcessor pendingAmendProcessor) {
         this.pendingAmendProcessor = pendingAmendProcessor;
     }
@@ -71,6 +80,22 @@ public final class StrategyContext implements IStrategyContext {
         return reportSender;
     }
 
+    public FillSender getFillSender() {
+        return fillSender;
+    }
+
+    public IStrategyPendingAmendContext getStrategyPendingAmendContext() {
+        return pendingAmendContext;
+    }
+
+    public IStrategyPendingAmendProcessor getStrategyPendingAmendProcessor() {
+        return pendingAmendProcessor;
+    }
+
+    public IStrategyPendingCancelProcessor getStrategyPendingCancelProcessor() {
+        return pendingCancelProcessor;
+    }
+
     @Override
     public IOrder getOrder() {
         return orderView;
@@ -84,16 +109,6 @@ public final class StrategyContext implements IStrategyContext {
     @Override
     public IProduct getProduct() {
         return product;
-    }
-
-    @Override
-    public IStrategyPendingAmendProcessor getStrategyPendingAmendProcessor() {
-        return pendingAmendProcessor;
-    }
-
-    @Override
-    public IStrategyPendingCancelProcessor getStrategyPendingCancelProcessor() {
-        return pendingCancelProcessor;
     }
 
     @Override
