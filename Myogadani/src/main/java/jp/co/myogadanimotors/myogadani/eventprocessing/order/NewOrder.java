@@ -39,14 +39,14 @@ public final class NewOrder extends BaseEvent<IAsyncOrderListener> {
         this.requestId = requestId;
         this.parentOrderId = parentOrderId;
         this.accountId = accountId;
-        this.symbol = symbol;
-        this.mic = mic;
-        this.orderSide = orderSide;
+        this.symbol = notNull(symbol);
+        this.mic = notNull(mic);
+        this.orderSide = notNull(orderSide);
         this.orderQuantity = orderQuantity;
         this.priceLimit = priceLimit;
-        this.orderer = orderer;
-        this.destination = destination;
-        this.extendedAttributes.putAll(extendedAttributes);
+        this.orderer = notNull(orderer);
+        this.destination = notNull(destination);
+        this.extendedAttributes.putAll(notNull(extendedAttributes));
     }
 
     public long getRequestId() {

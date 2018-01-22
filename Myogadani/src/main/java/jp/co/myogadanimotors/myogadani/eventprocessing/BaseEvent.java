@@ -9,7 +9,7 @@ public abstract class BaseEvent<T extends IAsyncEventListener> implements IEvent
     public BaseEvent(long eventId, long creationTime, T eventListener) {
         this.eventId = eventId;
         this.creationTime = creationTime;
-        this.eventListener = eventListener;
+        this.eventListener = notNull(eventListener);
     }
 
     protected abstract void callEventListener(T eventListener);
@@ -39,5 +39,12 @@ public abstract class BaseEvent<T extends IAsyncEventListener> implements IEvent
         return new StringBuilder(getClass().getName())
                 .append(" eventId: ").append(eventId)
                 .append(", creationTime: ").append(creationTime);
+    }
+
+    protected static <U> U notNull(U value) {
+        if (value == null) {
+            throw new NullPointerException();
+        }
+        return value;
     }
 }

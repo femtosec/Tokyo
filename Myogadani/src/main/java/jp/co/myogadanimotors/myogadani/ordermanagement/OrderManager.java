@@ -74,9 +74,18 @@ public final class OrderManager implements IAsyncOrderListener, IAsyncReportList
         exchangeAdapter.addFillListener(this);
     }
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    // getters
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
     @Override
     public Executor getExecutor() {
         return eventExecutor;
+    }
+
+    // todo: revisit here
+    public Map<Long, Order> getTerminatedOrdersMap() {
+        return terminatedOrdersByOrderId;
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -121,38 +130,6 @@ public final class OrderManager implements IAsyncOrderListener, IAsyncReportList
         );
     }
 
-    private void sendEmsNewAck(NewAck newAckEvent) {
-        emsReportSender.sendNewAck(newAckEvent.getRequestId(), newAckEvent.getOrderId());
-    }
-
-    private void sendEmsNewReject(NewReject newRejectEvent) {
-        emsReportSender.sendNewReject(newRejectEvent.getRequestId(), newRejectEvent.getOrderId(), newRejectEvent.getMessage());
-    }
-
-    private void sendEmsAmendAck(AmendAck amendAckEvent) {
-        emsReportSender.sendAmendAck(amendAckEvent.getRequestId(), amendAckEvent.getOrderId());
-    }
-
-    private void sendEmsAmendReject(AmendReject amendRejectEvent) {
-        emsReportSender.sendAmendReject(amendRejectEvent.getRequestId(), amendRejectEvent.getOrderId(), amendRejectEvent.getMessage());
-    }
-
-    private void sendEmsCancelAck(CancelAck cancelAckEvent) {
-        emsReportSender.sendCancelAck(cancelAckEvent.getRequestId(), cancelAckEvent.getOrderId());
-    }
-
-    private void sendEmsCancelReject(CancelReject cancelRejectEvent) {
-        emsReportSender.sendCancelReject(cancelRejectEvent.getRequestId(), cancelRejectEvent.getOrderId(), cancelRejectEvent.getMessage());
-    }
-
-    private void sendEmsUnsolicitedCancel(UnsolicitedCancel unsolicitedCancel) {
-        emsReportSender.sendUnsolicitedCancel(unsolicitedCancel.getOrderId(), unsolicitedCancel.getMessage());
-    }
-
-    private void sendEmsFill(FillEvent fillEvent) {
-        emsFillSender.sendFill(fillEvent.getOrderId(), fillEvent.getExecQuantity());
-    }
-
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     // order event processing
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -164,7 +141,30 @@ public final class OrderManager implements IAsyncOrderListener, IAsyncReportList
 
         // sanity check
         if (!isValidNewOrderEvent(newOrderEvent, newOrder)) {
-            // todo: send reject to orderer
+            if (newOrder.getOrderer() == Orderer.Strategy) {
+                Order parentStrategyOrder = newOrder.getParentStrategyOrder();
+                if (parentStrategyOrder == null) {
+                    logger.warn("parent order not found. ({})", newOrderEvent);
+                    return;
+                }
+
+                // send child order reject to parent strategy
+                sendStrategyEvent(
+                        parentStrategyOrder.getThreadId(),
+                        new StrategyChildOrderNewReject(
+                                eventIdGenerator.generateEventId(),
+                                timeSource.getCurrentTime(),
+                                newOrder.getStrategy(),
+                                new OrderView(parentStrategyOrder),
+                                new OrderView(newOrder),
+                                "invalid order event."
+                        )
+                );
+            } else {
+                // send order reject to ems
+                emsReportSender.sendNewReject(newOrderEvent.getRequestId(), newOrder.getOrderId(), "invalid order event.");
+            }
+
             logger.warn("invalid order event. (orderEvent: {})", newOrderEvent);
             return;
         }
@@ -174,17 +174,19 @@ public final class OrderManager implements IAsyncOrderListener, IAsyncReportList
 
         // send order to destination
         if (newOrder.getDestination() == OrderDestination.Strategy) {
-            // if strategy order, send strategy invoker
-            IEvent strategyEvent = new StrategyNew(
-                    eventIdGenerator.generateEventId(),
-                    timeSource.getCurrentTime(),
-                    newOrder.getStrategy(),
-                    newOrderEvent.getRequestId(),
-                    new OrderView(newOrder),
-                    newOrderEvent.getOrderer(),
-                    newOrderEvent.getDestination()
+            // if strategy order, send strategy event
+            sendStrategyEvent(
+                    newOrder.getThreadId(),
+                    new StrategyNew(
+                            eventIdGenerator.generateEventId(),
+                            timeSource.getCurrentTime(),
+                            newOrder.getStrategy(),
+                            newOrderEvent.getRequestId(),
+                            new OrderView(newOrder),
+                            newOrderEvent.getOrderer(),
+                            newOrderEvent.getDestination()
+                    )
             );
-            sendStrategyEvent(newOrder.getThreadId(), strategyEvent);
         } else {
             // if exchange order, send to exchange
             sendExchangeNewOrder(newOrderEvent);
@@ -193,25 +195,39 @@ public final class OrderManager implements IAsyncOrderListener, IAsyncReportList
 
     @Override
     public void processAmendOrder(AmendOrder amendOrderEvent) {
-        // find order object by order id and check order state
         Order currentOrder = findAndCheckOrder(amendOrderEvent.getOrderId());
         if (currentOrder == null) {
-            // todo: send reject to orderer
-            logger.warn("stop processing. (orderEvent: {})", amendOrderEvent);
+            logger.warn("stop processing. (amendOrderEvent: {})", amendOrderEvent);
             return;
         }
 
         // sanity check
-        if (!isValidAmendOrderEvent(amendOrderEvent, currentOrder)) {
-            // todo: send reject to orderer
-            logger.warn("invalid amend order event. (amendOrderEvent: {})", amendOrderEvent);
-            return;
-        }
+        if (!isValidAmendOrderEvent(amendOrderEvent, currentOrder) || !currentOrder.getOrderState().isAmendable()) {
+            if (currentOrder.getOrderer() == Orderer.Strategy) {
+                Order parentStrategyOrder = currentOrder.getParentStrategyOrder();
+                if (parentStrategyOrder == null) {
+                    logger.warn("parent order not found. (amendOrderEvent: {})", amendOrderEvent);
+                    return;
+                }
 
-        // order state check
-        if (!currentOrder.getOrderState().isAmendable()) {
-            // todo: send reject to orderer
-            logger.info("amend order not acceptable. (orderState: {})", currentOrder.getOrderState());
+                // send child order reject to parent strategy
+                sendStrategyEvent(
+                        parentStrategyOrder.getThreadId(),
+                        new StrategyChildOrderAmendReject(
+                                eventIdGenerator.generateEventId(),
+                                timeSource.getCurrentTime(),
+                                currentOrder.getStrategy(),
+                                new OrderView(parentStrategyOrder),
+                                new OrderView(currentOrder),
+                                "invalid order event."
+                        )
+                );
+            } else {
+                // send order reject to ems
+                emsReportSender.sendAmendReject(amendOrderEvent.getRequestId(), currentOrder.getOrderId(), "invalid order event.");
+            }
+
+            logger.warn("invalid amend order event. (amendOrderEvent: {}, orderState: {})", amendOrderEvent, currentOrder.getOrderState());
             return;
         }
 
@@ -224,18 +240,20 @@ public final class OrderManager implements IAsyncOrderListener, IAsyncReportList
 
         // send order to destination
         if (amendOrder.getDestination() == OrderDestination.Strategy) {
-            // if strategy order, send strategy invoker
-            IEvent strategyEvent = new StrategyAmend(
-                    eventIdGenerator.generateEventId(),
-                    timeSource.getCurrentTime(),
-                    amendOrder.getStrategy(),
-                    amendOrderEvent.getRequestId(),
-                    new OrderView(currentOrder),
-                    new OrderView(amendOrder),
-                    currentOrder.getOrderer(),
-                    currentOrder.getDestination()
+            // if strategy order, send strategy event
+            sendStrategyEvent(
+                    currentOrder.getThreadId(),
+                    new StrategyAmend(
+                            eventIdGenerator.generateEventId(),
+                            timeSource.getCurrentTime(),
+                            amendOrder.getStrategy(),
+                            amendOrderEvent.getRequestId(),
+                            new OrderView(currentOrder),
+                            new OrderView(amendOrder),
+                            currentOrder.getOrderer(),
+                            currentOrder.getDestination()
+                    )
             );
-            sendStrategyEvent(currentOrder.getThreadId(), strategyEvent);
         } else {
             // if exchange order, send to exchange
             sendExchangeAmendOrder(amendOrderEvent);
@@ -247,22 +265,37 @@ public final class OrderManager implements IAsyncOrderListener, IAsyncReportList
         // find order object by order id and check order state
         Order currentOrder = findAndCheckOrder(cancelOrderEvent.getOrderId());
         if (currentOrder == null) {
-            logger.warn("stop processing. (orderEvent: {})", cancelOrderEvent);
-            // todo: send reject to orderer
+            logger.warn("stop processing. (cancelOrderEvent: {})", cancelOrderEvent);
             return;
         }
 
         // sanity check
-        if (!isValidCancelOrderEvent(cancelOrderEvent, currentOrder)) {
-            // todo: send reject to orderer
-            logger.warn("invalid cancel order event. (cancelOrderEvent: {})", cancelOrderEvent);
-            return;
-        }
+        if (!isValidCancelOrderEvent(cancelOrderEvent, currentOrder) || !currentOrder.getOrderState().isCancellable()) {
+            if (currentOrder.getOrderer() == Orderer.Strategy) {
+                Order parentStrategyOrder = currentOrder.getParentStrategyOrder();
+                if (parentStrategyOrder == null) {
+                    logger.warn("parent order not found. (cancelOrderEvent: {})", cancelOrderEvent);
+                    return;
+                }
 
-        // order state check
-        if (!currentOrder.getOrderState().isCancellable()) {
-            // todo: send reject to orderer
-            logger.info("cancel order not acceptable. (orderState: {})", currentOrder.getOrderState());
+                // send child order reject to parent strategy
+                sendStrategyEvent(
+                        parentStrategyOrder.getThreadId(),
+                        new StrategyChildOrderCancelReject(
+                                eventIdGenerator.generateEventId(),
+                                timeSource.getCurrentTime(),
+                                currentOrder.getStrategy(),
+                                new OrderView(parentStrategyOrder),
+                                new OrderView(currentOrder),
+                                "invalid order event."
+                        )
+                );
+            } else {
+                // send order reject to ems
+                emsReportSender.sendCancelReject(cancelOrderEvent.getRequestId(), currentOrder.getOrderId(), "invalid order event.");
+            }
+
+            logger.warn("invalid cancel order event. (cancelOrderEvent: {}, orderState: {})", cancelOrderEvent, currentOrder.getOrderState());
             return;
         }
 
@@ -271,17 +304,19 @@ public final class OrderManager implements IAsyncOrderListener, IAsyncReportList
 
         // send order to destination
         if (currentOrder.getDestination() == OrderDestination.Strategy) {
-            // if strategy order, send strategy invoker
-            IEvent strategyEvent = new StrategyCancel(
-                    eventIdGenerator.generateEventId(),
-                    timeSource.getCurrentTime(),
-                    currentOrder.getStrategy(),
-                    cancelOrderEvent.getRequestId(),
-                    new OrderView(currentOrder),
-                    currentOrder.getOrderer(),
-                    currentOrder.getDestination()
+            // if strategy order, send strategy event
+            sendStrategyEvent(
+                    currentOrder.getThreadId(),
+                    new StrategyCancel(
+                            eventIdGenerator.generateEventId(),
+                            timeSource.getCurrentTime(),
+                            currentOrder.getStrategy(),
+                            cancelOrderEvent.getRequestId(),
+                            new OrderView(currentOrder),
+                            currentOrder.getOrderer(),
+                            currentOrder.getDestination()
+                    )
             );
-            sendStrategyEvent(currentOrder.getThreadId(), strategyEvent);
         } else {
             // if exchange order, send to exchange
             sendExchangeCancelOrder(cancelOrderEvent);
@@ -373,17 +408,19 @@ public final class OrderManager implements IAsyncOrderListener, IAsyncReportList
             parentStrategyOrder.setExposedQuantity(parentStrategyOrder.getExposedQuantity().add(order.getOrderQuantity()));
 
             // return child order report to parent strategy
-            IEvent strategyEvent = new StrategyChildOrderNewAck(
-                    eventIdGenerator.generateEventId(),
-                    timeSource.getCurrentTime(),
-                    order.getStrategy(),
-                    new OrderView(parentStrategyOrder),
-                    new OrderView(order)
+            sendStrategyEvent(
+                    parentStrategyOrder.getThreadId(),
+                    new StrategyChildOrderNewAck(
+                            eventIdGenerator.generateEventId(),
+                            timeSource.getCurrentTime(),
+                            order.getStrategy(),
+                            new OrderView(parentStrategyOrder),
+                            new OrderView(order)
+                    )
             );
-            sendStrategyEvent(parentStrategyOrder.getThreadId(), strategyEvent);
         } else {
             // send report event to ems
-            sendEmsNewAck(newAck);
+            emsReportSender.sendNewAck(newAck.getRequestId(), newAck.getOrderId());
         }
 
         // return report event to strategy if order is a strategy order
@@ -420,31 +457,36 @@ public final class OrderManager implements IAsyncOrderListener, IAsyncReportList
             }
 
             // return child order report to parent strategy
-            IEvent strategyEvent = new StrategyChildOrderNewReject(
-                    eventIdGenerator.generateEventId(),
-                    timeSource.getCurrentTime(),
-                    order.getStrategy(),
-                    new OrderView(parentStrategyOrder),
-                    new OrderView(order),
-                    newReject.getMessage()
+            sendStrategyEvent(
+                    parentStrategyOrder.getThreadId(),
+                    new StrategyChildOrderNewReject(
+                            eventIdGenerator.generateEventId(),
+                            timeSource.getCurrentTime(),
+                            order.getStrategy(),
+                            new OrderView(parentStrategyOrder),
+                            new OrderView(order),
+                            newReject.getMessage()
+                    )
             );
-            sendStrategyEvent(parentStrategyOrder.getThreadId(), strategyEvent);
         } else {
             // send report event to ems
-            sendEmsNewReject(newReject);
+            emsReportSender.sendNewReject(newReject.getRequestId(), newReject.getOrderId(), newReject.getMessage());
+
         }
 
         // todo: do I send this before parent order?
         // return report event to strategy if the order is a strategy order
         if (order.isStrategyOrder()) {
-            IEvent strategyEvent = new StrategyNewReject(
-                    eventIdGenerator.generateEventId(),
-                    timeSource.getCurrentTime(),
-                    order.getStrategy(),
-                    new OrderView(order),
-                    newReject.getMessage()
+            sendStrategyEvent(
+                    order.getThreadId(),
+                    new StrategyNewReject(
+                            eventIdGenerator.generateEventId(),
+                            timeSource.getCurrentTime(),
+                            order.getStrategy(),
+                            new OrderView(order),
+                            newReject.getMessage()
+                    )
             );
-            sendStrategyEvent(order.getThreadId(), strategyEvent);
         }
 
         // move order to terminated order list
@@ -495,26 +537,30 @@ public final class OrderManager implements IAsyncOrderListener, IAsyncReportList
             parentStrategyOrder.setExposedQuantity(parentStrategyOrder.getExposedQuantity().add(orderQtyDiff));
 
             // return child order report to parent strategy
-            IEvent strategyEvent = new StrategyChildOrderAmendAck(
-                    eventIdGenerator.generateEventId(),
-                    timeSource.getCurrentTime(),
-                    order.getStrategy(),
-                    new OrderView(parentStrategyOrder),
-                    new OrderView(order));
-            sendStrategyEvent(parentStrategyOrder.getThreadId(), strategyEvent);
+            sendStrategyEvent(
+                    parentStrategyOrder.getThreadId(),
+                    new StrategyChildOrderAmendAck(
+                            eventIdGenerator.generateEventId(),
+                            timeSource.getCurrentTime(),
+                            order.getStrategy(),
+                            new OrderView(parentStrategyOrder),
+                            new OrderView(order))
+            );
         } else {
             // send report event to ems
-            sendEmsAmendAck(amendAck);
+            emsReportSender.sendAmendAck(amendAck.getRequestId(), amendAck.getOrderId());
         }
 
         // return report event to strategy if the order is strategy order
         if (order.isStrategyOrder()) {
-            IEvent strategyEvent = new StrategyAmendAck(
-                    eventIdGenerator.generateEventId(),
-                    timeSource.getCurrentTime(),
-                    order.getStrategy(),new OrderView(order)
+            sendStrategyEvent(
+                    order.getThreadId(),
+                    new StrategyAmendAck(
+                            eventIdGenerator.generateEventId(),
+                            timeSource.getCurrentTime(),
+                            order.getStrategy(),new OrderView(order)
+                    )
             );
-            sendStrategyEvent(order.getThreadId(), strategyEvent);
         }
     }
 
@@ -523,7 +569,7 @@ public final class OrderManager implements IAsyncOrderListener, IAsyncReportList
         // find order object by order id and check order state
         Order order = findAndCheckOrder(amendReject.getOrderId());
         if (order == null) {
-            logger.warn("stop processing. (reportEvent: {})", amendReject);
+            logger.warn("stop processing. (amendReject: {})", amendReject);
             return;
         }
 
@@ -549,30 +595,34 @@ public final class OrderManager implements IAsyncOrderListener, IAsyncReportList
             }
 
             // return child order report to parent strategy
-            IEvent strategyEvent = new StrategyChildOrderAmendReject(
-                    eventIdGenerator.generateEventId(),
-                    timeSource.getCurrentTime(),
-                    order.getStrategy(),
-                    new OrderView(parentStrategyOrder),
-                    new OrderView(order),
-                    amendReject.getMessage()
+            sendStrategyEvent(
+                    parentStrategyOrder.getThreadId(),
+                    new StrategyChildOrderAmendReject(
+                            eventIdGenerator.generateEventId(),
+                            timeSource.getCurrentTime(),
+                            order.getStrategy(),
+                            new OrderView(parentStrategyOrder),
+                            new OrderView(order),
+                            amendReject.getMessage()
+                    )
             );
-            sendStrategyEvent(parentStrategyOrder.getThreadId(), strategyEvent);
         } else {
             // send report event to ems
-            sendEmsAmendReject(amendReject);
+            emsReportSender.sendAmendReject(amendReject.getRequestId(), amendReject.getOrderId(), amendReject.getMessage());
         }
 
         // return report event to strategy if the order is strategy order
         if (order.isStrategyOrder()) {
-            IEvent strategyEvent = new StrategyAmendReject(
-                    eventIdGenerator.generateEventId(),
-                    timeSource.getCurrentTime(),
-                    order.getStrategy(),
-                    new OrderView(order),
-                    amendReject.getMessage()
+            sendStrategyEvent(
+                    order.getThreadId(),
+                    new StrategyAmendReject(
+                            eventIdGenerator.generateEventId(),
+                            timeSource.getCurrentTime(),
+                            order.getStrategy(),
+                            new OrderView(order),
+                            amendReject.getMessage()
+                    )
             );
-            sendStrategyEvent(order.getThreadId(), strategyEvent);
         }
     }
 
@@ -604,28 +654,32 @@ public final class OrderManager implements IAsyncOrderListener, IAsyncReportList
             parentStrategyOrder.setExposedQuantity(parentStrategyOrder.getExposedQuantity().add(orderQtyDiff));
 
             // return child order report to parent strategy
-            IEvent strategyEvent = new StrategyChildOrderCancelAck(
-                    eventIdGenerator.generateEventId(),
-                    timeSource.getCurrentTime(),
-                    order.getStrategy(),
-                    new OrderView(parentStrategyOrder),
-                    new OrderView(order)
+            sendStrategyEvent(
+                    parentStrategyOrder.getThreadId(),
+                    new StrategyChildOrderCancelAck(
+                            eventIdGenerator.generateEventId(),
+                            timeSource.getCurrentTime(),
+                            order.getStrategy(),
+                            new OrderView(parentStrategyOrder),
+                            new OrderView(order)
+                    )
             );
-            sendStrategyEvent(parentStrategyOrder.getThreadId(), strategyEvent);
         } else {
             // send report event to ems
-            sendEmsCancelAck(cancelAck);
+            emsReportSender.sendCancelAck(cancelAck.getRequestId(), cancelAck.getOrderId());
         }
 
         // return report event to strategy if the order is strategy order
         if (order.isStrategyOrder()) {
-            IEvent strategyEvent = new StrategyCancelAck(
-                    eventIdGenerator.generateEventId(),
-                    timeSource.getCurrentTime(),
-                    order.getStrategy(),
-                    new OrderView(order)
+            sendStrategyEvent(
+                    order.getThreadId(),
+                    new StrategyCancelAck(
+                            eventIdGenerator.generateEventId(),
+                            timeSource.getCurrentTime(),
+                            order.getStrategy(),
+                            new OrderView(order)
+                    )
             );
-            sendStrategyEvent(order.getThreadId(), strategyEvent);
         }
 
         // mover order to terminated order list
@@ -653,30 +707,34 @@ public final class OrderManager implements IAsyncOrderListener, IAsyncReportList
             }
 
             // return child order report to parent strategy
-            IEvent strategyEvent = new StrategyChildOrderCancelReject(
-                    eventIdGenerator.generateEventId(),
-                    timeSource.getCurrentTime(),
-                    order.getStrategy(),
-                    new OrderView(parentStrategyOrder),
-                    new OrderView(order),
-                    cancelReject.getMessage()
+            sendStrategyEvent(
+                    parentStrategyOrder.getThreadId(),
+                    new StrategyChildOrderCancelReject(
+                            eventIdGenerator.generateEventId(),
+                            timeSource.getCurrentTime(),
+                            order.getStrategy(),
+                            new OrderView(parentStrategyOrder),
+                            new OrderView(order),
+                            cancelReject.getMessage()
+                    )
             );
-            sendStrategyEvent(parentStrategyOrder.getThreadId(), strategyEvent);
         } else {
             // send report event to ems
-            sendEmsCancelReject(cancelReject);
+            emsReportSender.sendCancelReject(cancelReject.getRequestId(), cancelReject.getOrderId(), cancelReject.getMessage());
         }
 
         // return report event to strategy if the order is strategy order
         if (order.isStrategyOrder()) {
-            IEvent strategyEvent = new StrategyCancelReject(
-                    eventIdGenerator.generateEventId(),
-                    timeSource.getCurrentTime(),
-                    order.getStrategy(),
-                    new OrderView(order),
-                    cancelReject.getMessage()
+            sendStrategyEvent(
+                    order.getThreadId(),
+                    new StrategyCancelReject(
+                            eventIdGenerator.generateEventId(),
+                            timeSource.getCurrentTime(),
+                            order.getStrategy(),
+                            new OrderView(order),
+                            cancelReject.getMessage()
+                    )
             );
-            sendStrategyEvent(order.getThreadId(), strategyEvent);
         }
     }
 
@@ -708,30 +766,34 @@ public final class OrderManager implements IAsyncOrderListener, IAsyncReportList
             parentStrategyOrder.setExposedQuantity(parentStrategyOrder.getExposedQuantity().add(orderQtyDiff));
 
             // return child order report to parent strategy
-            IEvent strategyEvent = new StrategyChildOrderUnsolicitedCancel(
-                    eventIdGenerator.generateEventId(),
-                    timeSource.getCurrentTime(),
-                    order.getStrategy(),
-                    new OrderView(parentStrategyOrder),
-                    new OrderView(order),
-                    unsolicitedCancel.getMessage()
+            sendStrategyEvent(
+                    parentStrategyOrder.getThreadId(),
+                    new StrategyChildOrderUnsolicitedCancel(
+                            eventIdGenerator.generateEventId(),
+                            timeSource.getCurrentTime(),
+                            order.getStrategy(),
+                            new OrderView(parentStrategyOrder),
+                            new OrderView(order),
+                            unsolicitedCancel.getMessage()
+                    )
             );
-            sendStrategyEvent(parentStrategyOrder.getThreadId(), strategyEvent);
         } else {
             // send report event to ems
-            sendEmsUnsolicitedCancel(unsolicitedCancel);
+            emsReportSender.sendUnsolicitedCancel(unsolicitedCancel.getOrderId(), unsolicitedCancel.getMessage());
         }
 
         // return report event to strategy if the order is strategy order
         if (order.isStrategyOrder()) {
-            IEvent strategyEvent = new StrategyUnsolicitedCancel(
-                    eventIdGenerator.generateEventId(),
-                    timeSource.getCurrentTime(),
-                    order.getStrategy(),
-                    new OrderView(order),
-                    unsolicitedCancel.getMessage()
+            sendStrategyEvent(
+                    order.getThreadId(),
+                    new StrategyUnsolicitedCancel(
+                            eventIdGenerator.generateEventId(),
+                            timeSource.getCurrentTime(),
+                            order.getStrategy(),
+                            new OrderView(order),
+                            unsolicitedCancel.getMessage()
+                    )
             );
-            sendStrategyEvent(order.getThreadId(), strategyEvent);
         }
 
         // mover order to terminated order list
@@ -772,17 +834,19 @@ public final class OrderManager implements IAsyncOrderListener, IAsyncReportList
             }
 
             // return child order report to parent strategy
-            IEvent strategyEvent = new StrategyChildOrderFill(
-                    eventIdGenerator.generateEventId(),
-                    timeSource.getCurrentTime(),
-                    order.getStrategy(),
-                    new OrderView(parentStrategyOrder),
-                    new OrderView(order)
+            sendStrategyEvent(
+                    parentStrategyOrder.getThreadId(),
+                    new StrategyChildOrderFill(
+                            eventIdGenerator.generateEventId(),
+                            timeSource.getCurrentTime(),
+                            order.getStrategy(),
+                            new OrderView(parentStrategyOrder),
+                            new OrderView(order)
+                    )
             );
-            sendStrategyEvent(parentStrategyOrder.getThreadId(), strategyEvent);
         } else {
             // send fill event to ems
-            sendEmsFill(fillEvent);
+            emsFillSender.sendFill(fillEvent.getOrderId(), fillEvent.getExecQuantity());
         }
     }
 
@@ -799,14 +863,16 @@ public final class OrderManager implements IAsyncOrderListener, IAsyncReportList
         }
 
         if (order.isStrategyOrder()) {
-            IEvent strategyEvent = new StrategyTimerEvent(
-                    eventIdGenerator.generateEventId(),
-                    timeSource.getCurrentTime(),
-                    order.getStrategy(),
-                    timerEvent.getUserTag(),
-                    timerEvent.getTimerEventTime()
+             sendStrategyEvent(
+                    order.getThreadId(),
+                    new StrategyTimerEvent(
+                            eventIdGenerator.generateEventId(),
+                            timeSource.getCurrentTime(),
+                            order.getStrategy(),
+                            timerEvent.getUserTag(),
+                            timerEvent.getTimerEventTime()
+                    )
             );
-            sendStrategyEvent(order.getThreadId(), strategyEvent);
         }
     }
 

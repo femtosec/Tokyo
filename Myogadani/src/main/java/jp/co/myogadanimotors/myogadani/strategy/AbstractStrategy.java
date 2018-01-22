@@ -90,21 +90,10 @@ public abstract class AbstractStrategy implements IStrategy {
         // validate report report request
         List<RejectMessage> rejectMessages = new ArrayList<>();
         if (isValid(validators, (validator) -> validator.isValidStrategyRequestNew(strategyNew, context, rejectMessages))) {
-//            context.getReportSender().sendNewAck(
-//                    context.getOrder().getOrderId(),
-//                    strategyNew.getRequestId(),
-//                    strategyNew.getOrderer(),
-//                    strategyNew.getDestination()
-//            );
+            context.getReportSender().sendNewAck(context.getOrder().getOrderId(), strategyNew.getRequestId());
         } else {
             context.setStrategyState(StrategyState.Rejected);
-//            context.getReportSender().sendNewReject(
-//                    context.getOrder().getOrderId(),
-//                    strategyNew.getRequestId(),
-//                    combineRejectMessages(rejectMessages),
-//                    strategyNew.getOrderer(),
-//                    strategyNew.getDestination()
-//            );
+            context.getReportSender().sendNewReject(context.getOrder().getOrderId(), strategyNew.getRequestId(), combineRejectMessages(rejectMessages));
         }
     }
 
@@ -114,21 +103,15 @@ public abstract class AbstractStrategy implements IStrategy {
         context.setOrder(strategyAmend.getOrderView());
 
         // create pending amend context
-        IStrategyPendingAmendContext spac = createPendingAmendContext();
+        IStrategyPendingAmendContext pac = createPendingAmendContext();
 
         // validate report amend report request
         List<RejectMessage> rejectMessages = new ArrayList<>();
-        if (isValid(validators, (validator) -> validator.isValidStrategyRequestAmend(strategyAmend, context, spac, rejectMessages))) {
+        if (isValid(validators, (validator) -> validator.isValidStrategyRequestAmend(strategyAmend, context, pac, rejectMessages))) {
             context.setStrategyState(StrategyState.PendingAmend);
-            context.setStrategyPendingAmendProcessor(createPendingAmendProcessor(spac));
+            context.setStrategyPendingAmendProcessor(createPendingAmendProcessor(pac));
         } else {
-//            context.getReportSender().sendAmendReject(
-//                    context.getOrder().getOrderId(),
-//                    strategyAmend.getRequestId(),
-//                    combineRejectMessages(rejectMessages),
-//                    strategyAmend.getOrderer(),
-//                    strategyAmend.getDestination()
-//            );
+            context.getReportSender().sendAmendReject(context.getOrder().getOrderId(), strategyAmend.getRequestId(), combineRejectMessages(rejectMessages));
         }
     }
 
@@ -143,13 +126,7 @@ public abstract class AbstractStrategy implements IStrategy {
             context.setStrategyState(StrategyState.PendingCancel);
             context.setStrategyPendingCancelProcessor(createPendingCancelProcessor());
         } else {
-//            context.getReportSender().sendCancelReject(
-//                    context.getOrder().getOrderId(),
-//                    strategyCancel.getRequestId(),
-//                    combineRejectMessages(rejectMessages),
-//                    strategyCancel.getOrderer(),
-//                    strategyCancel.getDestination()
-//            );
+            context.getReportSender().sendCancelReject(context.getOrder().getOrderId(), strategyCancel.getRequestId(), combineRejectMessages(rejectMessages));
         }
     }
 
