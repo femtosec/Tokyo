@@ -5,4 +5,5 @@ public class Constants {
     public static final long NOT_SET_ID_LONG = -1L;
     public static final String CONFIG_FILE_NAME = "configuration.groovy";
     public static final String MULTIPLE_SYMBOLS = "*";
+    public static final int MAX_NUMBER_OF_DEPTH_ENTRIES = 10;
 }

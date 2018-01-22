@@ -5,31 +5,10 @@ import exchangeadapter.IExchangeAdapter;
 import jp.co.myogadanimotors.myogadani.common.Constants;
 import jp.co.myogadanimotors.myogadani.eventprocessing.EventIdGenerator;
 import jp.co.myogadanimotors.myogadani.eventprocessing.IEvent;
-import jp.co.myogadanimotors.myogadani.eventprocessing.order.amendorder.AmendOrder;
-import jp.co.myogadanimotors.myogadani.eventprocessing.order.amendorder.AmendOrderSender;
-import jp.co.myogadanimotors.myogadani.eventprocessing.order.cancelorder.CancelOrder;
-import jp.co.myogadanimotors.myogadani.eventprocessing.order.cancelorder.CancelOrderSender;
-import jp.co.myogadanimotors.myogadani.eventprocessing.order.neworder.NewOrder;
-import jp.co.myogadanimotors.myogadani.eventprocessing.order.neworder.NewOrderSender;
-import jp.co.myogadanimotors.myogadani.eventprocessing.order.neworder.OrderDestination;
-import jp.co.myogadanimotors.myogadani.eventprocessing.order.neworder.Orderer;
-import jp.co.myogadanimotors.myogadani.eventprocessing.report.amendack.AmendAck;
-import jp.co.myogadanimotors.myogadani.eventprocessing.report.amendack.AmendAckSender;
-import jp.co.myogadanimotors.myogadani.eventprocessing.report.amendreject.AmendReject;
-import jp.co.myogadanimotors.myogadani.eventprocessing.report.amendreject.AmendRejectSender;
-import jp.co.myogadanimotors.myogadani.eventprocessing.report.cancelack.CancelAck;
-import jp.co.myogadanimotors.myogadani.eventprocessing.report.cancelack.CancelAckSender;
-import jp.co.myogadanimotors.myogadani.eventprocessing.report.cancelreject.CancelReject;
-import jp.co.myogadanimotors.myogadani.eventprocessing.report.cancelreject.CancelRejectSender;
-import jp.co.myogadanimotors.myogadani.eventprocessing.report.fill.FillEvent;
-import jp.co.myogadanimotors.myogadani.eventprocessing.report.fill.FillSender;
-import jp.co.myogadanimotors.myogadani.eventprocessing.report.newack.NewAck;
-import jp.co.myogadanimotors.myogadani.eventprocessing.report.newack.NewAckSender;
-import jp.co.myogadanimotors.myogadani.eventprocessing.report.newrejet.NewReject;
-import jp.co.myogadanimotors.myogadani.eventprocessing.report.newrejet.NewRejectSender;
-import jp.co.myogadanimotors.myogadani.eventprocessing.report.unsolicitedcancel.UnsolicitedCancel;
-import jp.co.myogadanimotors.myogadani.eventprocessing.report.unsolicitedcancel.UnsolicitedCancelSender;
-import jp.co.myogadanimotors.myogadani.eventprocessing.timer.timerevent.TimerEvent;
+import jp.co.myogadanimotors.myogadani.eventprocessing.order.*;
+import jp.co.myogadanimotors.myogadani.eventprocessing.report.*;
+import jp.co.myogadanimotors.myogadani.eventprocessing.timer.IAsyncTimerEventListener;
+import jp.co.myogadanimotors.myogadani.eventprocessing.timer.TimerEvent;
 import jp.co.myogadanimotors.myogadani.idgenerator.IIdGenerator;
 import jp.co.myogadanimotors.myogadani.idgenerator.IdGenerator;
 import jp.co.myogadanimotors.myogadani.ordermanagement.order.Order;
@@ -51,30 +30,19 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 import java.util.function.Function;
 
-public final class OrderManager {
+public final class OrderManager implements IAsyncOrderListener, IAsyncReportListener, IAsyncFillListener, IAsyncTimerEventListener {
 
     private final Logger logger = LogManager.getLogger(getClass().getName());
 
-    // EMS report senders
-    private final NewAckSender emsNewAckSender;
-    private final NewRejectSender emsNewRejectSender;
-    private final AmendAckSender emsAmendAckSender;
-    private final AmendRejectSender emsAmendRejectSender;
-    private final CancelAckSender emsCancelAckSender;
-    private final CancelRejectSender emsCancelRejectSender;
-    private final UnsolicitedCancelSender emsUnsolicitedCancelSender;
+    private final ReportSender emsReportSender;
     private final FillSender emsFillSender;
-
-    // exchange order senders
-    private final NewOrderSender exchangeNewOrderSender;
-    private final AmendOrderSender exchangeAmendOrderSender;
-    private final CancelOrderSender exchangeCancelOrderSender;
-
-    private final Executor[] strategyEventExecutors;
-    private final IIdGenerator orderIdGenerator = new IdGenerator(0L);
+    private final OrderSender exchangeOrderSender;
     private final EventIdGenerator eventIdGenerator;
+    private final IIdGenerator orderIdGenerator = new IdGenerator(0L);
     private final ITimeSource timeSource;
     private final IStrategyFactory strategyFactory;
+    private final Executor eventExecutor;
+    private final Executor[] strategyEventExecutors;
     private final Map<Long, Order> ordersByOrderId = new ConcurrentHashMap<>();
     private final Map<Long, Order> amendOrdersByRequestId = new ConcurrentHashMap<>();
     private final Map<Long, Order> terminatedOrdersByOrderId = new ConcurrentHashMap<>();
@@ -83,60 +51,32 @@ public final class OrderManager {
 
     public OrderManager(IEmsAdapter emsAdapter,
                         IExchangeAdapter exchangeAdapter,
-                        IStrategyFactory strategyFactory,
                         EventIdGenerator eventIdGenerator,
                         ITimeSource timeSource,
+                        IStrategyFactory strategyFactory,
                         Executor eventExecutor,
                         Executor... strategyEventExecutors) {
-        emsNewAckSender = new NewAckSender(eventIdGenerator, timeSource);
-        emsNewRejectSender = new NewRejectSender(eventIdGenerator, timeSource);
-        emsAmendAckSender = new AmendAckSender(eventIdGenerator, timeSource);
-        emsAmendRejectSender = new AmendRejectSender(eventIdGenerator, timeSource);
-        emsCancelAckSender = new CancelAckSender(eventIdGenerator, timeSource);
-        emsCancelRejectSender = new CancelRejectSender(eventIdGenerator, timeSource);
-        emsUnsolicitedCancelSender = new UnsolicitedCancelSender(eventIdGenerator, timeSource);
-        emsFillSender = new FillSender(eventIdGenerator, timeSource);
-
-        emsNewAckSender.addAsyncEventListener(emsAdapter::processNewAck, emsAdapter.getExecutor());
-        emsNewRejectSender.addAsyncEventListener(emsAdapter::processNewReject, emsAdapter.getExecutor());
-        emsAmendAckSender.addAsyncEventListener(emsAdapter::processAmendAck, emsAdapter.getExecutor());
-        emsAmendRejectSender.addAsyncEventListener(emsAdapter::processAmendReject, emsAdapter.getExecutor());
-        emsCancelAckSender.addAsyncEventListener(emsAdapter::processCancelAck, emsAdapter.getExecutor());
-        emsCancelRejectSender.addAsyncEventListener(emsAdapter::processCancelReject, emsAdapter.getExecutor());
-        emsUnsolicitedCancelSender.addAsyncEventListener(emsAdapter::processUnsolicitedCancel, emsAdapter.getExecutor());
-        emsFillSender.addAsyncEventListener(emsAdapter::processFill, emsAdapter.getExecutor());
-
-        emsAdapter.addEventListeners(
-                this::processNewOrder,
-                this::processAmendOrder,
-                this::processCancelOrder,
-                eventExecutor
-        );
-
-        exchangeNewOrderSender = new NewOrderSender(eventIdGenerator, timeSource);
-        exchangeAmendOrderSender = new AmendOrderSender(eventIdGenerator, timeSource);
-        exchangeCancelOrderSender = new CancelOrderSender(eventIdGenerator, timeSource);
-
-        exchangeNewOrderSender.addAsyncEventListener(exchangeAdapter::processNewOrder, exchangeAdapter.getExecutor());
-        exchangeAmendOrderSender.addAsyncEventListener(exchangeAdapter::processAmendOrder, exchangeAdapter.getExecutor());
-        exchangeCancelOrderSender.addAsyncEventListener(exchangeAdapter::processCancelOrder, exchangeAdapter.getExecutor());
-
-        exchangeAdapter.addEventListeners(
-                this::processNewAck,
-                this::processNewReject,
-                this::processAmendAck,
-                this::processAmendReject,
-                this::processCancelAck,
-                this::processCancelReject,
-                this::processUnsolicitedCancel,
-                this::processFillEvent,
-                eventExecutor
-        );
-
+        this.emsReportSender = new ReportSender(eventIdGenerator, timeSource);
+        this.emsFillSender = new FillSender(eventIdGenerator, timeSource);
+        this.exchangeOrderSender = new OrderSender(eventIdGenerator, timeSource);
         this.eventIdGenerator = eventIdGenerator;
         this.timeSource = timeSource;
         this.strategyFactory = strategyFactory;
+        this.eventExecutor = eventExecutor;
         this.strategyEventExecutors = strategyEventExecutors;
+
+        emsReportSender.addAsyncEventListener(emsAdapter);
+        emsFillSender.addAsyncEventListener(emsAdapter);
+        exchangeOrderSender.addAsyncEventListener(exchangeAdapter);
+
+        emsAdapter.addEventListener(this);
+        exchangeAdapter.addReportListener(this);
+        exchangeAdapter.addFillListener(this);
+    }
+
+    @Override
+    public Executor getExecutor() {
+        return eventExecutor;
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -149,7 +89,7 @@ public final class OrderManager {
     }
 
     private void sendExchangeNewOrder(NewOrder newOrderEvent) {
-        exchangeNewOrderSender.sendNewOrder(
+        exchangeOrderSender.sendNewOrder(
                 newOrderEvent.getRequestId(),
                 newOrderEvent.getParentOrderId(),
                 newOrderEvent.getAccountId(),
@@ -165,7 +105,7 @@ public final class OrderManager {
     }
 
     private void sendExchangeAmendOrder(AmendOrder amendOrderEvent) {
-        exchangeAmendOrderSender.sendAmendOrder(
+        exchangeOrderSender.sendAmendOrder(
                 amendOrderEvent.getRequestId(),
                 amendOrderEvent.getOrderId(),
                 amendOrderEvent.getOrderQuantity(),
@@ -175,48 +115,49 @@ public final class OrderManager {
     }
 
     private void sendExchangeCancelOrder(CancelOrder cancelOrderEvent) {
-        exchangeCancelOrderSender.sendCancelOrder(
+        exchangeOrderSender.sendCancelOrder(
                 cancelOrderEvent.getRequestId(),
                 cancelOrderEvent.getOrderId()
         );
     }
 
     private void sendEmsNewAck(NewAck newAckEvent) {
-        emsNewAckSender.sendNewAck(newAckEvent.getRequestId(), newAckEvent.getOrderId());
+        emsReportSender.sendNewAck(newAckEvent.getRequestId(), newAckEvent.getOrderId());
     }
 
     private void sendEmsNewReject(NewReject newRejectEvent) {
-        emsNewRejectSender.sendNewReject(newRejectEvent.getRequestId(), newRejectEvent.getOrderId(), newRejectEvent.getMessage());
+        emsReportSender.sendNewReject(newRejectEvent.getRequestId(), newRejectEvent.getOrderId(), newRejectEvent.getMessage());
     }
 
     private void sendEmsAmendAck(AmendAck amendAckEvent) {
-        emsAmendAckSender.sendAmendAck(amendAckEvent.getRequestId(), amendAckEvent.getOrderId());
+        emsReportSender.sendAmendAck(amendAckEvent.getRequestId(), amendAckEvent.getOrderId());
     }
 
     private void sendEmsAmendReject(AmendReject amendRejectEvent) {
-        emsAmendRejectSender.sendAmendReject(amendRejectEvent.getRequestId(), amendRejectEvent.getOrderId(), amendRejectEvent.getMessage());
+        emsReportSender.sendAmendReject(amendRejectEvent.getRequestId(), amendRejectEvent.getOrderId(), amendRejectEvent.getMessage());
     }
 
     private void sendEmsCancelAck(CancelAck cancelAckEvent) {
-        emsCancelAckSender.sendCancelAck(cancelAckEvent.getRequestId(), cancelAckEvent.getOrderId());
+        emsReportSender.sendCancelAck(cancelAckEvent.getRequestId(), cancelAckEvent.getOrderId());
     }
 
     private void sendEmsCancelReject(CancelReject cancelRejectEvent) {
-        emsCancelRejectSender.sendCancelReject(cancelRejectEvent.getRequestId(), cancelRejectEvent.getOrderId(), cancelRejectEvent.getMessage());
+        emsReportSender.sendCancelReject(cancelRejectEvent.getRequestId(), cancelRejectEvent.getOrderId(), cancelRejectEvent.getMessage());
     }
 
     private void sendEmsUnsolicitedCancel(UnsolicitedCancel unsolicitedCancel) {
-        emsUnsolicitedCancelSender.sendUnsolicitedCancel(unsolicitedCancel.getOrderId(), unsolicitedCancel.getMessage());
+        emsReportSender.sendUnsolicitedCancel(unsolicitedCancel.getOrderId(), unsolicitedCancel.getMessage());
     }
 
     private void sendEmsFill(FillEvent fillEvent) {
-        emsFillSender.sendFillEvent(fillEvent.getOrderId(), fillEvent.getExecQuantity());
+        emsFillSender.sendFill(fillEvent.getOrderId(), fillEvent.getExecQuantity());
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     // order event processing
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
+    @Override
     public void processNewOrder(NewOrder newOrderEvent) {
         // create order object
         Order newOrder = createNewOrder(newOrderEvent);
@@ -250,6 +191,7 @@ public final class OrderManager {
         }
     }
 
+    @Override
     public void processAmendOrder(AmendOrder amendOrderEvent) {
         // find order object by order id and check order state
         Order currentOrder = findAndCheckOrder(amendOrderEvent.getOrderId());
@@ -300,6 +242,7 @@ public final class OrderManager {
         }
     }
 
+    @Override
     public void processCancelOrder(CancelOrder cancelOrderEvent) {
         // find order object by order id and check order state
         Order currentOrder = findAndCheckOrder(cancelOrderEvent.getOrderId());
@@ -406,6 +349,7 @@ public final class OrderManager {
     // report event processing
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
+    @Override
     public void processNewAck(NewAck newAck) {
         // find order object by order id and check order state
         Order order = findAndCheckOrder(newAck.getOrderId());
@@ -454,6 +398,7 @@ public final class OrderManager {
         }
     }
 
+    @Override
     public void processNewReject(NewReject newReject) {
         // find order object by order id and check order state
         Order order = findAndCheckOrder(newReject.getOrderId());
@@ -506,6 +451,7 @@ public final class OrderManager {
         moveOrderToTerminatedOrderList(order);
     }
 
+    @Override
     public void processAmendAck(AmendAck amendAck) {
         // find order object by order id and check order state
         Order order = findAndCheckOrder(amendAck.getOrderId());
@@ -572,6 +518,7 @@ public final class OrderManager {
         }
     }
 
+    @Override
     public void processAmendReject(AmendReject amendReject) {
         // find order object by order id and check order state
         Order order = findAndCheckOrder(amendReject.getOrderId());
@@ -629,6 +576,7 @@ public final class OrderManager {
         }
     }
 
+    @Override
     public void processCancelAck(CancelAck cancelAck) {
         // find order object by order id and check order state
         Order order = findAndCheckOrder(cancelAck.getOrderId());
@@ -684,6 +632,7 @@ public final class OrderManager {
         moveOrderToTerminatedOrderList(order);
     }
 
+    @Override
     public void processCancelReject(CancelReject cancelReject) {
         // find order object by order id and check order state
         Order order = findAndCheckOrder(cancelReject.getOrderId());
@@ -731,6 +680,7 @@ public final class OrderManager {
         }
     }
 
+    @Override
     public void processUnsolicitedCancel(UnsolicitedCancel unsolicitedCancel) {
         // find order object by order id and check order state
         Order order = findAndCheckOrder(unsolicitedCancel.getOrderId());
@@ -792,6 +742,7 @@ public final class OrderManager {
     // fill event processing
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
+    @Override
     public void processFillEvent(FillEvent fillEvent) {
         // find order object by order id and check order state
         Order order = findAndCheckOrder(fillEvent.getOrderId());
@@ -839,6 +790,7 @@ public final class OrderManager {
     // timer event processing
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
+    @Override
     public void processTimerEvent(TimerEvent timerEvent) {
         Order order = get(timerEvent.getOrderId());
         if (order == null) {

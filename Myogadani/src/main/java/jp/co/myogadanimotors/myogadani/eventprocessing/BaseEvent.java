@@ -12,10 +12,11 @@ public abstract class BaseEvent<T extends IAsyncEventListener> implements IEvent
         this.eventListener = eventListener;
     }
 
+    protected abstract void callEventListener(T eventListener);
+
     @Override
     public final void run() {
-        // todo: revisit this design
-        eventListener.handleEvent(this);
+        callEventListener(eventListener);
     }
 
     @Override
