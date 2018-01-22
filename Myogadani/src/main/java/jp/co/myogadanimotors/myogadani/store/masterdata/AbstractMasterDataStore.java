@@ -1,5 +1,6 @@
 package jp.co.myogadanimotors.myogadani.store.masterdata;
 
+import groovy.json.JsonException;
 import groovy.json.JsonSlurper;
 import jp.co.myogadanimotors.myogadani.config.IConfigAccessor;
 import jp.co.myogadanimotors.myogadani.store.BaseStore;
@@ -18,31 +19,46 @@ public abstract class AbstractMasterDataStore<T extends IStoredObject> extends B
 
     protected abstract T create();
 
-    public void init(IConfigAccessor configAccessor) throws Exception {
+    public void init(IConfigAccessor configAccessor) throws MasterDataInitializeException {
         String jsonFileLocation = configAccessor.getString("masterdata." + getClass().getSimpleName().toLowerCase() + ".jsonFileLocation", null);
         if (jsonFileLocation == null) {
-            throw new Exception("the json file is not available.");
+            throw new MasterDataInitializeException("the json file is not available.");
         }
 
-        ArrayList<Map<String, Object>> root;
+        logger.info("parsing a json file. (jsonFileLocation: {})", jsonFileLocation);
+
+        Object rawJson;
         try {
-            logger.info("parsing a json file. (jsonFileLocation: {})", jsonFileLocation);
-            root = (ArrayList<Map<String, Object>>) (new JsonSlurper().parse(new File(jsonFileLocation)));
-        } catch (Exception e) {
-            throw new Exception("cannot parse a json file. jsonFileLocation: " + jsonFileLocation, e);
+            rawJson = new JsonSlurper().parse(new File(jsonFileLocation));
+        } catch (JsonException e) {
+            throw new MasterDataInitializeException("cannot parse a json file. jsonFileLocation: " + jsonFileLocation);
         }
 
-        for (Map<String, Object> map : root) {
-            T obj = create();
+        if (!(rawJson instanceof ArrayList)) {
+            throw new MasterDataInitializeException("cannot cast a json object to the ArrayList. jsonFileLocation: " + jsonFileLocation);
+        }
+        ArrayList list = (ArrayList) rawJson;
 
-            for (Map.Entry<String, Object> entry : map.entrySet()) {
-                PropertyDescriptor pd = new PropertyDescriptor(entry.getKey(), obj.getClass());
-                pd.getWriteMethod().invoke(obj, entry.getValue());
+        try {
+            for (Object obj : list) {
+                if (!(obj instanceof Map)) {
+                    throw new MasterDataInitializeException("cannot a json object to Map. jsonFileLocation: " + jsonFileLocation);
+                }
+                Map map = (Map) obj;
+
+                T masterData = create();
+
+                for (Object key : map.keySet()) {
+                    PropertyDescriptor pd = new PropertyDescriptor(key.toString(), masterData.getClass());
+                    pd.getWriteMethod().invoke(masterData, map.get(key));
+                }
+
+                logger.info(masterData.toString());
+
+                put(masterData);
             }
-
-            logger.info(obj.toString());
-
-            put(obj);
+        } catch (Exception e) {
+            throw new MasterDataInitializeException("cannot create the PropertyDescriptor. jsonFileLocation: " + jsonFileLocation, e);
         }
     }
 }
