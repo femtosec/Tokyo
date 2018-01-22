@@ -27,7 +27,9 @@ public final class AmendOrder extends BaseEvent<IAsyncOrderListener> {
         this.orderId = orderId;
         this.orderQuantity = orderQuantity;
         this.priceLimit = priceLimit;
-        this.extendedAttributes.putAll(extendedAttributes);
+        if (extendedAttributes != null) {
+            this.extendedAttributes.putAll(extendedAttributes);
+        }
     }
 
     public long getRequestId() {

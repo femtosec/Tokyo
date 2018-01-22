@@ -1,7 +1,6 @@
 package jp.co.myogadanimotors.myogadani.store.masterdata.strategy;
 
 import jp.co.myogadanimotors.myogadani.common.Constants;
-import jp.co.myogadanimotors.myogadani.store.BaseStore;
 
 public class StrategyDescriptor implements IStrategyDescriptor {
 

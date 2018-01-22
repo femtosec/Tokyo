@@ -29,8 +29,8 @@ class MasterDataTest {
 
     private static void assertMarket(IMarket market, MarketType marketType, String name, String mic) {
         assert market.getMarketType() == marketType
-        assert market.getName().equals(name)
-        assert market.getMic().equals(mic)
+        assert market.getName() == name
+        assert market.getMic() == mic
     }
 
     @Test

@@ -10,5 +10,6 @@ public interface IStrategyContext {
     IOrder getOrder();
     IMarket getMarket();
     IProduct getProduct();
+    ChildOrderSender getChildOrderSender();
     long getCurrentTime();
 }

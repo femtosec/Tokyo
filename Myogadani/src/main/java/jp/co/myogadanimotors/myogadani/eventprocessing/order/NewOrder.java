@@ -46,7 +46,9 @@ public final class NewOrder extends BaseEvent<IAsyncOrderListener> {
         this.priceLimit = priceLimit;
         this.orderer = notNull(orderer);
         this.destination = notNull(destination);
-        this.extendedAttributes.putAll(notNull(extendedAttributes));
+        if (extendedAttributes != null) {
+            this.extendedAttributes.putAll(extendedAttributes);
+        }
     }
 
     public long getRequestId() {
