@@ -1,16 +1,33 @@
 package jp.co.myogadanimotors.myogadani.strategy.strategyevent.order;
 
+import jp.co.myogadanimotors.myogadani.strategy.IStrategy;
 import jp.co.myogadanimotors.myogadani.strategy.context.OrderView;
-import jp.co.myogadanimotors.myogadani.strategy.strategyevent.StrategyEventType;
 
 public final class StrategyNewReject extends AbstractStrategyReportEvent {
 
-    public StrategyNewReject(OrderView orderView) {
-        super(orderView);
+    private final String message;
+
+    public StrategyNewReject(long eventId,
+                             long creationTime,
+                             IStrategy strategy,
+                             OrderView orderView,
+                             String message) {
+        super(eventId, creationTime, strategy, orderView);
+        this.message = message;
+    }
+
+    public String getMessage() {
+        return message;
     }
 
     @Override
-    public StrategyEventType getStrategyEventType() {
-        return StrategyEventType.NewReject;
+    protected void callEventListener(IStrategy strategy) {
+        strategy.processStrategyNewReject(this);
+    }
+
+    @Override
+    public StringBuilder toStringBuilder() {
+        return super.toStringBuilder()
+                .append(", message: ").append(message);
     }
 }

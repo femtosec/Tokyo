@@ -1,16 +1,19 @@
 package jp.co.myogadanimotors.myogadani.strategy.strategyevent.order;
 
+import jp.co.myogadanimotors.myogadani.strategy.IStrategy;
 import jp.co.myogadanimotors.myogadani.strategy.context.OrderView;
-import jp.co.myogadanimotors.myogadani.strategy.strategyevent.StrategyEventType;
 
 public final class StrategyAmendAck extends AbstractStrategyReportEvent {
 
-    public StrategyAmendAck(OrderView orderView) {
-        super(orderView);
+    public StrategyAmendAck(long eventId,
+                            long creationTime,
+                            IStrategy strategy,
+                            OrderView orderView) {
+        super(eventId, creationTime, strategy, orderView);
     }
 
     @Override
-    public StrategyEventType getStrategyEventType() {
-        return StrategyEventType.AmendAck;
+    protected void callEventListener(IStrategy strategy) {
+        strategy.processStrategyAmendAck(this);
     }
 }

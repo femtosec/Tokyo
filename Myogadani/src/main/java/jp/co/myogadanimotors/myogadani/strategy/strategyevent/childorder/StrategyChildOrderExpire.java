@@ -1,16 +1,21 @@
 package jp.co.myogadanimotors.myogadani.strategy.strategyevent.childorder;
 
+import jp.co.myogadanimotors.myogadani.strategy.IStrategy;
 import jp.co.myogadanimotors.myogadani.strategy.context.OrderView;
-import jp.co.myogadanimotors.myogadani.strategy.strategyevent.StrategyEventType;
 
 public final class StrategyChildOrderExpire extends AbstractStrategyChildOrderReport {
 
-    public StrategyChildOrderExpire(OrderView orderView, OrderView childOrderView, String message) {
-        super(orderView, childOrderView, message);
+    public StrategyChildOrderExpire(long eventId,
+                                    long creationTime,
+                                    IStrategy strategy,
+                                    OrderView orderView,
+                                    OrderView childOrderView,
+                                    String message) {
+        super(eventId, creationTime, strategy, orderView, childOrderView, message);
     }
 
     @Override
-    public StrategyEventType getStrategyEventType() {
-        return StrategyEventType.ChildOrderExpire;
+    protected void callEventListener(IStrategy strategy) {
+        strategy.processStrategyChildOrderExpire(this);
     }
 }

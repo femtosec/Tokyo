@@ -3,7 +3,7 @@ package jp.co.myogadanimotors.myogadani.eventprocessing;
 import jp.co.myogadanimotors.myogadani.idgenerator.IIdGenerator;
 import jp.co.myogadanimotors.myogadani.idgenerator.IdGenerator;
 
-public class EventIdGenerator implements IEventIdGenerator {
+public class EventIdGenerator {
 
     private final IIdGenerator idGenerator;
 
@@ -15,7 +15,6 @@ public class EventIdGenerator implements IEventIdGenerator {
         idGenerator = new IdGenerator(initialId);
     }
 
-    @Override
     public long generateEventId() {
         return idGenerator.generateId();
     }

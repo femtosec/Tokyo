@@ -1,7 +1,5 @@
 package jp.co.myogadanimotors.myogadani.strategy.context;
 
-import jp.co.myogadanimotors.myogadani.eventprocessing.orderevent.OrderSender;
-import jp.co.myogadanimotors.myogadani.eventprocessing.report.ReportSender;
 import jp.co.myogadanimotors.myogadani.ordermanagement.order.IOrder;
 import jp.co.myogadanimotors.myogadani.store.masterdata.market.IMarket;
 import jp.co.myogadanimotors.myogadani.store.masterdata.market.MarketState;
@@ -11,8 +9,6 @@ import jp.co.myogadanimotors.myogadani.timesource.ITimeSource;
 
 public final class StrategyContext implements IStrategyContext {
 
-    private final ReportSender reportSender;
-    private final OrderSender childOrderSender;
     private final ITimeSource timeSource;
     private final OrderView orderView;
     private final MarketView marketView;
@@ -23,14 +19,10 @@ public final class StrategyContext implements IStrategyContext {
     private IStrategyPendingCancelProcessor pendingCancelProcessor;
     private long currentTime;
 
-    public StrategyContext(ReportSender reportSender,
-                           OrderSender childOrderSender,
-                           ITimeSource timeSource,
+    public StrategyContext(ITimeSource timeSource,
                            IOrder order,
                            IMarket market,
                            IProduct product) {
-        this.reportSender = reportSender;
-        this.childOrderSender = childOrderSender;
         this.timeSource = timeSource;
         this.orderView = new OrderView(order);
         this.marketView = new MarketView(market);
@@ -70,10 +62,6 @@ public final class StrategyContext implements IStrategyContext {
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     // getters
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    public ReportSender getReportSender() {
-        return reportSender;
-    }
 
     @Override
     public IOrder getOrder() {

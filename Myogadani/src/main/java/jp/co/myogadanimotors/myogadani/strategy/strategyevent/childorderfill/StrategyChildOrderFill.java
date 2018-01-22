@@ -1,22 +1,22 @@
 package jp.co.myogadanimotors.myogadani.strategy.strategyevent.childorderfill;
 
+import jp.co.myogadanimotors.myogadani.strategy.IStrategy;
 import jp.co.myogadanimotors.myogadani.strategy.context.OrderView;
-import jp.co.myogadanimotors.myogadani.strategy.strategyevent.IStrategyEvent;
-import jp.co.myogadanimotors.myogadani.strategy.strategyevent.StrategyEventType;
+import jp.co.myogadanimotors.myogadani.strategy.strategyevent.AbstractStrategyEvent;
 
-public final class StrategyChildOrderFill implements IStrategyEvent {
+public final class StrategyChildOrderFill extends AbstractStrategyEvent {
 
     private final OrderView orderView;
     private final OrderView childOrderView;
 
-    public StrategyChildOrderFill(OrderView orderView, OrderView childOrderView) {
+    public StrategyChildOrderFill(long eventId,
+                                  long creationTime,
+                                  IStrategy strategy,
+                                  OrderView orderView,
+                                  OrderView childOrderView) {
+        super(eventId, creationTime, strategy);
         this.orderView = orderView;
         this.childOrderView = childOrderView;
-    }
-
-    @Override
-    public StrategyEventType getStrategyEventType() {
-        return StrategyEventType.ChildOrderFill;
     }
 
     public final OrderView getOrderView() {
@@ -25,5 +25,17 @@ public final class StrategyChildOrderFill implements IStrategyEvent {
 
     public final OrderView getChildOrderView() {
         return childOrderView;
+    }
+
+    @Override
+    protected void callEventListener(IStrategy strategy) {
+        strategy.processStrategyChildOrderFill(this);
+    }
+
+    @Override
+    public StringBuilder toStringBuilder() {
+        return super.toStringBuilder()
+                .append(", orderView: ").append(orderView)
+                .append(", childOrderView: ").append(childOrderView);
     }
 }

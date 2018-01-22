@@ -1,18 +1,24 @@
 package jp.co.myogadanimotors.myogadani.strategy.strategyevent.order;
 
-import jp.co.myogadanimotors.myogadani.eventprocessing.orderevent.OrderDestination;
-import jp.co.myogadanimotors.myogadani.eventprocessing.orderevent.Orderer;
+import jp.co.myogadanimotors.myogadani.eventprocessing.order.neworder.OrderDestination;
+import jp.co.myogadanimotors.myogadani.eventprocessing.order.neworder.Orderer;
+import jp.co.myogadanimotors.myogadani.strategy.IStrategy;
 import jp.co.myogadanimotors.myogadani.strategy.context.OrderView;
-import jp.co.myogadanimotors.myogadani.strategy.strategyevent.StrategyEventType;
 
 public final class StrategyNew extends AbstractStrategyOrderEvent {
 
-    public StrategyNew(long requestId, OrderView orderView, Orderer orderer, OrderDestination destination) {
-        super(requestId, orderView, orderer, destination);
+    public StrategyNew(long eventId,
+                       long creationTime,
+                       IStrategy strategy,
+                       long requestId,
+                       OrderView orderView,
+                       Orderer orderer,
+                       OrderDestination destination) {
+        super(eventId, creationTime, strategy, requestId, orderView, orderer, destination);
     }
 
     @Override
-    public StrategyEventType getStrategyEventType() {
-        return StrategyEventType.New;
+    protected void callEventListener(IStrategy strategy) {
+        strategy.processStrategyNew(this);
     }
 }

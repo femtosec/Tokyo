@@ -1,8 +1,8 @@
 package jp.co.myogadanimotors.myogadani.ordermanagement.order;
 
 import jp.co.myogadanimotors.myogadani.common.OrderSide;
-import jp.co.myogadanimotors.myogadani.eventprocessing.orderevent.OrderDestination;
-import jp.co.myogadanimotors.myogadani.eventprocessing.orderevent.Orderer;
+import jp.co.myogadanimotors.myogadani.eventprocessing.order.neworder.OrderDestination;
+import jp.co.myogadanimotors.myogadani.eventprocessing.order.neworder.Orderer;
 import jp.co.myogadanimotors.myogadani.strategy.IStrategy;
 
 import java.math.BigDecimal;

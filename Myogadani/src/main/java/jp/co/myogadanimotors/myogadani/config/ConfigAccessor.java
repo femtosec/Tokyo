@@ -26,9 +26,11 @@ public class ConfigAccessor implements IConfigAccessor {
 
     @Override
     public int getInt(String key, int defaultValue) {
+        String rawValue = getRawValue(key);
+        if (rawValue == null) return defaultValue;
         try {
-            return Integer.parseInt(getRawValue(key));
-        } catch (Exception e) {
+            return Integer.parseInt(rawValue);
+        } catch (NumberFormatException e) {
             e.printStackTrace();
             return defaultValue;
         }
@@ -36,9 +38,11 @@ public class ConfigAccessor implements IConfigAccessor {
 
     @Override
     public double getDouble(String key, double defaultValue) {
+        String rawValue = getRawValue(key);
+        if (rawValue == null) return defaultValue;
         try {
-            return Double.parseDouble(getRawValue(key));
-        } catch (Exception e) {
+            return Double.parseDouble(rawValue);
+        } catch (NumberFormatException e) {
             e.printStackTrace();
             return defaultValue;
         }
@@ -46,12 +50,9 @@ public class ConfigAccessor implements IConfigAccessor {
 
     @Override
     public boolean getBoolean(String key, boolean defaultValue) {
-        try {
-            return Boolean.parseBoolean(getRawValue(key));
-        } catch (Exception e) {
-            e.printStackTrace();
-            return defaultValue;
-        }
+        String rawValue = getRawValue(key);
+        if (rawValue == null) return defaultValue;
+        return Boolean.parseBoolean(getRawValue(key));
     }
 
     @Override
