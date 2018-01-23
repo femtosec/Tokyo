@@ -11,6 +11,7 @@ import jp.co.myogadanimotors.myogadani.eventprocessing.timer.IAsyncTimerEventLis
 import jp.co.myogadanimotors.myogadani.eventprocessing.timer.TimerEvent;
 import jp.co.myogadanimotors.myogadani.idgenerator.IIdGenerator;
 import jp.co.myogadanimotors.myogadani.idgenerator.IdGenerator;
+import jp.co.myogadanimotors.myogadani.ordermanagement.order.IOrder;
 import jp.co.myogadanimotors.myogadani.ordermanagement.order.Order;
 import jp.co.myogadanimotors.myogadani.ordermanagement.order.OrderState;
 import jp.co.myogadanimotors.myogadani.strategy.IStrategy;
@@ -40,12 +41,13 @@ public final class OrderManager implements IAsyncOrderListener, IAsyncReportList
     private final EventIdGenerator eventIdGenerator;
     private final IIdGenerator orderIdGenerator = new IdGenerator(0L);
     private final ITimeSource timeSource;
-    private final IStrategyFactory strategyFactory;
     private final Executor eventExecutor;
     private final Executor[] strategyEventExecutors;
     private final Map<Long, Order> ordersByOrderId = new ConcurrentHashMap<>();
     private final Map<Long, Order> amendOrdersByRequestId = new ConcurrentHashMap<>();
     private final Map<Long, Order> terminatedOrdersByOrderId = new ConcurrentHashMap<>();
+
+    private IStrategyFactory strategyFactory;
 
     private int lastThreadId = 0;
 
@@ -53,7 +55,6 @@ public final class OrderManager implements IAsyncOrderListener, IAsyncReportList
                         IExchangeAdapter exchangeAdapter,
                         EventIdGenerator eventIdGenerator,
                         ITimeSource timeSource,
-                        IStrategyFactory strategyFactory,
                         Executor eventExecutor,
                         Executor... strategyEventExecutors) {
         this.emsReportSender = new ReportSender(eventIdGenerator, timeSource);
@@ -61,7 +62,6 @@ public final class OrderManager implements IAsyncOrderListener, IAsyncReportList
         this.exchangeOrderSender = new OrderSender(eventIdGenerator, timeSource);
         this.eventIdGenerator = eventIdGenerator;
         this.timeSource = timeSource;
-        this.strategyFactory = strategyFactory;
         this.eventExecutor = eventExecutor;
         this.strategyEventExecutors = strategyEventExecutors;
 
@@ -72,6 +72,10 @@ public final class OrderManager implements IAsyncOrderListener, IAsyncReportList
         emsAdapter.addEventListener(this);
         exchangeAdapter.addReportListener(this);
         exchangeAdapter.addFillListener(this);
+    }
+
+    public void setStrategyFactory(IStrategyFactory strategyFactory) {
+        this.strategyFactory = strategyFactory;
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -904,7 +908,7 @@ public final class OrderManager implements IAsyncOrderListener, IAsyncReportList
         );
 
         if (newOrder.isStrategyOrder()) {
-            newOrder.setStrategy(strategyFactory.create(getStrategyName(newOrderEvent::getExtendedAttribute), newOrder));
+            newOrder.setStrategy(createStrategy(getStrategyName(newOrderEvent::getExtendedAttribute), newOrder));
         }
 
         return newOrder;
@@ -931,7 +935,7 @@ public final class OrderManager implements IAsyncOrderListener, IAsyncReportList
             IStrategy currentStrategy = currentOrder.getStrategy();
             String newStrategyName = getStrategyName(orderEvent::getExtendedAttribute);
             if (!currentStrategy.getStrategyDescriptor().getName().equals(newStrategyName)) {
-                amendOrder.setStrategy(strategyFactory.create(newStrategyName, amendOrder));
+                amendOrder.setStrategy(createStrategy(newStrategyName, amendOrder));
             } else {
                 amendOrder.setStrategy(currentStrategy);
             }
@@ -955,6 +959,14 @@ public final class OrderManager implements IAsyncOrderListener, IAsyncReportList
 
     private String getStrategyName(Function<String, String> extendedAttributeGetter) {
         return extendedAttributeGetter.apply("strategyName");
+    }
+
+    private IStrategy createStrategy(String strategyName, IOrder order) {
+        if (strategyFactory == null) {
+            return null;
+        }
+
+        return strategyFactory.create(strategyName, order);
     }
 
     /**

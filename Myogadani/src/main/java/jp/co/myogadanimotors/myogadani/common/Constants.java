@@ -6,4 +6,5 @@ public class Constants {
     public static final String CONFIG_FILE_NAME = "configuration.groovy";
     public static final String MULTIPLE_SYMBOLS = "*";
     public static final int MAX_NUMBER_OF_DEPTH_ENTRIES = 10;
+    public static final int DEFAULT_NUMBER_OF_STRATEGY_THREADS = 1;
 }

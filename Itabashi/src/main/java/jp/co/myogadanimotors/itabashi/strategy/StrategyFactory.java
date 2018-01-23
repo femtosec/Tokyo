@@ -21,8 +21,8 @@ import jp.co.myogadanimotors.myogadani.timesource.ITimeSource;
 public class StrategyFactory extends AbstractStrategyFactory {
 
     public StrategyFactory(EventIdGenerator eventIdGenerator,
-                           ITimeSource timeSource,
                            RequestIdGenerator requestIdGenerator,
+                           ITimeSource timeSource,
                            MarketMaster marketMaster,
                            ProductMaster productMaster,
                            StrategyMaster strategyMaster,

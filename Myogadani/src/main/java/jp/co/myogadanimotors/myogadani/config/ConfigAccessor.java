@@ -5,6 +5,8 @@ import groovy.util.ConfigSlurper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.io.FileNotFoundException;
+
 public class ConfigAccessor implements IConfigAccessor {
 
     private final Logger logger = LogManager.getLogger(getClass().getName());
@@ -15,12 +17,12 @@ public class ConfigAccessor implements IConfigAccessor {
     }
 
     @Override
-    public void parse(String environment, String configFileName) throws Exception {
+    public void parse(String environment, String configFileName) throws FileNotFoundException {
         try {
             logger.info("parsing a config file. (configFileName: {})", configFileName);
             configObject = new ConfigSlurper(environment).parse(getClass().getClassLoader().getResource(configFileName));
-        } catch (Exception e) {
-            throw new Exception("cannot parse config file.", e);
+        } catch (NullPointerException e) {
+            throw new FileNotFoundException("cannot parse config file.");
         }
     }
 
