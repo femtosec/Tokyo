@@ -1,22 +1,30 @@
 package jp.co.myogadanimotors.myogadani.strategy.context;
 
 import jp.co.myogadanimotors.myogadani.eventprocessing.EventIdGenerator;
+import jp.co.myogadanimotors.myogadani.eventprocessing.RequestIdGenerator;
+import jp.co.myogadanimotors.myogadani.eventprocessing.marketdata.IAsyncMarketDataRequestListener;
+import jp.co.myogadanimotors.myogadani.eventprocessing.marketdata.MarketDataRequestSender;
+import jp.co.myogadanimotors.myogadani.eventprocessing.order.IAsyncOrderListener;
 import jp.co.myogadanimotors.myogadani.eventprocessing.report.FillSender;
+import jp.co.myogadanimotors.myogadani.eventprocessing.report.IAsyncFillListener;
+import jp.co.myogadanimotors.myogadani.eventprocessing.report.IAsyncReportListener;
 import jp.co.myogadanimotors.myogadani.eventprocessing.report.ReportSender;
-import jp.co.myogadanimotors.myogadani.idgenerator.IIdGenerator;
+import jp.co.myogadanimotors.myogadani.eventprocessing.timer.IAsyncTimerRegistrationListener;
 import jp.co.myogadanimotors.myogadani.ordermanagement.order.IOrder;
 import jp.co.myogadanimotors.myogadani.store.masterdata.market.IMarket;
 import jp.co.myogadanimotors.myogadani.store.masterdata.market.MarketState;
 import jp.co.myogadanimotors.myogadani.store.masterdata.product.IProduct;
-import jp.co.myogadanimotors.myogadani.store.masterdata.strategy.StrategyMaster;
 import jp.co.myogadanimotors.myogadani.strategy.StrategyState;
 import jp.co.myogadanimotors.myogadani.timesource.ITimeSource;
 
 public final class StrategyContext implements IStrategyContext {
 
+    private final RequestIdGenerator requestIdGenerator;
     private final ChildOrderSender childOrderSender;
+    private final TimerRegistry timerRegistry;
     private final ReportSender reportSender;
     private final FillSender fillSender;
+    private final MarketDataRequestSender marketDataRequestSender;
     private final ITimeSource timeSource;
     private final OrderView orderView;
     private final MarketView marketView;
@@ -28,29 +36,41 @@ public final class StrategyContext implements IStrategyContext {
     private IStrategyPendingCancelProcessor pendingCancelProcessor;
     private long currentTime;
 
-    // todo: fill sender and report sender should be created in this constructor
-    public StrategyContext(ReportSender reportSender,
-                           FillSender fillSender,
-                           EventIdGenerator eventIdGenerator,
+    public StrategyContext(EventIdGenerator eventIdGenerator,
+                           RequestIdGenerator requestIdGenerator,
                            ITimeSource timeSource,
-                           IIdGenerator requestIdGenerator,
-                           StrategyMaster strategyMaster,
                            IOrder order,
                            IMarket market,
-                           IProduct product) {
-        this.childOrderSender = new ChildOrderSender(eventIdGenerator, timeSource, requestIdGenerator, strategyMaster, order);
-        this.reportSender = reportSender;
-        this.fillSender = fillSender;
+                           IProduct product,
+                           IAsyncOrderListener asyncOrderListener,
+                           IAsyncReportListener asyncReportListener,
+                           IAsyncFillListener asyncFillListener,
+                           IAsyncMarketDataRequestListener asyncMarketDataRequestListener,
+                           IAsyncTimerRegistrationListener asyncTimerRegistrationListener) {
+        this.requestIdGenerator = requestIdGenerator;
+        this.childOrderSender = new ChildOrderSender(eventIdGenerator, requestIdGenerator, timeSource, order, asyncOrderListener);
+        this.timerRegistry = new TimerRegistry(order.getOrderId(), eventIdGenerator, timeSource, asyncTimerRegistrationListener);
+        this.reportSender = new ReportSender(eventIdGenerator, timeSource);
+        this.fillSender = new FillSender(eventIdGenerator, timeSource);
+        this.marketDataRequestSender = new MarketDataRequestSender(eventIdGenerator, timeSource);
         this.timeSource = timeSource;
         this.orderView = new OrderView(order);
         this.marketView = new MarketView(market);
         this.product = product;
         strategyState = StrategyState.PendingNew;
         currentTime = timeSource.getCurrentTime();
+
+        reportSender.addAsyncEventListener(asyncReportListener);
+        fillSender.addAsyncEventListener(asyncFillListener);
+        marketDataRequestSender.addAsyncEventListener(asyncMarketDataRequestListener);
     }
 
     public void refreshCurrentTime() {
         currentTime = timeSource.getCurrentTime();
+    }
+
+    public void onTimer(long userTag, long timerEventTime) {
+        timerRegistry.onTimer(userTag, timerEventTime);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -126,6 +146,11 @@ public final class StrategyContext implements IStrategyContext {
     }
 
     @Override
+    public ITimerRegistry getTimerRegistry() {
+        return timerRegistry;
+    }
+
+    @Override
     public StrategyState getStrategyState() {
         return strategyState;
     }
@@ -133,5 +158,19 @@ public final class StrategyContext implements IStrategyContext {
     @Override
     public long getCurrentTime() {
         return currentTime;
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    // utilities
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    @Override
+    public void subscribeMarketData(String symbol, String mic) {
+        marketDataRequestSender.sendMarketDataRequest(
+                requestIdGenerator.generateRequestId(),
+                product.getId(),
+                symbol,
+                mic
+        );
     }
 }

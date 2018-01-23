@@ -3,7 +3,7 @@ package jp.co.myogadanimotors.myogadani.strategy.strategyevent.order;
 import jp.co.myogadanimotors.myogadani.strategy.IStrategy;
 import jp.co.myogadanimotors.myogadani.strategy.context.OrderView;
 
-public class StrategyUnsolicitedCancel extends AbstractStrategyReportEvent {
+public final class StrategyUnsolicitedCancel extends AbstractStrategyReportEvent {
 
     private final String message;
 

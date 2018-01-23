@@ -14,7 +14,6 @@ public class IdGenerator implements IIdGenerator {
         idSource = new AtomicLong(initialId);
     }
 
-
     @Override
     public long generateId() {
         return idSource.getAndIncrement();

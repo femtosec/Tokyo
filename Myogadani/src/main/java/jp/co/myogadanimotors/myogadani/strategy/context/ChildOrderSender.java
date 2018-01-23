@@ -2,32 +2,32 @@ package jp.co.myogadanimotors.myogadani.strategy.context;
 
 import jp.co.myogadanimotors.myogadani.common.OrderSide;
 import jp.co.myogadanimotors.myogadani.eventprocessing.EventIdGenerator;
+import jp.co.myogadanimotors.myogadani.eventprocessing.RequestIdGenerator;
+import jp.co.myogadanimotors.myogadani.eventprocessing.order.IAsyncOrderListener;
 import jp.co.myogadanimotors.myogadani.eventprocessing.order.OrderDestination;
 import jp.co.myogadanimotors.myogadani.eventprocessing.order.OrderSender;
 import jp.co.myogadanimotors.myogadani.eventprocessing.order.Orderer;
-import jp.co.myogadanimotors.myogadani.idgenerator.IIdGenerator;
 import jp.co.myogadanimotors.myogadani.ordermanagement.order.IOrder;
-import jp.co.myogadanimotors.myogadani.store.masterdata.strategy.StrategyMaster;
 import jp.co.myogadanimotors.myogadani.timesource.ITimeSource;
 
 import java.math.BigDecimal;
 
-public class ChildOrderSender {
+public final class ChildOrderSender {
 
     private final OrderSender orderSeder;
-    private final IIdGenerator requestIdGenerator;
-    private final StrategyMaster strategyMaster;
+    private final RequestIdGenerator requestIdGenerator;
     private final IOrder order;
 
     public ChildOrderSender(EventIdGenerator eventIdGenerator,
+                            RequestIdGenerator requestIdGenerator,
                             ITimeSource timeSource,
-                            IIdGenerator requestIdGenerator,
-                            StrategyMaster strategyMaster,
-                            IOrder order) {
+                            IOrder order,
+                            IAsyncOrderListener asyncOrderListener) {
         this.orderSeder = new OrderSender(eventIdGenerator, timeSource);
         this.requestIdGenerator = requestIdGenerator;
-        this.strategyMaster = strategyMaster;
         this.order = new OrderView(order);
+
+        orderSeder.addAsyncEventListener(asyncOrderListener);
     }
 
     public void sendExchangeNewOrder(String symbol,
@@ -37,7 +37,7 @@ public class ChildOrderSender {
                                 BigDecimal priceLimit) {
         // todo: insert sanity check
         orderSeder.sendNewOrder(
-                requestIdGenerator.generateId(),
+                requestIdGenerator.generateRequestId(),
                 order.getOrderId(),
                 order.getAccountId(),
                 symbol,
@@ -56,7 +56,7 @@ public class ChildOrderSender {
                                   BigDecimal priceLimit) {
         // todo: insert sanity check
         orderSeder.sendAmendOrder(
-                requestIdGenerator.generateId(),
+                requestIdGenerator.generateRequestId(),
                 childOrderId,
                 orderQuantity,
                 priceLimit,
@@ -67,7 +67,7 @@ public class ChildOrderSender {
     public void sendExchangeCancelOrder(long childOrderId) {
         // todo: insert sanity check
         orderSeder.sendCancelOrder(
-                requestIdGenerator.generateId(),
+                requestIdGenerator.generateRequestId(),
                 childOrderId
         );
     }

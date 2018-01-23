@@ -2,15 +2,15 @@ package jp.co.myogadanimotors.myogadani.store.masterdata.market;
 
 import jp.co.myogadanimotors.myogadani.store.masterdata.AbstractMasterDataStore;
 
-public final class MarketMaster extends AbstractMasterDataStore<Market> {
+public final class MarketMaster extends AbstractMasterDataStore<IMarket> {
 
     @Override
-    protected Market create() {
+    protected IMarket create() {
         return new Market();
     }
 
-    public Market getByMic(String mic) {
-        for (Market market : objectsById.values()) {
+    public IMarket getByMic(String mic) {
+        for (IMarket market : objectsById.values()) {
             if (market.getMic().equals(mic)) return market;
         }
 

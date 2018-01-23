@@ -2,7 +2,7 @@ package jp.co.myogadanimotors.myogadani.eventprocessing.report;
 
 import jp.co.myogadanimotors.myogadani.eventprocessing.BaseEvent;
 
-public class NewReject extends BaseEvent<IAsyncReportListener> {
+public final class NewReject extends BaseEvent<IAsyncReportListener> {
 
     private final long requestId;
     private final long orderId;

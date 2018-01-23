@@ -2,15 +2,15 @@ package jp.co.myogadanimotors.myogadani.store.masterdata.strategy;
 
 import jp.co.myogadanimotors.myogadani.store.masterdata.AbstractMasterDataStore;
 
-public class StrategyMaster extends AbstractMasterDataStore<StrategyDescriptor> {
+public final class StrategyMaster extends AbstractMasterDataStore<IStrategyDescriptor> {
 
     @Override
-    protected StrategyDescriptor create() {
+    protected IStrategyDescriptor create() {
         return new StrategyDescriptor();
     }
 
-    public StrategyDescriptor getByName(String name) {
-        for (StrategyDescriptor sd : objectsById.values()) {
+    public IStrategyDescriptor getByName(String name) {
+        for (IStrategyDescriptor sd : objectsById.values()) {
             if (sd.getName().equals(name)) return sd;
         }
 

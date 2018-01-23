@@ -2,7 +2,7 @@ package jp.co.myogadanimotors.myogadani.eventprocessing.marketdata;
 
 import java.math.BigDecimal;
 
-public class DepthEntry {
+public final class DepthEntry {
 
     private final BigDecimal price;
     private final BigDecimal size;

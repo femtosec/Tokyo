@@ -4,7 +4,7 @@ import jp.co.myogadanimotors.myogadani.store.masterdata.market.IMarket;
 import jp.co.myogadanimotors.myogadani.store.masterdata.market.MarketState;
 import jp.co.myogadanimotors.myogadani.store.masterdata.market.MarketType;
 
-public class MarketView implements IMarket {
+public final class MarketView implements IMarket {
 
     private final long id;
     private final MarketType marketType;

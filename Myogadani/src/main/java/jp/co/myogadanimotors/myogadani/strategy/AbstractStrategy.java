@@ -1,6 +1,8 @@
 package jp.co.myogadanimotors.myogadani.strategy;
 
 import jp.co.myogadanimotors.myogadani.ordermanagement.order.OrderState;
+import jp.co.myogadanimotors.myogadani.store.masterdata.strategy.IStrategyDescriptor;
+import jp.co.myogadanimotors.myogadani.store.masterdata.strategy.StrategyDescriptor;
 import jp.co.myogadanimotors.myogadani.strategy.context.*;
 import jp.co.myogadanimotors.myogadani.strategy.strategyevent.childorder.*;
 import jp.co.myogadanimotors.myogadani.strategy.strategyevent.childorderfill.StrategyChildOrderFill;
@@ -19,20 +21,20 @@ import java.util.function.Predicate;
 
 public abstract class AbstractStrategy implements IStrategy {
 
-    protected final Logger log = LogManager.getLogger(getClass().getName());
+    protected final Logger logger = LogManager.getLogger(getClass().getName());
 
-    private final int strategyTypeId;
+    private final IStrategyDescriptor strategyDescriptor;
     private final StrategyContext context;
     private final List<IValidator> validators = new ArrayList<>();
 
-    public AbstractStrategy(int strategyTypeId, StrategyContext context) {
-        this.strategyTypeId = strategyTypeId;
+    public AbstractStrategy(IStrategyDescriptor strategyDescriptor, StrategyContext context) {
+        this.strategyDescriptor = new StrategyDescriptor(strategyDescriptor);
         this.context = context;
     }
 
     @Override
-    public final int getStrategyTypeId() {
-        return strategyTypeId;
+    public final IStrategyDescriptor getStrategyDescriptor() {
+        return strategyDescriptor;
     }
 
     protected final void addValidator(IValidator validator) {
@@ -45,7 +47,7 @@ public abstract class AbstractStrategy implements IStrategy {
     }
 
     protected void terminate(String message) {
-        log.info("terminating strategy. ({})", message);
+        logger.info("terminating strategy. ({})", message);
     }
 
     protected IStrategyPendingAmendContext createPendingAmendContext() {
@@ -255,7 +257,7 @@ public abstract class AbstractStrategy implements IStrategy {
 
     @Override
     public final void processStrategyMarketDataEvent(StrategyMarketDataEvent strategyMarketDataEvent) {
-        log.trace("processing market data.");
+        logger.trace("processing market data.");
     }
 
     //////////////////////////////////////////////////
@@ -264,7 +266,10 @@ public abstract class AbstractStrategy implements IStrategy {
 
     @Override
     public final void processStrategyTimerEvent(StrategyTimerEvent strategyTimerEvent) {
-        log.trace("processing timer event.");
+        logger.trace("processing timer event.");
+
+        // update context
+        context.onTimer(strategyTimerEvent.getUserTag(), strategyTimerEvent.getTimerEventTime());
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -287,7 +292,7 @@ public abstract class AbstractStrategy implements IStrategy {
     }
 
     private void processStrategyStateWorking() {
-        log.trace("processing working state.");
+        logger.trace("processing working state.");
     }
 
     private void processStrategyStateRejected() {
@@ -307,7 +312,7 @@ public abstract class AbstractStrategy implements IStrategy {
     }
 
     private void processStrategyStatePendingAmend() {
-        log.trace("processing pending amend.");
+        logger.trace("processing pending amend.");
 
         IStrategyPendingAmendProcessor pap = context.getStrategyPendingAmendProcessor();
         pap.process(context.getStrategyPendingAmendContext());
@@ -319,16 +324,16 @@ public abstract class AbstractStrategy implements IStrategy {
         context.setStrategyState(StrategyState.PostAmend);
 
         if (pap.getResult() == PendingAmendCancelResult.Succeeded) {
-            log.info("PendingAmendProcessor succeeded.");
+            logger.info("PendingAmendProcessor succeeded.");
             context.getReportSender().sendAmendAck(context.getOrder().getOrderId(), pap.getRequestId());
         } else if (pap.getResult() == PendingAmendCancelResult.Failed) {
-            log.info("PendingAmendProcessor failed.");
+            logger.info("PendingAmendProcessor failed.");
             context.getReportSender().sendAmendReject(context.getOrder().getOrderId(), pap.getRequestId(), pap.getMessage());
         }
     }
 
     private void processStrategyStatePendingCancel() {
-        log.trace("processing pending cancel.");
+        logger.trace("processing pending cancel.");
 
         IStrategyPendingCancelProcessor pcp = context.getStrategyPendingCancelProcessor();
         pcp.process();
@@ -340,24 +345,24 @@ public abstract class AbstractStrategy implements IStrategy {
         context.setStrategyState(StrategyState.PostCancel);
 
         if (pcp.getResult() == PendingAmendCancelResult.Succeeded) {
-            log.info("PendingCancelProcessor succeeded.");
+            logger.info("PendingCancelProcessor succeeded.");
             context.getReportSender().sendCancelAck(context.getOrder().getOrderId(), pcp.getRequestId());
         } else if (pcp.getResult() == PendingAmendCancelResult.Failed) {
-            log.info("PendingCancelProcessor failed.");
+            logger.info("PendingCancelProcessor failed.");
             context.getReportSender().sendCancelReject(context.getOrder().getOrderId(), pcp.getRequestId(), pcp.getMessage());
         }
     }
 
     private void processStrategyStatePostAmend() {
-        log.trace("not doing anything");
+        logger.trace("not doing anything");
     }
 
     private void processStrategyStatePostCancel() {
-        log.trace("not doing anything");
+        logger.trace("not doing anything");
     }
 
     private void checkSpamming() {
-        log.trace("checking spamming.");
+        logger.trace("checking spamming.");
         // todo: if spamming happened, change strategy state to "UnsolicitedCancel"
     }
 

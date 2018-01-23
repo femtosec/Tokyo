@@ -2,7 +2,7 @@ package jp.co.myogadanimotors.myogadani.eventprocessing.timer;
 
 import jp.co.myogadanimotors.myogadani.eventprocessing.BaseEvent;
 
-public class TimerEvent extends BaseEvent<IAsyncTimerEventListener> {
+public final class TimerEvent extends BaseEvent<IAsyncTimerEventListener> {
 
     private final long orderId;
     private final long userTag;

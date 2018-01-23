@@ -904,7 +904,7 @@ public final class OrderManager implements IAsyncOrderListener, IAsyncReportList
         );
 
         if (newOrder.isStrategyOrder()) {
-            newOrder.setStrategy(strategyFactory.create(getStrategyTypeId(newOrderEvent::getExtendedAttribute), newOrder));
+            newOrder.setStrategy(strategyFactory.create(getStrategyName(newOrderEvent::getExtendedAttribute), newOrder));
         }
 
         return newOrder;
@@ -929,9 +929,9 @@ public final class OrderManager implements IAsyncOrderListener, IAsyncReportList
         if (amendOrder.isStrategyOrder()) {
             // if strategy type amend, create new strategy
             IStrategy currentStrategy = currentOrder.getStrategy();
-            int newStrategyTypeId = getStrategyTypeId(orderEvent::getExtendedAttribute);
-            if (currentStrategy.getStrategyTypeId() != newStrategyTypeId) {
-                amendOrder.setStrategy(strategyFactory.create(newStrategyTypeId, amendOrder));
+            String newStrategyName = getStrategyName(orderEvent::getExtendedAttribute);
+            if (!currentStrategy.getStrategyDescriptor().getName().equals(newStrategyName)) {
+                amendOrder.setStrategy(strategyFactory.create(newStrategyName, amendOrder));
             } else {
                 amendOrder.setStrategy(currentStrategy);
             }
@@ -953,13 +953,8 @@ public final class OrderManager implements IAsyncOrderListener, IAsyncReportList
         return lastThreadId;
     }
 
-    private int getStrategyTypeId(Function<String, String> extendedAttributeGetter) {
-        String strId = extendedAttributeGetter.apply("strategyTypeId");
-        if (strId != null) {
-            return Integer.parseInt(strId);
-        }
-
-        return Integer.MIN_VALUE;
+    private String getStrategyName(Function<String, String> extendedAttributeGetter) {
+        return extendedAttributeGetter.apply("strategyName");
     }
 
     /**

@@ -3,7 +3,7 @@ package jp.co.myogadanimotors.myogadani.strategy.strategyevent.childorder;
 import jp.co.myogadanimotors.myogadani.strategy.IStrategy;
 import jp.co.myogadanimotors.myogadani.strategy.context.OrderView;
 
-public class StrategyChildOrderUnsolicitedCancel extends AbstractStrategyChildOrderReport {
+public final class StrategyChildOrderUnsolicitedCancel extends AbstractStrategyChildOrderReport {
 
     public StrategyChildOrderUnsolicitedCancel(long eventId,
                                                long creationTime,

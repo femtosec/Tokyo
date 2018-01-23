@@ -2,7 +2,7 @@ package jp.co.myogadanimotors.myogadani.store.masterdata.product;
 
 import jp.co.myogadanimotors.myogadani.common.Constants;
 
-public class Product implements IProduct {
+public final class Product implements IProduct {
 
     private long id = Constants.NOT_SET_ID_LONG;
     private ProductType productType;

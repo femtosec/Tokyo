@@ -2,15 +2,15 @@ package jp.co.myogadanimotors.myogadani.store.masterdata.product;
 
 import jp.co.myogadanimotors.myogadani.store.masterdata.AbstractMasterDataStore;
 
-public class ProductMaster extends AbstractMasterDataStore<Product> {
+public final class ProductMaster extends AbstractMasterDataStore<IProduct> {
 
     @Override
-    protected Product create() {
+    protected IProduct create() {
         return new Product();
     }
 
-    public Product getBySymbol(String symbol) {
-        for (Product product : objectsById.values()) {
+    public IProduct getBySymbol(String symbol) {
+        for (IProduct product : objectsById.values()) {
             if (product.getSymbol().equals(symbol)) return product;
         }
 

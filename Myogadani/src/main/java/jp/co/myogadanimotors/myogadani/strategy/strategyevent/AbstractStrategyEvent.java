@@ -44,6 +44,6 @@ public abstract class AbstractStrategyEvent implements IEvent {
         return new StringBuilder(getClass().getName())
                 .append(" eventId: ").append(eventId)
                 .append(", creationTime: ").append(creationTime)
-                .append(", strategyTypeId: ").append(strategy.getStrategyTypeId());
+                .append(", strategyName: ").append(strategy.getStrategyDescriptor().getName());
     }
 }

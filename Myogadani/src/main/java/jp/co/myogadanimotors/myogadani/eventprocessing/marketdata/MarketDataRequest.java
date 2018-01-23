@@ -2,7 +2,7 @@ package jp.co.myogadanimotors.myogadani.eventprocessing.marketdata;
 
 import jp.co.myogadanimotors.myogadani.eventprocessing.BaseEvent;
 
-public class MarketDataRequest extends BaseEvent<IAsyncMarketDataRequestListener> {
+public final class MarketDataRequest extends BaseEvent<IAsyncMarketDataRequestListener> {
 
     private final long requestId;
     private final long productId;

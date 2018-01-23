@@ -2,11 +2,21 @@ package jp.co.myogadanimotors.myogadani.store.masterdata.strategy;
 
 import jp.co.myogadanimotors.myogadani.common.Constants;
 
-public class StrategyDescriptor implements IStrategyDescriptor {
+public final class StrategyDescriptor implements IStrategyDescriptor {
 
     private long id = Constants.NOT_SET_ID_LONG;
     private String name;
     private String description;
+
+    public StrategyDescriptor() {
+
+    }
+
+    public StrategyDescriptor(IStrategyDescriptor strategyDescriptor) {
+        id = strategyDescriptor.getId();
+        name = strategyDescriptor.getName();
+        description = strategyDescriptor.getDescription();
+    }
 
     @Override
     public long getId() {
@@ -33,5 +43,12 @@ public class StrategyDescriptor implements IStrategyDescriptor {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    @Override
+    public String toString() {
+        return "id: " + id
+                + ", name: " + name
+                + ", description: " + description;
     }
 }

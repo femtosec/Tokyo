@@ -2,7 +2,7 @@ package jp.co.myogadanimotors.myogadani.eventprocessing.report;
 
 import jp.co.myogadanimotors.myogadani.eventprocessing.BaseEvent;
 
-public class CancelAck extends BaseEvent<IAsyncReportListener> {
+public final class CancelAck extends BaseEvent<IAsyncReportListener> {
 
     private final long requestId;
     private final long orderId;

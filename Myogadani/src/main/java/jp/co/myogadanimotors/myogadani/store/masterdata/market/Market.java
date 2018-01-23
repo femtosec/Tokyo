@@ -2,7 +2,7 @@ package jp.co.myogadanimotors.myogadani.store.masterdata.market;
 
 import jp.co.myogadanimotors.myogadani.common.Constants;
 
-public class Market implements IMarket {
+public final class Market implements IMarket {
 
     private long id = Constants.NOT_SET_ID_LONG;
     private MarketType marketType;

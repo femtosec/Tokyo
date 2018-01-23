@@ -2,7 +2,7 @@ package jp.co.myogadanimotors.myogadani.eventprocessing.report;
 
 import jp.co.myogadanimotors.myogadani.eventprocessing.BaseEvent;
 
-public class UnsolicitedCancel extends BaseEvent<IAsyncReportListener> {
+public final class UnsolicitedCancel extends BaseEvent<IAsyncReportListener> {
 
     private final long orderId;
     private final String message;

@@ -4,7 +4,7 @@ import jp.co.myogadanimotors.myogadani.eventprocessing.BaseEvent;
 
 import java.math.BigDecimal;
 
-public class MarketData extends BaseEvent<IAsyncMarketDataListener> {
+public final class MarketData extends BaseEvent<IAsyncMarketDataListener> {
 
     private final long requestId;
     private final long productId;

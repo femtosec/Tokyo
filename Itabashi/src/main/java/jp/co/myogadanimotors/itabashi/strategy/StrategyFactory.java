@@ -2,12 +2,16 @@ package jp.co.myogadanimotors.itabashi.strategy;
 
 import jp.co.myogadanimotors.itabashi.strategy.peg.Peg;
 import jp.co.myogadanimotors.myogadani.eventprocessing.EventIdGenerator;
-import jp.co.myogadanimotors.myogadani.eventprocessing.report.FillSender;
-import jp.co.myogadanimotors.myogadani.eventprocessing.report.ReportSender;
-import jp.co.myogadanimotors.myogadani.idgenerator.IIdGenerator;
+import jp.co.myogadanimotors.myogadani.eventprocessing.RequestIdGenerator;
+import jp.co.myogadanimotors.myogadani.eventprocessing.marketdata.IAsyncMarketDataRequestListener;
+import jp.co.myogadanimotors.myogadani.eventprocessing.order.IAsyncOrderListener;
+import jp.co.myogadanimotors.myogadani.eventprocessing.report.IAsyncFillListener;
+import jp.co.myogadanimotors.myogadani.eventprocessing.report.IAsyncReportListener;
+import jp.co.myogadanimotors.myogadani.eventprocessing.timer.IAsyncTimerRegistrationListener;
 import jp.co.myogadanimotors.myogadani.ordermanagement.order.IOrder;
 import jp.co.myogadanimotors.myogadani.store.masterdata.market.MarketMaster;
 import jp.co.myogadanimotors.myogadani.store.masterdata.product.ProductMaster;
+import jp.co.myogadanimotors.myogadani.store.masterdata.strategy.IStrategyDescriptor;
 import jp.co.myogadanimotors.myogadani.store.masterdata.strategy.StrategyMaster;
 import jp.co.myogadanimotors.myogadani.strategy.AbstractStrategyFactory;
 import jp.co.myogadanimotors.myogadani.strategy.IStrategy;
@@ -16,34 +20,41 @@ import jp.co.myogadanimotors.myogadani.timesource.ITimeSource;
 
 public class StrategyFactory extends AbstractStrategyFactory {
 
-    public StrategyFactory(ReportSender reportSender,
-                           FillSender fillSender,
-                           EventIdGenerator eventIdGenerator,
+    public StrategyFactory(EventIdGenerator eventIdGenerator,
                            ITimeSource timeSource,
-                           IIdGenerator requestIdGenerator,
+                           RequestIdGenerator requestIdGenerator,
                            MarketMaster marketMaster,
                            ProductMaster productMaster,
-                           StrategyMaster strategyMaster) {
+                           StrategyMaster strategyMaster,
+                           IAsyncOrderListener asyncOrderListener,
+                           IAsyncReportListener asyncReportListener,
+                           IAsyncFillListener asyncFillListener,
+                           IAsyncMarketDataRequestListener asyncMarketDataRequestListener,
+                           IAsyncTimerRegistrationListener asyncTimerRegistrationListener) {
         super(
-                reportSender,
-                fillSender,
                 eventIdGenerator,
-                timeSource,
                 requestIdGenerator,
+                timeSource,
                 marketMaster,
                 productMaster,
-                strategyMaster
+                strategyMaster,
+                asyncOrderListener,
+                asyncReportListener,
+                asyncFillListener,
+                asyncMarketDataRequestListener,
+                asyncTimerRegistrationListener
         );
     }
 
     @Override
-    public IStrategy create(int strategyTypeId, IOrder order) {
+    public IStrategy create(String strategyName, IOrder order) {
+        IStrategyDescriptor strategyDescriptor = getStrategyDescriptor(strategyName);
         StrategyContext context = createStrategyContext(order);
 
         // todo: to be implemented
-        switch (strategyTypeId) {
-            case 0:     // test
-                return new Peg(strategyTypeId, context);
+        switch (strategyName) {
+            case "Peg":     // test
+                return new Peg(strategyDescriptor, context);
         }
 
         return null;
