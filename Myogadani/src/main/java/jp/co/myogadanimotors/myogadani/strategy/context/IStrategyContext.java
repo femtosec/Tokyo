@@ -11,7 +11,7 @@ public interface IStrategyContext {
     IMarket getMarket();
     IProduct getProduct();
     IChildOrderContainer getChildOrderContainer();
-    ChildOrderSender getChildOrderSender();
+    IChildOrderSender getChildOrderSender();
     ITimerRegistry getTimerRegistry();
     long getCurrentTime();
     void subscribeMarketData(String symbol, String mic);

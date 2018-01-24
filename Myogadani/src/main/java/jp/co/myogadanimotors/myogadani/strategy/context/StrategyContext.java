@@ -174,7 +174,7 @@ public final class StrategyContext implements IStrategyContext {
     }
 
     @Override
-    public ChildOrderSender getChildOrderSender() {
+    public IChildOrderSender getChildOrderSender() {
         return childOrderSender;
     }
 

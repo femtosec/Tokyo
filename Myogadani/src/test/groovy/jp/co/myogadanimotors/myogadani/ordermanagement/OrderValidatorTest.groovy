@@ -1,14 +1,9 @@
 package jp.co.myogadanimotors.myogadani.ordermanagement
 
 import jp.co.myogadanimotors.myogadani.common.Constants
-import jp.co.myogadanimotors.myogadani.common.OrderSide
+import jp.co.myogadanimotors.myogadani.eventprocessing.order.OrderSide
 import jp.co.myogadanimotors.myogadani.config.ConfigAccessor
-import jp.co.myogadanimotors.myogadani.eventprocessing.order.AmendOrder
-import jp.co.myogadanimotors.myogadani.eventprocessing.order.CancelOrder
-import jp.co.myogadanimotors.myogadani.eventprocessing.order.IAsyncOrderListener
-import jp.co.myogadanimotors.myogadani.eventprocessing.order.NewOrder
-import jp.co.myogadanimotors.myogadani.eventprocessing.order.OrderDestination
-import jp.co.myogadanimotors.myogadani.eventprocessing.order.Orderer
+import jp.co.myogadanimotors.myogadani.eventprocessing.order.*
 import jp.co.myogadanimotors.myogadani.ordermanagement.order.Order
 import jp.co.myogadanimotors.myogadani.ordermanagement.order.OrderState
 import jp.co.myogadanimotors.myogadani.store.masterdata.extendedattriute.ExtendedAttributeMaster
@@ -108,7 +103,7 @@ class OrderValidatorTest {
         )
         newOrder.setStrategy(strategy)
 
-        assert orderValidator.isValidNewOrder(newOrderEvent, newOrder) == expectedResult
+        assert orderValidator.isInvalidNewOrder(newOrderEvent, newOrder) == expectedResult
     }
 
 
@@ -165,7 +160,7 @@ class OrderValidatorTest {
                 0
         )
         currentOrder.setOrderState(orderState)
-        assert orderValidator.isValidAmendOrder(amendOrderEvent, currentOrder) == expectedResult
+        assert orderValidator.isInvalidAmendOrder(amendOrderEvent, currentOrder) == expectedResult
     }
 
     @DataProvider(name = "isValidCancelOrder")
@@ -215,6 +210,6 @@ class OrderValidatorTest {
                 0
         )
         currentOrder.setOrderState(orderState)
-        assert orderValidator.isValidCancelOrder(cancelOrderEvent, currentOrder) == expectedResult
+        assert orderValidator.isInvalidCancelOrder(cancelOrderEvent, currentOrder) == expectedResult
     }
 }

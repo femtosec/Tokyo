@@ -9,5 +9,6 @@ public interface IChildOrderContainer {
     Collection<IOrder> getChildOrders();
     Collection<IOrder> getChildOrdersByTag(String childOrderTag);
     boolean hasOnTheWireChildOrders();
+    boolean hasExposedChildOrders();
     boolean contains(long orderId);
 }

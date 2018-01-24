@@ -57,6 +57,11 @@ public class TimerRegistry implements ITimerRegistry {
     }
 
     @Override
+    public void removeRepetitiveTimer(long timerTag) {
+        repetitiveTimerEntryMapByTimerTag.remove(timerTag);
+    }
+
+    @Override
     public boolean hasTimerRegistry(long timerTag) {
         return timerTagList.contains(timerTag);
     }

@@ -10,7 +10,6 @@ import jp.co.myogadanimotors.myogadani.eventprocessing.RequestIdGenerator;
 import jp.co.myogadanimotors.myogadani.ordermanagement.OrderManager;
 import jp.co.myogadanimotors.myogadani.ordermanagement.OrderValidator;
 import jp.co.myogadanimotors.myogadani.store.masterdata.MasterDataInitializeException;
-import jp.co.myogadanimotors.myogadani.store.masterdata.extendedattriute.ExtendedAttributeDescriptor;
 import jp.co.myogadanimotors.myogadani.store.masterdata.extendedattriute.ExtendedAttributeMaster;
 import jp.co.myogadanimotors.myogadani.store.masterdata.market.MarketMaster;
 import jp.co.myogadanimotors.myogadani.store.masterdata.product.ProductMaster;

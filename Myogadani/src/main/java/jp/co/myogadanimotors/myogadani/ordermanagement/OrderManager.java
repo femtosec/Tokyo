@@ -14,10 +14,6 @@ import jp.co.myogadanimotors.myogadani.idgenerator.IdGenerator;
 import jp.co.myogadanimotors.myogadani.ordermanagement.order.IOrder;
 import jp.co.myogadanimotors.myogadani.ordermanagement.order.Order;
 import jp.co.myogadanimotors.myogadani.ordermanagement.order.OrderState;
-import jp.co.myogadanimotors.myogadani.store.masterdata.extendedattriute.ExtendedAttributeDescriptor;
-import jp.co.myogadanimotors.myogadani.store.masterdata.extendedattriute.ExtendedAttributeMaster;
-import jp.co.myogadanimotors.myogadani.store.masterdata.market.MarketMaster;
-import jp.co.myogadanimotors.myogadani.store.masterdata.product.ProductMaster;
 import jp.co.myogadanimotors.myogadani.strategy.IStrategy;
 import jp.co.myogadanimotors.myogadani.strategy.IStrategyFactory;
 import jp.co.myogadanimotors.myogadani.strategy.context.OrderView;
@@ -150,7 +146,7 @@ public final class OrderManager implements IAsyncOrderListener, IAsyncReportList
         Order newOrder = createNewOrder(newOrderEvent);
 
         // validation
-        if (!orderValidator.isValidNewOrder(newOrderEvent, newOrder)) {
+        if (orderValidator.isInvalidNewOrder(newOrderEvent, newOrder)) {
             if (newOrder.getOrderer() == Orderer.Strategy) {
                 Order parentStrategyOrder = newOrder.getParentStrategyOrder();
                 if (parentStrategyOrder == null) {
@@ -213,7 +209,7 @@ public final class OrderManager implements IAsyncOrderListener, IAsyncReportList
         }
 
         // validation
-        if (!orderValidator.isValidAmendOrder(amendOrderEvent, currentOrder)) {
+        if (orderValidator.isInvalidAmendOrder(amendOrderEvent, currentOrder)) {
             if (currentOrder.getOrderer() == Orderer.Strategy) {
                 Order parentStrategyOrder = currentOrder.getParentStrategyOrder();
                 if (parentStrategyOrder == null) {
@@ -282,7 +278,7 @@ public final class OrderManager implements IAsyncOrderListener, IAsyncReportList
         }
 
         // validation
-        if (!orderValidator.isValidCancelOrder(cancelOrderEvent, currentOrder)) {
+        if (orderValidator.isInvalidCancelOrder(cancelOrderEvent, currentOrder)) {
             if (currentOrder.getOrderer() == Orderer.Strategy) {
                 Order parentStrategyOrder = currentOrder.getParentStrategyOrder();
                 if (parentStrategyOrder == null) {

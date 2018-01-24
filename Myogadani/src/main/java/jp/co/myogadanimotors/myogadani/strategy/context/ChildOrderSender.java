@@ -1,6 +1,6 @@
 package jp.co.myogadanimotors.myogadani.strategy.context;
 
-import jp.co.myogadanimotors.myogadani.common.OrderSide;
+import jp.co.myogadanimotors.myogadani.eventprocessing.order.OrderSide;
 import jp.co.myogadanimotors.myogadani.eventprocessing.EventIdGenerator;
 import jp.co.myogadanimotors.myogadani.eventprocessing.RequestIdGenerator;
 import jp.co.myogadanimotors.myogadani.eventprocessing.order.IAsyncOrderListener;
@@ -16,7 +16,7 @@ import java.math.BigDecimal;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public final class ChildOrderSender {
+public final class ChildOrderSender implements IChildOrderSender {
 
     private final Logger logger = LogManager.getLogger(getClass().getName());
 
@@ -39,6 +39,7 @@ public final class ChildOrderSender {
         orderSeder.addAsyncEventListener(asyncOrderListener);
     }
 
+    @Override
     public boolean sendExchangeNewOrder(String symbol,
                                         String mic,
                                         OrderSide orderSide,
@@ -68,6 +69,7 @@ public final class ChildOrderSender {
         return true;
     }
 
+    @Override
     public boolean sendExchangeAmendOrder(long childOrderId,
                                           BigDecimal orderQuantity,
                                           BigDecimal priceLimit) {
@@ -90,7 +92,8 @@ public final class ChildOrderSender {
         return true;
     }
 
-    public boolean sendExchangeCancelOrder(long childOrderId) {
+    @Override
+    public boolean sendCancelOrder(long childOrderId) {
         if (!childOrderContainer.contains(childOrderId)) {
             logger.warn("child order doesn't exist. (childOrderId: {})", childOrderId);
             return false;

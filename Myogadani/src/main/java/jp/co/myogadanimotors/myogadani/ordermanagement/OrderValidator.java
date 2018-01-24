@@ -26,88 +26,88 @@ public class OrderValidator {
         this.extendedAttributeMaster = extendedAttributeMaster;
     }
 
-    public boolean isValidNewOrder(NewOrder newOrderEvent, Order newOrder) {
+    public boolean isInvalidNewOrder(NewOrder newOrderEvent, Order newOrder) {
         if (productMaster.getBySymbol(newOrderEvent.getSymbol()) == null) {
             logger.warn("invalid symbol. (orderEvent: {})", newOrderEvent);
-            return false;
+            return true;
         }
 
         if (marketMaster.getByMic(newOrderEvent.getMic()) == null) {
             logger.warn("invalid mic. (orderEvent: {})", newOrderEvent);
-            return false;
+            return true;
         }
 
         if (newOrderEvent.getOrderSide() == null) {
             logger.warn("side is not set. (orderEvent: {})", newOrderEvent);
-            return false;
+            return true;
         }
 
         if (newOrderEvent.getOrderer() == null) {
             logger.warn("orderer is not set. (orderEvent: {})", newOrderEvent);
-            return false;
+            return true;
         }
 
         if (newOrderEvent.getDestination() == null) {
             logger.warn("destination is not set. (orderEvent: {})", newOrderEvent);
-            return false;
+            return true;
         }
 
         if (newOrderEvent.getRequestId() < 0) {
             logger.warn("request id is not set. (orderEvent: {})", newOrderEvent);
-            return false;
+            return true;
         }
 
         if (newOrder.isStrategyOrder()) {
             if (newOrder.getStrategy() == null) {
                 logger.warn("strategy is null despite strategy order. (isStrategyOrder: {})", newOrder.isStrategyOrder());
-                return false;
+                return true;
             }
         } else {
             if (newOrder.getStrategy() != null) {
                 logger.warn("strategy is not null despite not strategy order. (isStrategyOrder: {})", newOrder.isStrategyOrder());
-                return false;
+                return true;
             }
         }
 
-        return isValidExtendedAttributes(newOrderEvent.getExtendedAttributes());
+        return isInvalidExtendedAttributes(newOrderEvent.getExtendedAttributes());
     }
 
-    public boolean isValidAmendOrder(AmendOrder amendOrderEvent, Order currentOrder) {
+    public boolean isInvalidAmendOrder(AmendOrder amendOrderEvent, Order currentOrder) {
         if (!currentOrder.getOrderState().isAmendable()) {
             logger.warn("order is not amendable. (orderState: {})", currentOrder.getOrderState());
-            return false;
+            return true;
         }
 
         if (amendOrderEvent.getRequestId() < 0) {
             logger.warn("request id is not set. (amendOrderEvent: {})", amendOrderEvent);
-            return false;
+            return true;
         }
 
-        return isValidExtendedAttributes(amendOrderEvent.getExtendedAttributes());
+        return isInvalidExtendedAttributes(amendOrderEvent.getExtendedAttributes());
     }
 
-    public boolean isValidCancelOrder(CancelOrder cancelOrderEvent, Order currentOrder) {
+    public boolean isInvalidCancelOrder(CancelOrder cancelOrderEvent, Order currentOrder) {
         if (!currentOrder.getOrderState().isCancellable()) {
             logger.warn("order is not cancellable. (orderState: {})", currentOrder.getOrderState());
-            return false;
+            return true;
         }
 
         if (cancelOrderEvent.getRequestId() < 0) {
             logger.warn("invalid cancel order event. (cancelOrderEvent: {})", cancelOrderEvent);
-            return false;
+            return true;
         }
 
-        return true;
+        return false;
     }
 
-    private boolean isValidExtendedAttributes(Map<String, String> extendedAttributes) {
+    private boolean isInvalidExtendedAttributes(Map<String, String> extendedAttributes) {
         for (String key : extendedAttributes.keySet()) {
             if (extendedAttributeMaster.getByName(key) == null) {
                 logger.warn("invalid extended attribute (extendedAttributeName: {})", key);
-                return false;
+                return true;
             }
         }
 
-        return true;
+        return false;
     }
 }

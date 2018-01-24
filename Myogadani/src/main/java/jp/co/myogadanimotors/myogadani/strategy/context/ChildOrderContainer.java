@@ -12,8 +12,8 @@ public class ChildOrderContainer implements IChildOrderContainer {
 
     private final Logger logger = LogManager.getLogger(getClass().getName());
 
-    private final Map<Long, IOrder> ordersById = new ConcurrentHashMap<>();
-    private final Map<String, Map<Long, IOrder>> ordersByIdAndTag = new ConcurrentHashMap<>();
+    private final Map<Long, IOrder> exposedChildOrdersById = new ConcurrentHashMap<>();
+    private final Map<String, Map<Long, IOrder>> exposedChildOrdersByIdAndTag = new ConcurrentHashMap<>();
 
     private int onTheWireOrdersCount = 0;
 
@@ -23,20 +23,20 @@ public class ChildOrderContainer implements IChildOrderContainer {
 
     @Override
     public IOrder getChildOrder(long childOrderId) {
-        return ordersById.get(childOrderId);
+        return exposedChildOrdersById.get(childOrderId);
     }
 
     @Override
     public Collection<IOrder> getChildOrders() {
-        return ordersById.values();
+        return exposedChildOrdersById.values();
     }
 
     @Override
     public Collection<IOrder> getChildOrdersByTag(String childOrderTag) {
-        if (!ordersByIdAndTag.containsKey(childOrderTag)) {
-            ordersByIdAndTag.put(childOrderTag, new ConcurrentHashMap<>());
+        if (!exposedChildOrdersByIdAndTag.containsKey(childOrderTag)) {
+            exposedChildOrdersByIdAndTag.put(childOrderTag, new ConcurrentHashMap<>());
         }
-        return ordersByIdAndTag.get(childOrderTag).values();
+        return exposedChildOrdersByIdAndTag.get(childOrderTag).values();
     }
 
     @Override
@@ -45,46 +45,51 @@ public class ChildOrderContainer implements IChildOrderContainer {
     }
 
     @Override
+    public boolean hasExposedChildOrders() {
+        return (exposedChildOrdersById.size() > 0);
+    }
+
+    @Override
     public boolean contains(long orderId) {
-        return ordersById.containsKey(orderId);
+        return exposedChildOrdersById.containsKey(orderId);
     }
 
     public void addChildOrder(IOrder childOrder) {
         // sanity check
-        if (ordersById.containsKey(childOrder.getOrderId())) {
+        if (exposedChildOrdersById.containsKey(childOrder.getOrderId())) {
             logger.error("cannot add new child order. need to check the code. (childOrder: {})", childOrder);
             return;
         }
 
-        ordersById.put(childOrder.getOrderId(), childOrder);
+        exposedChildOrdersById.put(childOrder.getOrderId(), childOrder);
 
-        if (!ordersByIdAndTag.containsKey(childOrder.getOrderTag())) {
-            ordersByIdAndTag.put(childOrder.getOrderTag(), new ConcurrentHashMap<>());
+        if (!exposedChildOrdersByIdAndTag.containsKey(childOrder.getOrderTag())) {
+            exposedChildOrdersByIdAndTag.put(childOrder.getOrderTag(), new ConcurrentHashMap<>());
         }
 
-        ordersByIdAndTag.get(childOrder.getOrderTag()).put(childOrder.getOrderId(), childOrder);
+        exposedChildOrdersByIdAndTag.get(childOrder.getOrderTag()).put(childOrder.getOrderId(), childOrder);
     }
 
     public void updateChildOrder(IOrder childOrder) {
         // sanity check
-        if (!ordersById.containsKey(childOrder.getOrderId())) {
+        if (!exposedChildOrdersById.containsKey(childOrder.getOrderId())) {
             logger.error("cannot update the child order. need to check the code. (childOrder: {})", childOrder);
             return;
         }
 
-        ordersById.put(childOrder.getOrderId(), childOrder);
-        ordersByIdAndTag.get(childOrder.getOrderTag()).put(childOrder.getOrderId(), childOrder);
+        exposedChildOrdersById.put(childOrder.getOrderId(), childOrder);
+        exposedChildOrdersByIdAndTag.get(childOrder.getOrderTag()).put(childOrder.getOrderId(), childOrder);
     }
 
     public void removeChildOrder(IOrder childOrder) {
         // sanity check
-        if (!ordersById.containsKey(childOrder.getOrderId())) {
+        if (!exposedChildOrdersById.containsKey(childOrder.getOrderId())) {
             logger.error("cannot remove the child order. need to check the code. (childOrder: {})", childOrder);
             return;
         }
 
-        ordersById.remove(childOrder.getOrderId());
-        ordersByIdAndTag.get(childOrder.getOrderTag()).remove(childOrder.getOrderId());
+        exposedChildOrdersById.remove(childOrder.getOrderId());
+        exposedChildOrdersByIdAndTag.get(childOrder.getOrderTag()).remove(childOrder.getOrderId());
     }
 
     public void incrementOnTheWireOrdersCount() {

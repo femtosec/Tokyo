@@ -1,6 +1,5 @@
 package jp.co.myogadanimotors.myogadani.eventprocessing.order;
 
-import jp.co.myogadanimotors.myogadani.common.OrderSide;
 import jp.co.myogadanimotors.myogadani.eventprocessing.BaseEventSender;
 import jp.co.myogadanimotors.myogadani.eventprocessing.EventIdGenerator;
 import jp.co.myogadanimotors.myogadani.eventprocessing.IEvent;

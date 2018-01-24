@@ -1,5 +1,6 @@
 package jp.co.myogadanimotors.myogadani.strategy;
 
+import jp.co.myogadanimotors.myogadani.common.Constants;
 import jp.co.myogadanimotors.myogadani.ordermanagement.order.OrderState;
 import jp.co.myogadanimotors.myogadani.store.masterdata.strategy.IStrategyDescriptor;
 import jp.co.myogadanimotors.myogadani.store.masterdata.strategy.StrategyDescriptor;
@@ -55,11 +56,21 @@ public abstract class AbstractStrategy implements IStrategy {
     }
 
     protected IStrategyPendingAmendProcessor createPendingAmendProcessor(long requestId) {
-        return new StrategyPendingAmendProcessor(requestId);
+        return new StrategyPendingAmendProcessor(
+                requestId,
+                context.getChildOrderContainer(),
+                context.getChildOrderSender(),
+                5   // todo: need to get the number from config
+        );
     }
 
     protected IStrategyPendingCancelProcessor createPendingCancelProcessor(long requestId) {
-        return new StrategyPendingCancelProcessor(requestId);
+        return new StrategyPendingCancelProcessor(
+                requestId,
+                context.getChildOrderContainer(),
+                context.getChildOrderSender(),
+                5   // todo: need to get the number from config
+        );
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -112,6 +123,8 @@ public abstract class AbstractStrategy implements IStrategy {
         if (isValid(validators, (validator) -> validator.isValidStrategyRequestAmend(strategyAmend, context, pac, rejectMessages))) {
             context.setStrategyState(StrategyState.PendingAmend);
             context.setStrategyPendingAmendProcessor(createPendingAmendProcessor(strategyAmend.getRequestId()));
+            // todo: need to get repetitive timer interval from config
+            context.getTimerRegistry().registerRepetitiveTimer(Constants.PENDING_AMEND_CANCEL_REPETITIVE_TIMER_TAG, 100000, context.getCurrentTime());
         } else {
             context.getReportSender().sendAmendReject(context.getOrder().getOrderId(), strategyAmend.getRequestId(), combineRejectMessages(rejectMessages));
         }
@@ -127,6 +140,8 @@ public abstract class AbstractStrategy implements IStrategy {
         if (isValid(validators, (validator) -> validator.isValidStrategyRequestCancel(strategyCancel, context, rejectMessages))) {
             context.setStrategyState(StrategyState.PendingCancel);
             context.setStrategyPendingCancelProcessor(createPendingCancelProcessor(strategyCancel.getRequestId()));
+            // todo: need to get repetitive timer interval from config
+            context.getTimerRegistry().registerRepetitiveTimer(Constants.PENDING_AMEND_CANCEL_REPETITIVE_TIMER_TAG, 100000, context.getCurrentTime());
         } else {
             context.getReportSender().sendCancelReject(context.getOrder().getOrderId(), strategyCancel.getRequestId(), combineRejectMessages(rejectMessages));
         }
@@ -342,6 +357,7 @@ public abstract class AbstractStrategy implements IStrategy {
         }
 
         context.setStrategyState(StrategyState.PostAmend);
+        context.getTimerRegistry().removeRepetitiveTimer(Constants.PENDING_AMEND_CANCEL_REPETITIVE_TIMER_TAG);
 
         if (pap.getResult() == PendingAmendCancelResult.Succeeded) {
             logger.info("PendingAmendProcessor succeeded.");
@@ -363,6 +379,7 @@ public abstract class AbstractStrategy implements IStrategy {
         }
 
         context.setStrategyState(StrategyState.PostCancel);
+        context.getTimerRegistry().removeRepetitiveTimer(Constants.PENDING_AMEND_CANCEL_REPETITIVE_TIMER_TAG);
 
         if (pcp.getResult() == PendingAmendCancelResult.Succeeded) {
             logger.info("PendingCancelProcessor succeeded.");
