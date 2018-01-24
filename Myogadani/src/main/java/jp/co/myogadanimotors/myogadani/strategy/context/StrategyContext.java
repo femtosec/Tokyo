@@ -22,6 +22,7 @@ import java.util.Map;
 public final class StrategyContext implements IStrategyContext {
 
     private final RequestIdGenerator requestIdGenerator;
+    private final ChildOrderContainer childOrderContainer;
     private final ChildOrderSender childOrderSender;
     private final TimerRegistry timerRegistry;
     private final ReportSender reportSender;
@@ -50,7 +51,8 @@ public final class StrategyContext implements IStrategyContext {
                            IAsyncMarketDataRequestListener asyncMarketDataRequestListener,
                            IAsyncTimerRegistrationListener asyncTimerRegistrationListener) {
         this.requestIdGenerator = requestIdGenerator;
-        this.childOrderSender = new ChildOrderSender(eventIdGenerator, requestIdGenerator, timeSource, order, asyncOrderListener);
+        this.childOrderContainer = new ChildOrderContainer();
+        this.childOrderSender = new ChildOrderSender(eventIdGenerator, requestIdGenerator, timeSource, childOrderContainer, order, asyncOrderListener);
         this.timerRegistry = new TimerRegistry(order.getOrderId(), eventIdGenerator, timeSource, asyncTimerRegistrationListener);
         this.reportSender = new ReportSender(eventIdGenerator, timeSource);
         this.fillSender = new FillSender(eventIdGenerator, timeSource);
@@ -67,6 +69,10 @@ public final class StrategyContext implements IStrategyContext {
         marketDataRequestSender.addAsyncEventListener(asyncMarketDataRequestListener);
     }
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    // updaters
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
     public void refreshCurrentTime() {
         currentTime = timeSource.getCurrentTime();
     }
@@ -75,8 +81,32 @@ public final class StrategyContext implements IStrategyContext {
         timerRegistry.onTimer(userTag, timerEventTime);
     }
 
+    public void updateOrderView(IOrder order) {
+        orderView.update(order);
+    }
+
+    public void updateExtendedAttributes(Map<String, String> extendedAttributes) {
+        orderView.updateExtendedAttributes(extendedAttributes);
+    }
+
+    public void addChildOrder(IOrder childOrder) {
+        childOrderContainer.addChildOrder(childOrder);
+    }
+
+    public void updateChildOrder(IOrder childOrder) {
+        childOrderContainer.updateChildOrder(childOrder);
+    }
+
+    public void removeChildOrder(IOrder childOrder) {
+        childOrderContainer.removeChildOrder(childOrder);
+    }
+
+    public void decrementOnTheWireOrdersCount() {
+        childOrderContainer.decrementOnTheWireOrdersCount();
+    }
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    // setters/updaters
+    // setters
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     public void setStrategyState(StrategyState strategyState) {
@@ -97,14 +127,6 @@ public final class StrategyContext implements IStrategyContext {
 
     public void setStrategyPendingCancelProcessor(IStrategyPendingCancelProcessor pendingCancelProcessor) {
         this.pendingCancelProcessor = pendingCancelProcessor;
-    }
-
-    public void updateOrderView(IOrder order) {
-        orderView.update(order);
-    }
-
-    public void updateExtendedAttributes(Map<String, String> extendedAttributes) {
-        orderView.updateExtendedAttributes(extendedAttributes);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -144,6 +166,11 @@ public final class StrategyContext implements IStrategyContext {
     @Override
     public IProduct getProduct() {
         return product;
+    }
+
+    @Override
+    public IChildOrderContainer getChildOrderContainer() {
+        return childOrderContainer;
     }
 
     @Override

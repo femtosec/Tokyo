@@ -10,6 +10,7 @@ public interface IStrategyContext {
     IOrder getOrder();
     IMarket getMarket();
     IProduct getProduct();
+    IChildOrderContainer getChildOrderContainer();
     ChildOrderSender getChildOrderSender();
     ITimerRegistry getTimerRegistry();
     long getCurrentTime();

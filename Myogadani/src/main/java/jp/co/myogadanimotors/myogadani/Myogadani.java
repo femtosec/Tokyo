@@ -8,7 +8,10 @@ import jp.co.myogadanimotors.myogadani.config.ConfigAccessor;
 import jp.co.myogadanimotors.myogadani.eventprocessing.EventIdGenerator;
 import jp.co.myogadanimotors.myogadani.eventprocessing.RequestIdGenerator;
 import jp.co.myogadanimotors.myogadani.ordermanagement.OrderManager;
+import jp.co.myogadanimotors.myogadani.ordermanagement.OrderValidator;
 import jp.co.myogadanimotors.myogadani.store.masterdata.MasterDataInitializeException;
+import jp.co.myogadanimotors.myogadani.store.masterdata.extendedattriute.ExtendedAttributeDescriptor;
+import jp.co.myogadanimotors.myogadani.store.masterdata.extendedattriute.ExtendedAttributeMaster;
 import jp.co.myogadanimotors.myogadani.store.masterdata.market.MarketMaster;
 import jp.co.myogadanimotors.myogadani.store.masterdata.product.ProductMaster;
 import jp.co.myogadanimotors.myogadani.store.masterdata.strategy.StrategyMaster;
@@ -37,6 +40,7 @@ public class Myogadani implements Runnable {
     private final MarketMaster marketMaster = new MarketMaster();
     private final ProductMaster productMaster = new ProductMaster();
     private final StrategyMaster strategyMaster = new StrategyMaster();
+    private final ExtendedAttributeMaster extendedAttributeMaster = new ExtendedAttributeMaster();
 
     // time source
     private final ITimeSource timeSource = new SystemTimeSource();
@@ -72,10 +76,14 @@ public class Myogadani implements Runnable {
             marketMaster.init(configAccessor);
             productMaster.init(configAccessor);
             strategyMaster.init(configAccessor);
+            extendedAttributeMaster.init(configAccessor);
         } catch (MasterDataInitializeException e) {
             logger.error(e);
             return;
         }
+
+        // create order validator
+        OrderValidator orderValidator = new OrderValidator(marketMaster, productMaster, extendedAttributeMaster);
 
         // create executor services
         int numberOfStrategyThreads = configAccessor.getInt("myogadani.numberOfStrategyThreads", Constants.DEFAULT_NUMBER_OF_STRATEGY_THREADS);
@@ -91,6 +99,7 @@ public class Myogadani implements Runnable {
                 exchangeAdapter,
                 eventIdGenerator,
                 timeSource,
+                orderValidator,
                 eventExecutor,
                 strategyExecutors);
 

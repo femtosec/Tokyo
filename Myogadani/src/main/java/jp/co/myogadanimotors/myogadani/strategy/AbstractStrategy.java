@@ -194,48 +194,62 @@ public abstract class AbstractStrategy implements IStrategy {
     public final void processStrategyChildOrderNewAck(StrategyChildOrderNewAck strategyChildOrderNewAck) {
         // update context
         context.updateOrderView(strategyChildOrderNewAck.getOrderView());
+        context.addChildOrder(strategyChildOrderNewAck.getChildOrderView());
+        context.decrementOnTheWireOrdersCount();
     }
 
     @Override
     public final void processStrategyChildOrderNewReject(StrategyChildOrderNewReject strategyChildOrderNewReject) {
         // update context
         context.updateOrderView(strategyChildOrderNewReject.getOrderView());
+        context.updateChildOrder(strategyChildOrderNewReject.getChildOrderView());
+        context.decrementOnTheWireOrdersCount();
     }
 
     @Override
     public final void processStrategyChildOrderAmendAck(StrategyChildOrderAmendAck strategyChildOrderAmendAck) {
         // update context
         context.updateOrderView(strategyChildOrderAmendAck.getOrderView());
+        context.updateChildOrder(strategyChildOrderAmendAck.getChildOrderView());
+        context.decrementOnTheWireOrdersCount();
     }
 
     @Override
     public final void processStrategyChildOrderAmendReject(StrategyChildOrderAmendReject strategyChildOrderAmendReject) {
         // update context
         context.updateOrderView(strategyChildOrderAmendReject.getOrderView());
+        context.updateChildOrder(strategyChildOrderAmendReject.getChildOrderView());
+        context.decrementOnTheWireOrdersCount();
     }
 
     @Override
     public final void processStrategyChildOrderCancelAck(StrategyChildOrderCancelAck strategyChildOrderCancelAck) {
         // update context
         context.updateOrderView(strategyChildOrderCancelAck.getOrderView());
+        context.removeChildOrder(strategyChildOrderCancelAck.getChildOrderView());
+        context.decrementOnTheWireOrdersCount();
     }
 
     @Override
     public final void processStrategyChildOrderCancelReject(StrategyChildOrderCancelReject strategyChildOrderCancelReject) {
         // update context
         context.updateOrderView(strategyChildOrderCancelReject.getOrderView());
+        context.updateChildOrder(strategyChildOrderCancelReject.getChildOrderView());
+        context.decrementOnTheWireOrdersCount();
     }
 
     @Override
     public final void processStrategyChildOrderExpire(StrategyChildOrderExpire strategyChildOrderExpire) {
         // update context
         context.updateOrderView(strategyChildOrderExpire.getOrderView());
+        context.removeChildOrder(strategyChildOrderExpire.getChildOrderView());
     }
 
     @Override
     public final void processStrategyChildOrderUnsolicitedCancel(StrategyChildOrderUnsolicitedCancel strategyChildOrderUnsolicitedCancel) {
         // update context
         context.updateOrderView(strategyChildOrderUnsolicitedCancel.getOrderView());
+        context.removeChildOrder(strategyChildOrderUnsolicitedCancel.getChildOrderView());
     }
 
     //////////////////////////////////////////////////
@@ -247,6 +261,11 @@ public abstract class AbstractStrategy implements IStrategy {
         // update context
         context.updateOrderView(strategyChildOrderFill.getOrderView());
         if (context.getOrder().getOrderState() == OrderState.FullyFilled) context.setStrategyState(StrategyState.FullyFilled);
+        if (strategyChildOrderFill.getChildOrderView().getOrderState() == OrderState.FullyFilled) {
+            context.removeChildOrder(strategyChildOrderFill.getChildOrderView());
+        } else {
+            context.updateChildOrder(strategyChildOrderFill.getChildOrderView());
+        }
 
         // send fill event to parent order
         context.getFillSender().sendFill(context.getOrder().getOrderId(), strategyChildOrderFill.getExecQuantity());

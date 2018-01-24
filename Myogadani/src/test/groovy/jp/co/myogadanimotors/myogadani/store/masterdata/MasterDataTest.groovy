@@ -2,6 +2,8 @@ package jp.co.myogadanimotors.myogadani.store.masterdata
 
 import jp.co.myogadanimotors.myogadani.common.Constants
 import jp.co.myogadanimotors.myogadani.config.ConfigAccessor
+import jp.co.myogadanimotors.myogadani.store.masterdata.extendedattriute.ExtendedAttributeMaster
+import jp.co.myogadanimotors.myogadani.store.masterdata.extendedattriute.IExtendedAttributeDescriptor
 import jp.co.myogadanimotors.myogadani.store.masterdata.market.IMarket
 import jp.co.myogadanimotors.myogadani.store.masterdata.market.MarketMaster
 import jp.co.myogadanimotors.myogadani.store.masterdata.market.MarketType
@@ -10,15 +12,20 @@ import jp.co.myogadanimotors.myogadani.store.masterdata.product.ProductMaster
 import jp.co.myogadanimotors.myogadani.store.masterdata.product.ProductType
 import jp.co.myogadanimotors.myogadani.store.masterdata.strategy.IStrategyDescriptor
 import jp.co.myogadanimotors.myogadani.store.masterdata.strategy.StrategyMaster
+import org.junit.Before
 import org.junit.Test
 
 class MasterDataTest {
 
+    def config = new ConfigAccessor()
+
+    @Before
+    void setup() {
+        config.parse("development", Constants.CONFIG_FILE_NAME)
+    }
+
     @Test
     void testMarketMaster() {
-        def config = new ConfigAccessor()
-        config.parse("development", Constants.CONFIG_FILE_NAME)
-
         def marketMaster = new MarketMaster()
         marketMaster.init(config)
 
@@ -35,9 +42,6 @@ class MasterDataTest {
 
     @Test
     void testProductMaster() {
-        def config = new ConfigAccessor()
-        config.parse("development", Constants.CONFIG_FILE_NAME)
-
         def productMaster = new ProductMaster()
         productMaster.init(config)
 
@@ -58,9 +62,6 @@ class MasterDataTest {
 
     @Test
     void testStrategyMaster() {
-        def config = new ConfigAccessor()
-        config.parse("development", Constants.CONFIG_FILE_NAME)
-
         def strategyMaster = new StrategyMaster()
         strategyMaster.init(config)
 
@@ -71,5 +72,24 @@ class MasterDataTest {
     private static void assertStrategyDescriptor(IStrategyDescriptor sd, String name, String description) {
         assert sd.getName() == name
         assert sd.getDescription() == description
+    }
+
+    @Test
+    void testExtendedAttributeMaster() {
+        def extendedAttributeMaster = new ExtendedAttributeMaster()
+        extendedAttributeMaster.init(config)
+
+        assertExtendedAttribute(extendedAttributeMaster.get(0L), "strategyName", "String", "strategy name")
+        assertExtendedAttribute(extendedAttributeMaster.get(1L), "symbolList", "List", "symbol list")
+        assertExtendedAttribute(extendedAttributeMaster.get(2L), "micList", "List", "mic list")
+        assertExtendedAttribute(extendedAttributeMaster.get(3L), "priceLimitList", "List", "price limit list")
+        assertExtendedAttribute(extendedAttributeMaster.get(4L), "orderQuantityList", "List", "order quantity list")
+        assertExtendedAttribute(extendedAttributeMaster.get(5L), "orderTag", "String", "order tag")
+    }
+
+    private static void assertExtendedAttribute(IExtendedAttributeDescriptor ead, String name, String type, String description) {
+        assert ead.getName() == name
+        assert ead.getType() == type
+        assert ead.getDescription() == description
     }
 }

@@ -14,9 +14,9 @@ public final class AmendOrder extends BaseEvent<IAsyncOrderListener> {
     private final BigDecimal priceLimit;
     private final Map<String, String> extendedAttributes = new ConcurrentHashMap<>();
 
-    public AmendOrder(long requestId,
-                      long eventId,
+    public AmendOrder(long eventId,
                       long creationTime,
+                      long requestId,
                       long orderId,
                       BigDecimal orderQuantity,
                       BigDecimal priceLimit,

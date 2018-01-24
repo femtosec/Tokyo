@@ -1,0 +1,8 @@
+[
+  { "id": 0,    "name": "strategyName",       "type": "String",   "description": "strategy name" },
+  { "id": 1,    "name": "symbolList",         "type": "List",     "description": "symbol list" },
+  { "id": 2,    "name": "micList",            "type": "List",     "description": "mic list" },
+  { "id": 3,    "name": "priceLimitList",     "type": "List",     "description": "price limit list" },
+  { "id": 4,    "name": "orderQuantityList",  "type": "List",     "description": "order quantity list" },
+  { "id": 5,    "name": "orderTag",           "type": "String",   "description": "order tag" }
+]

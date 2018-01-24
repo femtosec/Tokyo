@@ -14,6 +14,10 @@ import jp.co.myogadanimotors.myogadani.idgenerator.IdGenerator;
 import jp.co.myogadanimotors.myogadani.ordermanagement.order.IOrder;
 import jp.co.myogadanimotors.myogadani.ordermanagement.order.Order;
 import jp.co.myogadanimotors.myogadani.ordermanagement.order.OrderState;
+import jp.co.myogadanimotors.myogadani.store.masterdata.extendedattriute.ExtendedAttributeDescriptor;
+import jp.co.myogadanimotors.myogadani.store.masterdata.extendedattriute.ExtendedAttributeMaster;
+import jp.co.myogadanimotors.myogadani.store.masterdata.market.MarketMaster;
+import jp.co.myogadanimotors.myogadani.store.masterdata.product.ProductMaster;
 import jp.co.myogadanimotors.myogadani.strategy.IStrategy;
 import jp.co.myogadanimotors.myogadani.strategy.IStrategyFactory;
 import jp.co.myogadanimotors.myogadani.strategy.context.OrderView;
@@ -40,6 +44,7 @@ public final class OrderManager implements IAsyncOrderListener, IAsyncReportList
     private final EventIdGenerator eventIdGenerator;
     private final IIdGenerator orderIdGenerator = new IdGenerator(0L);
     private final ITimeSource timeSource;
+    private final OrderValidator orderValidator;
     private final Executor eventExecutor;
     private final Executor[] strategyEventExecutors;
     private final Map<Long, Order> ordersByOrderId = new ConcurrentHashMap<>();
@@ -54,6 +59,7 @@ public final class OrderManager implements IAsyncOrderListener, IAsyncReportList
                         IExchangeAdapter exchangeAdapter,
                         EventIdGenerator eventIdGenerator,
                         ITimeSource timeSource,
+                        OrderValidator orderValidator,
                         Executor eventExecutor,
                         Executor... strategyEventExecutors) {
         this.emsReportSender = new ReportSender(eventIdGenerator, timeSource);
@@ -61,6 +67,7 @@ public final class OrderManager implements IAsyncOrderListener, IAsyncReportList
         this.exchangeOrderSender = new OrderSender(eventIdGenerator, timeSource);
         this.eventIdGenerator = eventIdGenerator;
         this.timeSource = timeSource;
+        this.orderValidator = orderValidator;
         this.eventExecutor = eventExecutor;
         this.strategyEventExecutors = strategyEventExecutors;
 
@@ -142,8 +149,8 @@ public final class OrderManager implements IAsyncOrderListener, IAsyncReportList
         // create order object
         Order newOrder = createNewOrder(newOrderEvent);
 
-        // sanity check
-        if (!isValidNewOrderEvent(newOrderEvent, newOrder)) {
+        // validation
+        if (!orderValidator.isValidNewOrder(newOrderEvent, newOrder)) {
             if (newOrder.getOrderer() == Orderer.Strategy) {
                 Order parentStrategyOrder = newOrder.getParentStrategyOrder();
                 if (parentStrategyOrder == null) {
@@ -205,8 +212,8 @@ public final class OrderManager implements IAsyncOrderListener, IAsyncReportList
             return;
         }
 
-        // sanity check
-        if (!isValidAmendOrderEvent(amendOrderEvent, currentOrder) || !currentOrder.getOrderState().isAmendable()) {
+        // validation
+        if (!orderValidator.isValidAmendOrder(amendOrderEvent, currentOrder)) {
             if (currentOrder.getOrderer() == Orderer.Strategy) {
                 Order parentStrategyOrder = currentOrder.getParentStrategyOrder();
                 if (parentStrategyOrder == null) {
@@ -274,8 +281,8 @@ public final class OrderManager implements IAsyncOrderListener, IAsyncReportList
             return;
         }
 
-        // sanity check
-        if (!isValidCancelOrderEvent(cancelOrderEvent, currentOrder) || !currentOrder.getOrderState().isCancellable()) {
+        // validation
+        if (!orderValidator.isValidCancelOrder(cancelOrderEvent, currentOrder)) {
             if (currentOrder.getOrderer() == Orderer.Strategy) {
                 Order parentStrategyOrder = currentOrder.getParentStrategyOrder();
                 if (parentStrategyOrder == null) {
@@ -327,63 +334,6 @@ public final class OrderManager implements IAsyncOrderListener, IAsyncReportList
             // if exchange order, send to exchange
             sendExchangeCancelOrder(cancelOrderEvent);
         }
-    }
-
-    private boolean isValidNewOrderEvent(NewOrder newOrderEvent, Order newOrder) {
-        if (newOrderEvent.getSymbol() == null) {
-            logger.warn("symbol is not set. (orderEvent: {})", newOrderEvent);
-            return false;
-        }
-
-        if (newOrderEvent.getMic() == null) {
-            logger.warn("mic is not set. (orderEvent: {})", newOrderEvent);
-            return false;
-        }
-
-        if (newOrderEvent.getOrderSide() == null) {
-            logger.warn("side is not set. (orderEvent: {})", newOrderEvent);
-            return false;
-        }
-
-        if (newOrderEvent.getOrderer() == null) {
-            logger.warn("orderer is not set. (orderEvent: {})", newOrderEvent);
-            return false;
-        }
-
-        if (newOrderEvent.getDestination() == null) {
-            logger.warn("destination is not set. (orderEvent: {})", newOrderEvent);
-            return false;
-        }
-
-        if (newOrderEvent.getRequestId() < 0) {
-            logger.warn("request id is not set. (orderEvent: {})", newOrderEvent);
-            return false;
-        }
-
-        if (newOrder.isStrategyOrder() && newOrder.getStrategy() == null) {
-            logger.warn("strategy type invalid.");
-            return false;
-        }
-
-        return true;
-    }
-
-    private boolean isValidAmendOrderEvent(AmendOrder amendOrderEvent, Order currentOrder) {
-        if (amendOrderEvent.getRequestId() < 0) {
-            logger.warn("request id is not set. (amendOrderEvent: {})", amendOrderEvent);
-            return false;
-        }
-
-        return true;
-    }
-
-    private boolean isValidCancelOrderEvent(CancelOrder cancelOrderEvent, Order currentOrder) {
-        if (cancelOrderEvent.getRequestId() < 0) {
-            logger.warn("invalid cancel order event. (cancelOrderEvent: {})", cancelOrderEvent);
-            return false;
-        }
-
-        return true;
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
