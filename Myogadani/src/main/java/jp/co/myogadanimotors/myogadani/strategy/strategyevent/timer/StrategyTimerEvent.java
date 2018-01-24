@@ -5,21 +5,21 @@ import jp.co.myogadanimotors.myogadani.strategy.strategyevent.AbstractStrategyEv
 
 public final class StrategyTimerEvent extends AbstractStrategyEvent {
 
-    private final long userTag;
+    private final long timerTag;
     private final long timerEventTime;
 
     public StrategyTimerEvent(long eventId,
                               long creationTime,
                               IStrategy strategy,
-                              long userTag,
+                              long timerTag,
                               long timerEventTime) {
         super(eventId, creationTime, strategy);
-        this.userTag = userTag;
+        this.timerTag = timerTag;
         this.timerEventTime = timerEventTime;
     }
 
-    public long getUserTag() {
-        return userTag;
+    public long getTimerTag() {
+        return timerTag;
     }
 
     public long getTimerEventTime() {
@@ -34,7 +34,7 @@ public final class StrategyTimerEvent extends AbstractStrategyEvent {
     @Override
     public StringBuilder toStringBuilder() {
         return super.toStringBuilder()
-                .append(", userTag: ").append(userTag)
+                .append(", timerTag: ").append(timerTag)
                 .append(", timerEventTime: ").append(timerEventTime);
     }
 }

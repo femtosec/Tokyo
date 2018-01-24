@@ -5,18 +5,18 @@ import jp.co.myogadanimotors.myogadani.eventprocessing.BaseEvent;
 public final class TimerRegistration extends BaseEvent<IAsyncTimerRegistrationListener> {
 
     private final long orderId;
-    private final long userTag;
+    private final long timerTag;
     private final long timerEventTime;
 
     public TimerRegistration(long eventId,
                              long creationTime,
                              long orderId,
-                             long userTag,
+                             long timerTag,
                              long timerEventTime,
                              IAsyncTimerRegistrationListener eventListener) {
         super(eventId, creationTime, eventListener);
         this.orderId = orderId;
-        this.userTag = userTag;
+        this.timerTag = timerTag;
         this.timerEventTime = timerEventTime;
     }
 
@@ -24,8 +24,8 @@ public final class TimerRegistration extends BaseEvent<IAsyncTimerRegistrationLi
         return orderId;
     }
 
-    public long getUserTag() {
-        return userTag;
+    public long getTimerTag() {
+        return timerTag;
     }
 
     public long getTimerEventTime() {
@@ -41,7 +41,7 @@ public final class TimerRegistration extends BaseEvent<IAsyncTimerRegistrationLi
     public StringBuilder toStringBuilder() {
         return super.toStringBuilder()
                 .append(", orderId: ").append(orderId)
-                .append(", userTag: ").append(userTag)
+                .append(", timerTag: ").append(timerTag)
                 .append(", timerEventTime: ").append(timerEventTime);
     }
 }

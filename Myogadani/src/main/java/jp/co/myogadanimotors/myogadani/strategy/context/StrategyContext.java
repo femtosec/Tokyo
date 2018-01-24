@@ -17,6 +17,8 @@ import jp.co.myogadanimotors.myogadani.store.masterdata.product.IProduct;
 import jp.co.myogadanimotors.myogadani.strategy.StrategyState;
 import jp.co.myogadanimotors.myogadani.timesource.ITimeSource;
 
+import java.util.Map;
+
 public final class StrategyContext implements IStrategyContext {
 
     private final RequestIdGenerator requestIdGenerator;
@@ -74,15 +76,11 @@ public final class StrategyContext implements IStrategyContext {
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    // setters
+    // setters/updaters
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     public void setStrategyState(StrategyState strategyState) {
         this.strategyState = strategyState;
-    }
-
-    public void setOrder(IOrder order) {
-        orderView.update(order);
     }
 
     public void setMarketState(MarketState marketState) {
@@ -99,6 +97,14 @@ public final class StrategyContext implements IStrategyContext {
 
     public void setStrategyPendingCancelProcessor(IStrategyPendingCancelProcessor pendingCancelProcessor) {
         this.pendingCancelProcessor = pendingCancelProcessor;
+    }
+
+    public void updateOrderView(IOrder order) {
+        orderView.update(order);
+    }
+
+    public void updateExtendedAttributes(Map<String, String> extendedAttributes) {
+        orderView.updateExtendedAttributes(extendedAttributes);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////

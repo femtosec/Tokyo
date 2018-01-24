@@ -8,21 +8,21 @@ import jp.co.myogadanimotors.myogadani.timesource.ITimeSource;
 public class TimerEventSender extends BaseEventSender<IAsyncTimerEventListener> {
 
     private long orderId;
-    private long userTag;
+    private long timerTag;
     private long timerEventTime;
 
     public TimerEventSender(EventIdGenerator idGenerator, ITimeSource timeSource) {
         super(idGenerator, timeSource);
     }
 
-    public void sendTimerEvent(long orderId, long userTag, long timerEventTime) {
+    public void sendTimerEvent(long orderId, long timerTag, long timerEventTime) {
         this.orderId = orderId;
-        this.userTag = userTag;
+        this.timerTag = timerTag;
         this.timerEventTime = timerEventTime;
         send(this::createTimerEvent);
     }
 
     private IEvent createTimerEvent(long eventId, long creationTime, IAsyncTimerEventListener asyncEventListener) {
-        return new TimerEvent(eventId, creationTime, orderId, userTag, timerEventTime,asyncEventListener);
+        return new TimerEvent(eventId, creationTime, orderId, timerTag, timerEventTime,asyncEventListener);
     }
 }

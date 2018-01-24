@@ -11,17 +11,20 @@ public final class StrategyChildOrderFill extends AbstractStrategyEvent {
     private final BigDecimal execQuantity;
     private final OrderView orderView;
     private final OrderView childOrderView;
+    private final String childOrderTag;
 
     public StrategyChildOrderFill(long eventId,
                                   long creationTime,
                                   IStrategy strategy,
                                   BigDecimal execQuantity,
                                   OrderView orderView,
-                                  OrderView childOrderView) {
+                                  OrderView childOrderView,
+                                  String childOrderTag) {
         super(eventId, creationTime, strategy);
         this.execQuantity = execQuantity;
         this.orderView = orderView;
         this.childOrderView = childOrderView;
+        this.childOrderTag = childOrderTag;
     }
 
     public BigDecimal getExecQuantity() {
@@ -36,6 +39,10 @@ public final class StrategyChildOrderFill extends AbstractStrategyEvent {
         return childOrderView;
     }
 
+    public String getChildOrderTag() {
+        return childOrderTag;
+    }
+
     @Override
     protected void callEventListener(IStrategy strategy) {
         strategy.processStrategyChildOrderFill(this);
@@ -46,6 +53,7 @@ public final class StrategyChildOrderFill extends AbstractStrategyEvent {
         return super.toStringBuilder()
                 .append(", execQuantity: ").append(execQuantity)
                 .append(", orderView: ").append(orderView)
-                .append(", childOrderView: ").append(childOrderView);
+                .append(", childOrderView: ").append(childOrderView)
+                .append(", childOrderTag: ").append(childOrderTag);
     }
 }

@@ -3,6 +3,7 @@ package jp.co.myogadanimotors.myogadani.ordermanagement.order;
 import jp.co.myogadanimotors.myogadani.common.OrderSide;
 
 import java.math.BigDecimal;
+import java.util.Map;
 
 public interface IOrder {
     long getOrderId();
@@ -11,6 +12,7 @@ public interface IOrder {
     long getAccountId();
     String getSymbol();
     String getMic();
+    String getOrderTag();
     OrderSide getOrderSide();
     BigDecimal getOrderQuantity();
     BigDecimal getExecQuantity();
@@ -25,4 +27,6 @@ public interface IOrder {
         return getRemainingQuantity().subtract(getExposedQuantity());
     }
     BigDecimal getPriceLimit();
+    String getExtendedAttribute(String key);
+    Map<String, String> getExtendedAttributes();
 }

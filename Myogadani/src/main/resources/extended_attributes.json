@@ -3,5 +3,6 @@
   { "name": "symbolList",         "type": "List" },
   { "name": "micList",            "type": "List" },
   { "name": "priceLimitList",     "type": "List" },
-  { "name": "orderQuantityList",  "type": "List" }
+  { "name": "orderQuantityList",  "type": "List" },
+  { "name": "orderTag",           "type": "String" }
 ]

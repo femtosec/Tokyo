@@ -5,6 +5,8 @@ import jp.co.myogadanimotors.myogadani.ordermanagement.order.IOrder;
 import jp.co.myogadanimotors.myogadani.ordermanagement.order.OrderState;
 
 import java.math.BigDecimal;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public final class OrderView implements IOrder {
 
@@ -12,7 +14,9 @@ public final class OrderView implements IOrder {
     private final long accountId;
     private final String symbol;
     private final String mic;
+    private final String orderTag;
     private final OrderSide orderSide;
+    private final Map<String, String> extendedAttributes = new ConcurrentHashMap<>();
     private BigDecimal orderQuantity;
     private BigDecimal execQuantity;
     private BigDecimal cancelledQuantity;
@@ -28,6 +32,7 @@ public final class OrderView implements IOrder {
         accountId = order.getAccountId();
         symbol = order.getSymbol();
         mic = order.getMic();
+        orderTag = order.getOrderTag();
         orderSide = order.getOrderSide();
         orderQuantity = order.getOrderQuantity();
         execQuantity = order.getExecQuantity();
@@ -38,6 +43,7 @@ public final class OrderView implements IOrder {
         priceLimit = order.getPriceLimit();
         orderState = order.getOrderState();
         version = order.getVersion();
+        extendedAttributes.putAll(order.getExtendedAttributes());
     }
 
     public void update(IOrder order) {
@@ -50,6 +56,11 @@ public final class OrderView implements IOrder {
         priceLimit = order.getPriceLimit();
         orderState = order.getOrderState();
         version = order.getVersion();
+    }
+
+    public void updateExtendedAttributes(Map<String, String> extendedAttributes) {
+        this.extendedAttributes.clear();
+        this.extendedAttributes.putAll(extendedAttributes);
     }
 
     @Override
@@ -80,6 +91,11 @@ public final class OrderView implements IOrder {
     @Override
     public String getMic() {
         return mic;
+    }
+
+    @Override
+    public String getOrderTag() {
+        return orderTag;
     }
 
     @Override
@@ -123,12 +139,23 @@ public final class OrderView implements IOrder {
     }
 
     @Override
+    public String getExtendedAttribute(String key) {
+        return extendedAttributes.get(key);
+    }
+
+    @Override
+    public Map<String, String> getExtendedAttributes() {
+        return new ConcurrentHashMap<>(extendedAttributes);
+    }
+
+    @Override
     public String toString() {
-        return new StringBuilder()
+        StringBuilder sb = new StringBuilder()
                 .append("orderId: ").append(orderId)
                 .append(", accountId: ").append(accountId)
                 .append(", symbol: ").append(symbol)
                 .append(", mic: ").append(mic)
+                .append(", orderTag: ").append(orderTag)
                 .append(", orderSide: ").append(orderSide)
                 .append(", orderQuantity: ").append(orderQuantity)
                 .append(", execQuantity: ").append(execQuantity)
@@ -137,7 +164,12 @@ public final class OrderView implements IOrder {
                 .append(", rejectedQuantity: ").append(rejectedQuantity)
                 .append(", exposedQuantity: ").append(exposedQuantity)
                 .append(", remainingQuantity: ").append(getRemainingQuantity())
-                .append(", priceLimit: ").append(priceLimit)
-                .toString();
+                .append(", priceLimit: ").append(priceLimit);
+
+        for (Map.Entry<String, String> entry : extendedAttributes.entrySet()) {
+            sb.append(", [").append(entry.getKey()).append(":").append(entry.getValue()).append("]");
+        }
+
+        return sb.toString();
     }
 }

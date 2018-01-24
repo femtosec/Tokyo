@@ -29,7 +29,6 @@ import java.math.BigDecimal;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
-import java.util.function.Function;
 
 public final class OrderManager implements IAsyncOrderListener, IAsyncReportListener, IAsyncFillListener, IAsyncTimerEventListener {
 
@@ -161,6 +160,7 @@ public final class OrderManager implements IAsyncOrderListener, IAsyncReportList
                                 newOrder.getStrategy(),
                                 new OrderView(parentStrategyOrder),
                                 new OrderView(newOrder),
+                                newOrder.getOrderTag(),
                                 "invalid order event."
                         )
                 );
@@ -223,6 +223,7 @@ public final class OrderManager implements IAsyncOrderListener, IAsyncReportList
                                 currentOrder.getStrategy(),
                                 new OrderView(parentStrategyOrder),
                                 new OrderView(currentOrder),
+                                currentOrder.getOrderTag(),
                                 "invalid order event."
                         )
                 );
@@ -291,6 +292,7 @@ public final class OrderManager implements IAsyncOrderListener, IAsyncReportList
                                 currentOrder.getStrategy(),
                                 new OrderView(parentStrategyOrder),
                                 new OrderView(currentOrder),
+                                currentOrder.getOrderTag(),
                                 "invalid order event."
                         )
                 );
@@ -430,7 +432,8 @@ public final class OrderManager implements IAsyncOrderListener, IAsyncReportList
                             timeSource.getCurrentTime(),
                             order.getStrategy(),
                             new OrderView(parentStrategyOrder),
-                            new OrderView(order)
+                            new OrderView(order),
+                            order.getOrderTag()
                     )
             );
         } else {
@@ -483,6 +486,7 @@ public final class OrderManager implements IAsyncOrderListener, IAsyncReportList
                             order.getStrategy(),
                             new OrderView(parentStrategyOrder),
                             new OrderView(order),
+                            order.getOrderTag(),
                             newReject.getMessage()
                     )
             );
@@ -559,7 +563,9 @@ public final class OrderManager implements IAsyncOrderListener, IAsyncReportList
                             timeSource.getCurrentTime(),
                             order.getStrategy(),
                             new OrderView(parentStrategyOrder),
-                            new OrderView(order))
+                            new OrderView(order),
+                            order.getOrderTag()
+                    )
             );
         } else {
             // send report event to ems
@@ -620,6 +626,7 @@ public final class OrderManager implements IAsyncOrderListener, IAsyncReportList
                             order.getStrategy(),
                             new OrderView(parentStrategyOrder),
                             new OrderView(order),
+                            order.getOrderTag(),
                             amendReject.getMessage()
                     )
             );
@@ -677,7 +684,8 @@ public final class OrderManager implements IAsyncOrderListener, IAsyncReportList
                             timeSource.getCurrentTime(),
                             order.getStrategy(),
                             new OrderView(parentStrategyOrder),
-                            new OrderView(order)
+                            new OrderView(order),
+                            order.getOrderTag()
                     )
             );
         } else {
@@ -732,6 +740,7 @@ public final class OrderManager implements IAsyncOrderListener, IAsyncReportList
                             order.getStrategy(),
                             new OrderView(parentStrategyOrder),
                             new OrderView(order),
+                            order.getOrderTag(),
                             cancelReject.getMessage()
                     )
             );
@@ -791,6 +800,7 @@ public final class OrderManager implements IAsyncOrderListener, IAsyncReportList
                             order.getStrategy(),
                             new OrderView(parentStrategyOrder),
                             new OrderView(order),
+                            order.getOrderTag(),
                             unsolicitedCancel.getMessage()
                     )
             );
@@ -845,7 +855,8 @@ public final class OrderManager implements IAsyncOrderListener, IAsyncReportList
                             order.getStrategy(),
                             fillEvent.getExecQuantity(),
                             new OrderView(parentStrategyOrder),
-                            new OrderView(order)
+                            new OrderView(order),
+                            order.getOrderTag()
                     )
             );
         } else {
@@ -873,7 +884,7 @@ public final class OrderManager implements IAsyncOrderListener, IAsyncReportList
                             eventIdGenerator.generateEventId(),
                             timeSource.getCurrentTime(),
                             order.getStrategy(),
-                            timerEvent.getUserTag(),
+                            timerEvent.getTimerTag(),
                             timerEvent.getTimerEventTime()
                     )
             );
@@ -897,6 +908,7 @@ public final class OrderManager implements IAsyncOrderListener, IAsyncReportList
                 newOrderEvent.getAccountId(),
                 newOrderEvent.getSymbol(),
                 newOrderEvent.getMic(),
+                newOrderEvent.getExtendedAttribute("orderTag"),
                 newOrderEvent.getOrderSide(),
                 newOrderEvent.getOrderQuantity(),
                 newOrderEvent.getPriceLimit(),
@@ -908,7 +920,7 @@ public final class OrderManager implements IAsyncOrderListener, IAsyncReportList
         );
 
         if (newOrder.isStrategyOrder()) {
-            newOrder.setStrategy(createStrategy(getStrategyName(newOrderEvent::getExtendedAttribute), newOrder));
+            newOrder.setStrategy(createStrategy(newOrder.getExtendedAttribute("strategyName"), newOrder));
         }
 
         return newOrder;
@@ -920,6 +932,7 @@ public final class OrderManager implements IAsyncOrderListener, IAsyncReportList
                 currentOrder.getAccountId(),
                 currentOrder.getSymbol(),
                 currentOrder.getMic(),
+                currentOrder.getOrderTag(),
                 currentOrder.getOrderSide(),
                 orderEvent.getOrderQuantity(),
                 orderEvent.getPriceLimit(),
@@ -933,7 +946,7 @@ public final class OrderManager implements IAsyncOrderListener, IAsyncReportList
         if (amendOrder.isStrategyOrder()) {
             // if strategy type amend, create new strategy
             IStrategy currentStrategy = currentOrder.getStrategy();
-            String newStrategyName = getStrategyName(orderEvent::getExtendedAttribute);
+            String newStrategyName = orderEvent.getExtendedAttribute("strategyName");
             if (!currentStrategy.getStrategyDescriptor().getName().equals(newStrategyName)) {
                 amendOrder.setStrategy(createStrategy(newStrategyName, amendOrder));
             } else {
@@ -957,9 +970,13 @@ public final class OrderManager implements IAsyncOrderListener, IAsyncReportList
         return lastThreadId;
     }
 
-    private String getStrategyName(Function<String, String> extendedAttributeGetter) {
-        return extendedAttributeGetter.apply("strategyName");
-    }
+//    private String getOrderTag(Function<String, String> extendedAttributeGetter) {
+//        return extendedAttributeGetter.apply("orderTag");
+//    }
+//
+//    private String getStrategyName(Function<String, String> extendedAttributeGetter) {
+//        return extendedAttributeGetter.apply("strategyName");
+//    }
 
     private IStrategy createStrategy(String strategyName, IOrder order) {
         if (strategyFactory == null) {

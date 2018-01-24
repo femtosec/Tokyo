@@ -8,6 +8,7 @@ public abstract class AbstractStrategyChildOrderReport extends AbstractStrategyE
 
     private final OrderView orderView;
     private final OrderView childOrderView;
+    private final String childOrderTag;
     private final String message;
 
     public AbstractStrategyChildOrderReport(long eventId,
@@ -15,10 +16,12 @@ public abstract class AbstractStrategyChildOrderReport extends AbstractStrategyE
                                             IStrategy strategy,
                                             OrderView orderView,
                                             OrderView childOrderView,
+                                            String childOrderTag,
                                             String message) {
         super(eventId, creationTime, strategy);
         this.orderView = orderView;
         this.childOrderView = childOrderView;
+        this.childOrderTag = childOrderTag;
         this.message = message;
     }
 
@@ -30,6 +33,10 @@ public abstract class AbstractStrategyChildOrderReport extends AbstractStrategyE
         return childOrderView;
     }
 
+    public final String getChildOrderTag() {
+        return childOrderTag;
+    }
+
     public final String getMessage() {
         return message;
     }
@@ -39,6 +46,7 @@ public abstract class AbstractStrategyChildOrderReport extends AbstractStrategyE
         return super.toStringBuilder()
                 .append(", orderView: ").append(orderView)
                 .append(", childOrderView: ").append(childOrderView)
+                .append(", childOrderTag: ").append(childOrderTag)
                 .append(", message: ").append(message);
     }
 }

@@ -15,6 +15,7 @@ public final class Order implements IOrder {
     private final long accountId;
     private final String symbol;
     private final String mic;
+    private final String orderTag;
     private final OrderSide orderSide;
     private final Orderer orderer;
     private final OrderDestination destination;
@@ -37,6 +38,7 @@ public final class Order implements IOrder {
                  long accountId,
                  String symbol,
                  String mic,
+                 String orderTag,
                  OrderSide orderSide,
                  BigDecimal orderQuantity,
                  BigDecimal priceLimit,
@@ -49,6 +51,7 @@ public final class Order implements IOrder {
         this.accountId = accountId;
         this.symbol = symbol;
         this.mic = mic;
+        this.orderTag = orderTag;
         this.orderSide = orderSide;
         this.orderQuantity = orderQuantity;
         this.execQuantity = BigDecimal.ZERO;
@@ -148,6 +151,11 @@ public final class Order implements IOrder {
     }
 
     @Override
+    public String getOrderTag() {
+        return orderTag;
+    }
+
+    @Override
     public OrderSide getOrderSide() {
         return orderSide;
     }
@@ -211,6 +219,12 @@ public final class Order implements IOrder {
         return threadId;
     }
 
+    @Override
+    public String getExtendedAttribute(String key) {
+        return extendedAttributes.get(key);
+    }
+
+    @Override
     public Map<String, String> getExtendedAttributes() {
         return new ConcurrentHashMap<>(extendedAttributes);
     }
@@ -223,6 +237,7 @@ public final class Order implements IOrder {
                 .append(", accountId: ").append(accountId)
                 .append(", symbol: ").append(symbol)
                 .append(", mic: ").append(mic)
+                .append(", orderTag: ").append(orderTag)
                 .append(", orderSide: ").append(orderSide)
                 .append(", orderQuantity: ").append(orderQuantity)
                 .append(", execQuantity: ").append(execQuantity)

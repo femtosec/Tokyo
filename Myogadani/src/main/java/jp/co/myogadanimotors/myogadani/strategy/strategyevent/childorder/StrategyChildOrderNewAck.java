@@ -9,8 +9,9 @@ public final class StrategyChildOrderNewAck extends AbstractStrategyChildOrderRe
                                     long creationTime,
                                     IStrategy strategy,
                                     OrderView orderView,
-                                    OrderView childOrderView) {
-        super(eventId, creationTime, strategy, orderView, childOrderView, null);
+                                    OrderView childOrderView,
+                                    String childOrderTag) {
+        super(eventId, creationTime, strategy, orderView, childOrderView, childOrderTag, null);
     }
 
     @Override

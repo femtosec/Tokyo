@@ -10,8 +10,9 @@ public final class StrategyChildOrderAmendReject extends AbstractStrategyChildOr
                                          IStrategy strategy,
                                          OrderView orderView,
                                          OrderView childOrderView,
+                                         String childOrderTag,
                                          String message) {
-        super(eventId, creationTime, strategy, orderView, childOrderView, message);
+        super(eventId, creationTime, strategy, orderView, childOrderView, childOrderTag, message);
     }
 
     @Override

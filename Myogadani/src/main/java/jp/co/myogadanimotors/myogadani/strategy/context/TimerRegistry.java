@@ -14,8 +14,8 @@ public class TimerRegistry implements ITimerRegistry {
 
     private final long orderId;
     private final TimerRegistrationSender timerRegistrationSender;
-    private final List<Long> userTagList = new ArrayList<>();
-    private final Map<Long, RepetitiveTimerEntry> repetitiveTimerEntryMapByUserTag = new ConcurrentHashMap<>();
+    private final List<Long> timerTagList = new ArrayList<>();
+    private final Map<Long, RepetitiveTimerEntry> repetitiveTimerEntryMapByTimerTag = new ConcurrentHashMap<>();
 
     public TimerRegistry(long orderId,
                          EventIdGenerator eventIdGenerator,
@@ -27,18 +27,18 @@ public class TimerRegistry implements ITimerRegistry {
     }
 
     @Override
-    public void registerTimer(long userTag, long timerEventTime) {
-        timerRegistrationSender.sendTimerRegistration(orderId, userTag, timerEventTime);
-        userTagList.add(userTag);
+    public void registerTimer(long timerTag, long timerEventTime) {
+        timerRegistrationSender.sendTimerRegistration(orderId, timerTag, timerEventTime);
+        timerTagList.add(timerTag);
     }
 
     @Override
-    public void registerRepetitiveTimer(long userTag, long timerInterval, long timerStartTime) {
-        registerRepetitiveTimer(userTag, timerStartTime, Long.MAX_VALUE, timerInterval);
+    public void registerRepetitiveTimer(long timerTag, long timerInterval, long timerStartTime) {
+        registerRepetitiveTimer(timerTag, timerStartTime, Long.MAX_VALUE, timerInterval);
     }
 
     @Override
-    public void registerRepetitiveTimer(long userTag, long timerInterval, long timerStartTime, long timerEndTime) {
+    public void registerRepetitiveTimer(long timerTag, long timerInterval, long timerStartTime, long timerEndTime) {
         if (timerInterval <= 0) {
             throw new IllegalArgumentException("timerInterval must be more than 0. timerInterval: " + timerInterval);
         }
@@ -47,52 +47,52 @@ public class TimerRegistry implements ITimerRegistry {
             throw new IllegalArgumentException("timerEndTime must be more than or equal to timerStartTime. timerStartTime: "+ timerStartTime + ", timerEndTime: " + timerEndTime);
         }
 
-        RepetitiveTimerEntry rte = new RepetitiveTimerEntry(userTag, timerInterval, timerStartTime, timerEndTime);
-        if (repetitiveTimerEntryMapByUserTag.containsKey(userTag)) {
-            repetitiveTimerEntryMapByUserTag.remove(userTag);
+        RepetitiveTimerEntry rte = new RepetitiveTimerEntry(timerTag, timerInterval, timerStartTime, timerEndTime);
+        if (repetitiveTimerEntryMapByTimerTag.containsKey(timerTag)) {
+            repetitiveTimerEntryMapByTimerTag.remove(timerTag);
         }
-        repetitiveTimerEntryMapByUserTag.put(userTag, rte);
+        repetitiveTimerEntryMapByTimerTag.put(timerTag, rte);
 
-        registerTimer(userTag, timerStartTime);
+        registerTimer(timerTag, timerStartTime);
     }
 
     @Override
-    public boolean hasTimerRegistry(long userTag) {
-        return userTagList.contains(userTag);
+    public boolean hasTimerRegistry(long timerTag) {
+        return timerTagList.contains(timerTag);
     }
 
-    public void onTimer(long userTag, long timerEventTime) {
-        userTagList.remove(userTag);
+    public void onTimer(long timerTag, long timerEventTime) {
+        timerTagList.remove(timerTag);
 
-        if (!repetitiveTimerEntryMapByUserTag.containsKey(userTag)) {
+        if (!repetitiveTimerEntryMapByTimerTag.containsKey(timerTag)) {
             return;
         }
 
-        if (userTagList.contains(userTag)) {
+        if (timerTagList.contains(timerTag)) {
             return;
         }
 
-        RepetitiveTimerEntry rte = repetitiveTimerEntryMapByUserTag.get(userTag);
+        RepetitiveTimerEntry rte = repetitiveTimerEntryMapByTimerTag.get(timerTag);
         if (timerEventTime < rte.timerStartTime) {
             return;
         }
 
         long nextTimerEventTime = timerEventTime + rte.timerInterval;
         if (rte.timerEndTime < nextTimerEventTime) {
-            repetitiveTimerEntryMapByUserTag.remove(userTag);
+            repetitiveTimerEntryMapByTimerTag.remove(timerTag);
         }
 
-        registerTimer(userTag, nextTimerEventTime);
+        registerTimer(timerTag, nextTimerEventTime);
     }
 
     private class RepetitiveTimerEntry {
-        private final long userTag;
+        private final long timerTag;
         private final long timerInterval;
         private final long timerStartTime;
         private final long timerEndTime;
 
-        private RepetitiveTimerEntry(long userTag, long timerInterval, long timerStartTime, long timerEndTime) {
-            this.userTag = userTag;
+        private RepetitiveTimerEntry(long timerTag, long timerInterval, long timerStartTime, long timerEndTime) {
+            this.timerTag = timerTag;
             this.timerInterval = timerInterval;
             this.timerStartTime = timerStartTime;
             this.timerEndTime = timerEndTime;

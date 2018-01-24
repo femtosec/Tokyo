@@ -11,6 +11,8 @@ import jp.co.myogadanimotors.myogadani.ordermanagement.order.IOrder;
 import jp.co.myogadanimotors.myogadani.timesource.ITimeSource;
 
 import java.math.BigDecimal;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public final class ChildOrderSender {
 
@@ -31,11 +33,14 @@ public final class ChildOrderSender {
     }
 
     public void sendExchangeNewOrder(String symbol,
-                                String mic,
-                                OrderSide orderSide,
-                                BigDecimal orderQuantity,
-                                BigDecimal priceLimit) {
+                                     String mic,
+                                     OrderSide orderSide,
+                                     BigDecimal orderQuantity,
+                                     BigDecimal priceLimit,
+                                     String childOrderTag) {
         // todo: insert sanity check
+        Map<String, String> extendedAttributes = new ConcurrentHashMap<>();
+        extendedAttributes.put("childOrderTag", childOrderTag);
         orderSeder.sendNewOrder(
                 requestIdGenerator.generateRequestId(),
                 order.getOrderId(),
@@ -47,20 +52,21 @@ public final class ChildOrderSender {
                 priceLimit,
                 Orderer.Strategy,
                 OrderDestination.Exchange,
-                null
+                extendedAttributes
         );
     }
 
-    public void sendExchangeAmendOrder(long childOrderId,
-                                  BigDecimal orderQuantity,
-                                  BigDecimal priceLimit) {
+    // todo: pass childOrderId instead of IOrder
+    public void sendExchangeAmendOrder(IOrder childOrder,
+                                       BigDecimal orderQuantity,
+                                       BigDecimal priceLimit) {
         // todo: insert sanity check
         orderSeder.sendAmendOrder(
                 requestIdGenerator.generateRequestId(),
-                childOrderId,
+                childOrder.getOrderId(),
                 orderQuantity,
                 priceLimit,
-                null
+                childOrder.getExtendedAttributes()
         );
     }
 
