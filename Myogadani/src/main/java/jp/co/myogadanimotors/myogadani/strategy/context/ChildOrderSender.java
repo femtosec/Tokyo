@@ -1,12 +1,8 @@
 package jp.co.myogadanimotors.myogadani.strategy.context;
 
-import jp.co.myogadanimotors.myogadani.eventprocessing.order.OrderSide;
 import jp.co.myogadanimotors.myogadani.eventprocessing.EventIdGenerator;
 import jp.co.myogadanimotors.myogadani.eventprocessing.RequestIdGenerator;
-import jp.co.myogadanimotors.myogadani.eventprocessing.order.IAsyncOrderListener;
-import jp.co.myogadanimotors.myogadani.eventprocessing.order.OrderDestination;
-import jp.co.myogadanimotors.myogadani.eventprocessing.order.OrderSender;
-import jp.co.myogadanimotors.myogadani.eventprocessing.order.Orderer;
+import jp.co.myogadanimotors.myogadani.eventprocessing.order.*;
 import jp.co.myogadanimotors.myogadani.ordermanagement.order.IOrder;
 import jp.co.myogadanimotors.myogadani.timesource.ITimeSource;
 import org.apache.logging.log4j.LogManager;

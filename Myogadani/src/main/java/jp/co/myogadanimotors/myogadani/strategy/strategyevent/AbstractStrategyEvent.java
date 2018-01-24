@@ -3,6 +3,8 @@ package jp.co.myogadanimotors.myogadani.strategy.strategyevent;
 import jp.co.myogadanimotors.myogadani.eventprocessing.IEvent;
 import jp.co.myogadanimotors.myogadani.strategy.IStrategy;
 
+import static jp.co.myogadanimotors.myogadani.common.Utility.notNull;
+
 public abstract class AbstractStrategyEvent implements IEvent {
 
     private final long eventId;
@@ -12,7 +14,7 @@ public abstract class AbstractStrategyEvent implements IEvent {
     public AbstractStrategyEvent(long eventId, long creationTime, IStrategy strategy) {
         this.eventId = eventId;
         this.creationTime = creationTime;
-        this.strategy = strategy;
+        this.strategy = notNull(strategy);
     }
 
     protected abstract void callEventListener(IStrategy strategy);

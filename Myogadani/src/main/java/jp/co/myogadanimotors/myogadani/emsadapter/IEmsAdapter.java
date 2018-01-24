@@ -1,4 +1,4 @@
-package emsadapter;
+package jp.co.myogadanimotors.myogadani.emsadapter;
 
 import jp.co.myogadanimotors.myogadani.eventprocessing.IAsyncEventSender;
 import jp.co.myogadanimotors.myogadani.eventprocessing.order.IAsyncOrderListener;

@@ -1,4 +1,4 @@
-package exchangeadapter;
+package jp.co.myogadanimotors.myogadani.exchangeadapter;
 
 import jp.co.myogadanimotors.myogadani.eventprocessing.order.IAsyncOrderListener;
 import jp.co.myogadanimotors.myogadani.eventprocessing.report.IAsyncFillListener;

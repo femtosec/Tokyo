@@ -1,14 +1,14 @@
 package jp.co.myogadanimotors.myogadani.ordermanagement;
 
-import emsadapter.IEmsAdapter;
-import exchangeadapter.IExchangeAdapter;
 import jp.co.myogadanimotors.myogadani.common.Constants;
+import jp.co.myogadanimotors.myogadani.emsadapter.IEmsAdapter;
 import jp.co.myogadanimotors.myogadani.eventprocessing.EventIdGenerator;
 import jp.co.myogadanimotors.myogadani.eventprocessing.IEvent;
 import jp.co.myogadanimotors.myogadani.eventprocessing.order.*;
 import jp.co.myogadanimotors.myogadani.eventprocessing.report.*;
 import jp.co.myogadanimotors.myogadani.eventprocessing.timer.IAsyncTimerEventListener;
 import jp.co.myogadanimotors.myogadani.eventprocessing.timer.TimerEvent;
+import jp.co.myogadanimotors.myogadani.exchangeadapter.IExchangeAdapter;
 import jp.co.myogadanimotors.myogadani.idgenerator.IIdGenerator;
 import jp.co.myogadanimotors.myogadani.idgenerator.IdGenerator;
 import jp.co.myogadanimotors.myogadani.ordermanagement.order.IOrder;
@@ -29,6 +29,8 @@ import java.math.BigDecimal;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
+
+import static jp.co.myogadanimotors.myogadani.common.Utility.notNull;
 
 public final class OrderManager implements IAsyncOrderListener, IAsyncReportListener, IAsyncFillListener, IAsyncTimerEventListener {
 
@@ -58,18 +60,18 @@ public final class OrderManager implements IAsyncOrderListener, IAsyncReportList
                         OrderValidator orderValidator,
                         Executor eventExecutor,
                         Executor... strategyEventExecutors) {
-        this.emsReportSender = new ReportSender(eventIdGenerator, timeSource);
+        this.emsReportSender = new ReportSender(notNull(eventIdGenerator), notNull(timeSource));
         this.emsFillSender = new FillSender(eventIdGenerator, timeSource);
         this.exchangeOrderSender = new OrderSender(eventIdGenerator, timeSource);
-        this.eventIdGenerator = eventIdGenerator;
-        this.timeSource = timeSource;
-        this.orderValidator = orderValidator;
-        this.eventExecutor = eventExecutor;
-        this.strategyEventExecutors = strategyEventExecutors;
+        this.eventIdGenerator = notNull(eventIdGenerator);
+        this.timeSource = notNull(timeSource);
+        this.orderValidator = notNull(orderValidator);
+        this.eventExecutor = notNull(eventExecutor);
+        this.strategyEventExecutors = notNull(strategyEventExecutors);
 
-        emsReportSender.addAsyncEventListener(emsAdapter);
-        emsFillSender.addAsyncEventListener(emsAdapter);
-        exchangeOrderSender.addAsyncEventListener(exchangeAdapter);
+        emsReportSender.addAsyncEventListener(notNull(emsAdapter));
+        emsFillSender.addAsyncEventListener(notNull(emsAdapter));
+        exchangeOrderSender.addAsyncEventListener(notNull(exchangeAdapter));
 
         emsAdapter.addEventListener(this);
         exchangeAdapter.addReportListener(this);
@@ -866,7 +868,7 @@ public final class OrderManager implements IAsyncOrderListener, IAsyncReportList
         );
 
         if (newOrder.isStrategyOrder()) {
-            newOrder.setStrategy(createStrategy(newOrder.getExtendedAttribute("strategyName"), newOrder));
+            newOrder.setStrategy(createStrategy(getStrategyName(newOrder), newOrder));
         }
 
         return newOrder;
@@ -892,7 +894,7 @@ public final class OrderManager implements IAsyncOrderListener, IAsyncReportList
         if (amendOrder.isStrategyOrder()) {
             // if strategy type amend, create new strategy
             IStrategy currentStrategy = currentOrder.getStrategy();
-            String newStrategyName = orderEvent.getExtendedAttribute("strategyName");
+            String newStrategyName = getStrategyName(amendOrder);
             if (!currentStrategy.getStrategyDescriptor().getName().equals(newStrategyName)) {
                 amendOrder.setStrategy(createStrategy(newStrategyName, amendOrder));
             } else {
@@ -916,13 +918,9 @@ public final class OrderManager implements IAsyncOrderListener, IAsyncReportList
         return lastThreadId;
     }
 
-//    private String getOrderTag(Function<String, String> extendedAttributeGetter) {
-//        return extendedAttributeGetter.apply("orderTag");
-//    }
-//
-//    private String getStrategyName(Function<String, String> extendedAttributeGetter) {
-//        return extendedAttributeGetter.apply("strategyName");
-//    }
+    private String getStrategyName(IOrder order) {
+        return order.getExtendedAttribute("strategyName");
+    }
 
     private IStrategy createStrategy(String strategyName, IOrder order) {
         if (strategyFactory == null) {

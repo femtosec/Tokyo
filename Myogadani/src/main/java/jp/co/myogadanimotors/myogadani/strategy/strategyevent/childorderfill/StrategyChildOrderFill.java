@@ -6,6 +6,8 @@ import jp.co.myogadanimotors.myogadani.strategy.strategyevent.AbstractStrategyEv
 
 import java.math.BigDecimal;
 
+import static jp.co.myogadanimotors.myogadani.common.Utility.notNull;
+
 public final class StrategyChildOrderFill extends AbstractStrategyEvent {
 
     private final BigDecimal execQuantity;
@@ -22,8 +24,8 @@ public final class StrategyChildOrderFill extends AbstractStrategyEvent {
                                   String childOrderTag) {
         super(eventId, creationTime, strategy);
         this.execQuantity = execQuantity;
-        this.orderView = orderView;
-        this.childOrderView = childOrderView;
+        this.orderView = notNull(orderView);
+        this.childOrderView = notNull(childOrderView);
         this.childOrderTag = childOrderTag;
     }
 

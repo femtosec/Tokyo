@@ -4,6 +4,8 @@ import jp.co.myogadanimotors.myogadani.strategy.IStrategy;
 import jp.co.myogadanimotors.myogadani.strategy.context.OrderView;
 import jp.co.myogadanimotors.myogadani.strategy.strategyevent.AbstractStrategyEvent;
 
+import static jp.co.myogadanimotors.myogadani.common.Utility.notNull;
+
 public abstract class AbstractStrategyChildOrderReport extends AbstractStrategyEvent {
 
     private final OrderView orderView;
@@ -19,9 +21,9 @@ public abstract class AbstractStrategyChildOrderReport extends AbstractStrategyE
                                             String childOrderTag,
                                             String message) {
         super(eventId, creationTime, strategy);
-        this.orderView = orderView;
-        this.childOrderView = childOrderView;
-        this.childOrderTag = childOrderTag;
+        this.orderView = notNull(orderView);
+        this.childOrderView = notNull(childOrderView);
+        this.childOrderTag = notNull(childOrderTag);
         this.message = message;
     }
 

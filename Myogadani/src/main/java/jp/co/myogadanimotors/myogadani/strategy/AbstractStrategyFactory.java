@@ -17,6 +17,8 @@ import jp.co.myogadanimotors.myogadani.store.masterdata.strategy.StrategyMaster;
 import jp.co.myogadanimotors.myogadani.strategy.context.StrategyContext;
 import jp.co.myogadanimotors.myogadani.timesource.ITimeSource;
 
+import static jp.co.myogadanimotors.myogadani.common.Utility.notNull;
+
 public abstract class AbstractStrategyFactory implements IStrategyFactory {
 
     private final EventIdGenerator eventIdGenerator;
@@ -42,17 +44,17 @@ public abstract class AbstractStrategyFactory implements IStrategyFactory {
                                    IAsyncFillListener asyncFillListener,
                                    IAsyncMarketDataRequestListener asyncMarketDataRequestListener,
                                    IAsyncTimerRegistrationListener asyncTimerRegistrationListener) {
-        this.eventIdGenerator = eventIdGenerator;
-        this.requestIdGenerator = requestIdGenerator;
-        this.timeSource = timeSource;
-        this.marketMaster = marketMaster;
-        this.productMaster = productMaster;
-        this.strategyMaster = strategyMaster;
-        this.asyncOrderListener = asyncOrderListener;
-        this.asyncReportListener = asyncReportListener;
-        this.asyncFillListener = asyncFillListener;
-        this.asyncMarketDataRequestListener = asyncMarketDataRequestListener;
-        this.asyncTimerRegistrationListener = asyncTimerRegistrationListener;
+        this.eventIdGenerator = notNull(eventIdGenerator);
+        this.requestIdGenerator = notNull(requestIdGenerator);
+        this.timeSource = notNull(timeSource);
+        this.marketMaster = notNull(marketMaster);
+        this.productMaster = notNull(productMaster);
+        this.strategyMaster = notNull(strategyMaster);
+        this.asyncOrderListener = notNull(asyncOrderListener);
+        this.asyncReportListener = notNull(asyncReportListener);
+        this.asyncFillListener = notNull(asyncFillListener);
+        this.asyncMarketDataRequestListener = notNull(asyncMarketDataRequestListener);
+        this.asyncTimerRegistrationListener = notNull(asyncTimerRegistrationListener);
     }
 
     protected final StrategyContext createStrategyContext(IOrder order) {

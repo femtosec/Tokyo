@@ -6,6 +6,8 @@ import java.math.BigDecimal;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import static jp.co.myogadanimotors.myogadani.common.Utility.notNull;
+
 public final class NewOrder extends BaseEvent<IAsyncOrderListener> {
 
     private final long requestId;

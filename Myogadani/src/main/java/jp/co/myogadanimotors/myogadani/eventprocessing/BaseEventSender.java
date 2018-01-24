@@ -5,6 +5,8 @@ import jp.co.myogadanimotors.myogadani.timesource.ITimeSource;
 import java.util.ArrayList;
 import java.util.List;
 
+import static jp.co.myogadanimotors.myogadani.common.Utility.notNull;
+
 public class BaseEventSender<T extends IAsyncEventListener> implements IAsyncEventSender<T> {
 
     private final EventIdGenerator idGenerator;
@@ -12,8 +14,8 @@ public class BaseEventSender<T extends IAsyncEventListener> implements IAsyncEve
     private final List<T> asyncEventListenerList = new ArrayList<>();
 
     public BaseEventSender(EventIdGenerator idGenerator, ITimeSource timeSource) {
-        this.idGenerator = idGenerator;
-        this.timeSource = timeSource;
+        this.idGenerator = notNull(idGenerator);
+        this.timeSource = notNull(timeSource);
     }
 
     @Override

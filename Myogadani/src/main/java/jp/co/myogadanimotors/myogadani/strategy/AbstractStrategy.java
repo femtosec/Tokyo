@@ -20,6 +20,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
 
+import static jp.co.myogadanimotors.myogadani.common.Utility.notNull;
+
 public abstract class AbstractStrategy implements IStrategy {
 
     protected final Logger logger = LogManager.getLogger(getClass().getName());
@@ -29,8 +31,8 @@ public abstract class AbstractStrategy implements IStrategy {
     private final List<IValidator> validators = new ArrayList<>();
 
     public AbstractStrategy(IStrategyDescriptor strategyDescriptor, StrategyContext context) {
-        this.strategyDescriptor = new StrategyDescriptor(strategyDescriptor);
-        this.context = context;
+        this.strategyDescriptor = new StrategyDescriptor(notNull(strategyDescriptor));
+        this.context = notNull(context);
     }
 
     @Override

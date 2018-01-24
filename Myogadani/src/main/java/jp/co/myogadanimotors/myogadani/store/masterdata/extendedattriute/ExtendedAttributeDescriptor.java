@@ -2,7 +2,7 @@ package jp.co.myogadanimotors.myogadani.store.masterdata.extendedattriute;
 
 import jp.co.myogadanimotors.myogadani.common.Constants;
 
-public class ExtendedAttributeDescriptor implements IExtendedAttributeDescriptor {
+public final class ExtendedAttributeDescriptor implements IExtendedAttributeDescriptor {
 
     private long id = Constants.NOT_SET_ID_LONG;
     private String name;

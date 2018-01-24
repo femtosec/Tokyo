@@ -1,7 +1,6 @@
 package jp.co.myogadanimotors.myogadani.ordermanagement
 
 import jp.co.myogadanimotors.myogadani.common.Constants
-import jp.co.myogadanimotors.myogadani.eventprocessing.order.OrderSide
 import jp.co.myogadanimotors.myogadani.config.ConfigAccessor
 import jp.co.myogadanimotors.myogadani.eventprocessing.order.*
 import jp.co.myogadanimotors.myogadani.ordermanagement.order.Order

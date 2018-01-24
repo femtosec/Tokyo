@@ -3,7 +3,7 @@ package jp.co.myogadanimotors.myogadani.eventprocessing;
 import jp.co.myogadanimotors.myogadani.idgenerator.IIdGenerator;
 import jp.co.myogadanimotors.myogadani.idgenerator.IdGenerator;
 
-public class RequestIdGenerator {
+public final class RequestIdGenerator {
 
     private final IIdGenerator idGenerator;
 

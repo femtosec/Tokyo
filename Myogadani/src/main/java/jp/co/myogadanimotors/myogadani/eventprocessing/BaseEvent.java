@@ -1,5 +1,7 @@
 package jp.co.myogadanimotors.myogadani.eventprocessing;
 
+import static jp.co.myogadanimotors.myogadani.common.Utility.notNull;
+
 public abstract class BaseEvent<T extends IAsyncEventListener> implements IEvent {
 
     private final long eventId;
@@ -39,12 +41,5 @@ public abstract class BaseEvent<T extends IAsyncEventListener> implements IEvent
         return new StringBuilder(getClass().getName())
                 .append(" eventId: ").append(eventId)
                 .append(", creationTime: ").append(creationTime);
-    }
-
-    protected static <U> U notNull(U value) {
-        if (value == null) {
-            throw new NullPointerException();
-        }
-        return value;
     }
 }

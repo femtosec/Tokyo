@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class TimerRegistry implements ITimerRegistry {
+public final class TimerRegistry implements ITimerRegistry {
 
     private final long orderId;
     private final TimerRegistrationSender timerRegistrationSender;

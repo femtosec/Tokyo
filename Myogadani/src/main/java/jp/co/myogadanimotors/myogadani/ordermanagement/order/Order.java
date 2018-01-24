@@ -1,7 +1,7 @@
 package jp.co.myogadanimotors.myogadani.ordermanagement.order;
 
-import jp.co.myogadanimotors.myogadani.eventprocessing.order.OrderSide;
 import jp.co.myogadanimotors.myogadani.eventprocessing.order.OrderDestination;
+import jp.co.myogadanimotors.myogadani.eventprocessing.order.OrderSide;
 import jp.co.myogadanimotors.myogadani.eventprocessing.order.Orderer;
 import jp.co.myogadanimotors.myogadani.strategy.IStrategy;
 
