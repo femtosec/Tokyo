@@ -1,17 +1,17 @@
-package jp.co.myogadanimotors.myogadani.store.masterdata
+package jp.co.myogadanimotors.myogadani.store.master
 
 import jp.co.myogadanimotors.myogadani.common.Constants
 import jp.co.myogadanimotors.myogadani.config.ConfigAccessor
-import jp.co.myogadanimotors.myogadani.store.masterdata.extendedattriute.ExtendedAttributeMaster
-import jp.co.myogadanimotors.myogadani.store.masterdata.extendedattriute.IExtendedAttributeDescriptor
-import jp.co.myogadanimotors.myogadani.store.masterdata.market.IMarket
-import jp.co.myogadanimotors.myogadani.store.masterdata.market.MarketMaster
-import jp.co.myogadanimotors.myogadani.store.masterdata.market.MarketType
-import jp.co.myogadanimotors.myogadani.store.masterdata.product.IProduct
-import jp.co.myogadanimotors.myogadani.store.masterdata.product.ProductMaster
-import jp.co.myogadanimotors.myogadani.store.masterdata.product.ProductType
-import jp.co.myogadanimotors.myogadani.store.masterdata.strategy.IStrategyDescriptor
-import jp.co.myogadanimotors.myogadani.store.masterdata.strategy.StrategyMaster
+import jp.co.myogadanimotors.myogadani.store.master.extendedattriute.ExtendedAttributeMaster
+import jp.co.myogadanimotors.myogadani.store.master.extendedattriute.IExtendedAttributeDescriptor
+import jp.co.myogadanimotors.myogadani.store.master.market.IMarket
+import jp.co.myogadanimotors.myogadani.store.master.market.MarketMaster
+import jp.co.myogadanimotors.myogadani.store.master.market.MarketType
+import jp.co.myogadanimotors.myogadani.store.master.product.IProduct
+import jp.co.myogadanimotors.myogadani.store.master.product.ProductMaster
+import jp.co.myogadanimotors.myogadani.store.master.product.ProductType
+import jp.co.myogadanimotors.myogadani.store.master.strategy.IStrategyDescriptor
+import jp.co.myogadanimotors.myogadani.store.master.strategy.StrategyMaster
 import org.junit.Before
 import org.junit.Test
 

@@ -1,10 +1,12 @@
 package jp.co.myogadanimotors.myogadani.config;
 
+import java.io.FileNotFoundException;
+
 public interface IConfigAccessor {
     /**
      * initializes IConfigAccessor
      */
-    void parse(String environment, String configFileName) throws Exception;
+    void parse(String environment, String configFileName) throws FileNotFoundException;
 
     /**
      * returns config value in Integer

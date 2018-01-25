@@ -1,4 +1,4 @@
-package jp.co.myogadanimotors.myogadani.store.masterdata;
+package jp.co.myogadanimotors.myogadani.store.master;
 
 import groovy.json.JsonException;
 import groovy.json.JsonSlurper;
@@ -13,14 +13,14 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Map;
 
-public abstract class AbstractMasterDataStore<T extends IStoredObject> extends BaseStore<T> {
+public abstract class AbstractDataMaster<T extends IStoredObject> extends BaseStore<T> {
 
     private final Logger logger = LogManager.getLogger(getClass().getName());
 
     protected abstract T create();
 
     public void init(IConfigAccessor configAccessor) throws MasterDataInitializeException {
-        String jsonFileLocation = configAccessor.getString("masterdata." + getClass().getSimpleName().toLowerCase() + ".jsonFileLocation", null);
+        String jsonFileLocation = configAccessor.getString("master." + getClass().getSimpleName().toLowerCase() + ".jsonFileLocation", null);
         if (jsonFileLocation == null) {
             throw new MasterDataInitializeException("the json file is not available.");
         }

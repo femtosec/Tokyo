@@ -1,4 +1,4 @@
-package jp.co.myogadanimotors.myogadani.store.masterdata.strategy;
+package jp.co.myogadanimotors.myogadani.store.master.strategy;
 
 import jp.co.myogadanimotors.myogadani.store.IStoredObject;
 

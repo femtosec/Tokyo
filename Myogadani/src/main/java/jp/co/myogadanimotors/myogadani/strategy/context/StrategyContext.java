@@ -11,9 +11,9 @@ import jp.co.myogadanimotors.myogadani.eventprocessing.report.IAsyncReportListen
 import jp.co.myogadanimotors.myogadani.eventprocessing.report.ReportSender;
 import jp.co.myogadanimotors.myogadani.eventprocessing.timer.IAsyncTimerRegistrationListener;
 import jp.co.myogadanimotors.myogadani.ordermanagement.order.IOrder;
-import jp.co.myogadanimotors.myogadani.store.masterdata.market.IMarket;
-import jp.co.myogadanimotors.myogadani.store.masterdata.market.MarketState;
-import jp.co.myogadanimotors.myogadani.store.masterdata.product.IProduct;
+import jp.co.myogadanimotors.myogadani.store.master.market.IMarket;
+import jp.co.myogadanimotors.myogadani.store.master.market.MarketState;
+import jp.co.myogadanimotors.myogadani.store.master.product.IProduct;
 import jp.co.myogadanimotors.myogadani.strategy.StrategyState;
 import jp.co.myogadanimotors.myogadani.timesource.ITimeSource;
 
@@ -23,7 +23,7 @@ public final class StrategyContext implements IStrategyContext {
 
     private final RequestIdGenerator requestIdGenerator;
     private final ChildOrderContainer childOrderContainer;
-    private final ChildOrderSender childOrderSender;
+    private final IChildOrderSender childOrderSender;
     private final TimerRegistry timerRegistry;
     private final ReportSender reportSender;
     private final FillSender fillSender;

@@ -1,4 +1,4 @@
-package jp.co.myogadanimotors.myogadani.store.masterdata.product;
+package jp.co.myogadanimotors.myogadani.store.master.product;
 
 import jp.co.myogadanimotors.myogadani.store.IStoredObject;
 

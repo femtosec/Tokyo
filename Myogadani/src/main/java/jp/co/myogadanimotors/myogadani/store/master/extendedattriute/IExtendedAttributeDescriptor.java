@@ -1,4 +1,4 @@
-package jp.co.myogadanimotors.myogadani.store.masterdata.extendedattriute;
+package jp.co.myogadanimotors.myogadani.store.master.extendedattriute;
 
 import jp.co.myogadanimotors.myogadani.store.IStoredObject;
 

@@ -1,8 +1,8 @@
-package jp.co.myogadanimotors.myogadani.store.masterdata.strategy;
+package jp.co.myogadanimotors.myogadani.store.master.strategy;
 
-import jp.co.myogadanimotors.myogadani.store.masterdata.AbstractMasterDataStore;
+import jp.co.myogadanimotors.myogadani.store.master.AbstractDataMaster;
 
-public final class StrategyMaster extends AbstractMasterDataStore<IStrategyDescriptor> {
+public final class StrategyMaster extends AbstractDataMaster<IStrategyDescriptor> {
 
     @Override
     protected IStrategyDescriptor create() {

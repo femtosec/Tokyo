@@ -1,8 +1,8 @@
-package jp.co.myogadanimotors.myogadani.store.masterdata.product;
+package jp.co.myogadanimotors.myogadani.store.master.product;
 
-import jp.co.myogadanimotors.myogadani.store.masterdata.AbstractMasterDataStore;
+import jp.co.myogadanimotors.myogadani.store.master.AbstractDataMaster;
 
-public final class ProductMaster extends AbstractMasterDataStore<IProduct> {
+public final class ProductMaster extends AbstractDataMaster<IProduct> {
 
     @Override
     protected IProduct create() {

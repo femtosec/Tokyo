@@ -1,4 +1,4 @@
-package jp.co.myogadanimotors.myogadani.store.masterdata;
+package jp.co.myogadanimotors.myogadani.store.master;
 
 public class MasterDataInitializeException extends Exception {
 

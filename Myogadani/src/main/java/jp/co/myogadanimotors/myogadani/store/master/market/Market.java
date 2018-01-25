@@ -1,4 +1,4 @@
-package jp.co.myogadanimotors.myogadani.store.masterdata.market;
+package jp.co.myogadanimotors.myogadani.store.master.market;
 
 import jp.co.myogadanimotors.myogadani.common.Constants;
 

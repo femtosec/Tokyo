@@ -5,9 +5,9 @@ import jp.co.myogadanimotors.myogadani.config.ConfigAccessor
 import jp.co.myogadanimotors.myogadani.eventprocessing.order.*
 import jp.co.myogadanimotors.myogadani.ordermanagement.order.Order
 import jp.co.myogadanimotors.myogadani.ordermanagement.order.OrderState
-import jp.co.myogadanimotors.myogadani.store.masterdata.extendedattriute.ExtendedAttributeMaster
-import jp.co.myogadanimotors.myogadani.store.masterdata.market.MarketMaster
-import jp.co.myogadanimotors.myogadani.store.masterdata.product.ProductMaster
+import jp.co.myogadanimotors.myogadani.store.master.extendedattriute.ExtendedAttributeMaster
+import jp.co.myogadanimotors.myogadani.store.master.market.MarketMaster
+import jp.co.myogadanimotors.myogadani.store.master.product.ProductMaster
 import jp.co.myogadanimotors.myogadani.strategy.IStrategy
 import org.testng.annotations.BeforeClass
 import org.testng.annotations.DataProvider

@@ -1,8 +1,8 @@
 package jp.co.myogadanimotors.myogadani.strategy.context;
 
-import jp.co.myogadanimotors.myogadani.store.masterdata.market.IMarket;
-import jp.co.myogadanimotors.myogadani.store.masterdata.market.MarketState;
-import jp.co.myogadanimotors.myogadani.store.masterdata.market.MarketType;
+import jp.co.myogadanimotors.myogadani.store.master.market.IMarket;
+import jp.co.myogadanimotors.myogadani.store.master.market.MarketState;
+import jp.co.myogadanimotors.myogadani.store.master.market.MarketType;
 
 public final class MarketView implements IMarket {
 

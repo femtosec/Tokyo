@@ -2,8 +2,8 @@ package jp.co.myogadanimotors.myogadani.strategy;
 
 import jp.co.myogadanimotors.myogadani.common.Constants;
 import jp.co.myogadanimotors.myogadani.ordermanagement.order.OrderState;
-import jp.co.myogadanimotors.myogadani.store.masterdata.strategy.IStrategyDescriptor;
-import jp.co.myogadanimotors.myogadani.store.masterdata.strategy.StrategyDescriptor;
+import jp.co.myogadanimotors.myogadani.store.master.strategy.IStrategyDescriptor;
+import jp.co.myogadanimotors.myogadani.store.master.strategy.StrategyDescriptor;
 import jp.co.myogadanimotors.myogadani.strategy.context.*;
 import jp.co.myogadanimotors.myogadani.strategy.strategyevent.childorder.*;
 import jp.co.myogadanimotors.myogadani.strategy.strategyevent.childorderfill.StrategyChildOrderFill;

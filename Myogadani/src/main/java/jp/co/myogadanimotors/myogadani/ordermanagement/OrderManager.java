@@ -4,6 +4,7 @@ import jp.co.myogadanimotors.myogadani.common.Constants;
 import jp.co.myogadanimotors.myogadani.emsadapter.IEmsAdapter;
 import jp.co.myogadanimotors.myogadani.eventprocessing.EventIdGenerator;
 import jp.co.myogadanimotors.myogadani.eventprocessing.IEvent;
+import jp.co.myogadanimotors.myogadani.eventprocessing.RequestIdGenerator;
 import jp.co.myogadanimotors.myogadani.eventprocessing.order.*;
 import jp.co.myogadanimotors.myogadani.eventprocessing.report.*;
 import jp.co.myogadanimotors.myogadani.eventprocessing.timer.IAsyncTimerEventListener;
@@ -14,9 +15,17 @@ import jp.co.myogadanimotors.myogadani.idgenerator.IdGenerator;
 import jp.co.myogadanimotors.myogadani.ordermanagement.order.IOrder;
 import jp.co.myogadanimotors.myogadani.ordermanagement.order.Order;
 import jp.co.myogadanimotors.myogadani.ordermanagement.order.OrderState;
+import jp.co.myogadanimotors.myogadani.store.master.extendedattriute.ExtendedAttributeMaster;
+import jp.co.myogadanimotors.myogadani.store.master.market.IMarket;
+import jp.co.myogadanimotors.myogadani.store.master.market.MarketMaster;
+import jp.co.myogadanimotors.myogadani.store.master.product.IProduct;
+import jp.co.myogadanimotors.myogadani.store.master.product.ProductMaster;
+import jp.co.myogadanimotors.myogadani.store.master.strategy.IStrategyDescriptor;
+import jp.co.myogadanimotors.myogadani.store.master.strategy.StrategyMaster;
 import jp.co.myogadanimotors.myogadani.strategy.IStrategy;
 import jp.co.myogadanimotors.myogadani.strategy.IStrategyFactory;
 import jp.co.myogadanimotors.myogadani.strategy.context.OrderView;
+import jp.co.myogadanimotors.myogadani.strategy.context.StrategyContext;
 import jp.co.myogadanimotors.myogadani.strategy.strategyevent.childorder.*;
 import jp.co.myogadanimotors.myogadani.strategy.strategyevent.childorderfill.StrategyChildOrderFill;
 import jp.co.myogadanimotors.myogadani.strategy.strategyevent.order.*;
@@ -40,32 +49,45 @@ public final class OrderManager implements IAsyncOrderListener, IAsyncReportList
     private final FillSender emsFillSender;
     private final OrderSender exchangeOrderSender;
     private final EventIdGenerator eventIdGenerator;
+    private final RequestIdGenerator requestIdGenerator;
     private final IIdGenerator orderIdGenerator = new IdGenerator(0L);
     private final ITimeSource timeSource;
     private final OrderValidator orderValidator;
+    private final IStrategyFactory strategyFactory;
+    private final MarketMaster marketMaster;
+    private final ProductMaster productMaster;
+    private final StrategyMaster strategyMaster;
     private final Executor eventExecutor;
     private final Executor[] strategyEventExecutors;
     private final Map<Long, Order> ordersByOrderId = new ConcurrentHashMap<>();
     private final Map<Long, Order> amendOrdersByRequestId = new ConcurrentHashMap<>();
     private final Map<Long, Order> terminatedOrdersByOrderId = new ConcurrentHashMap<>();
 
-    private IStrategyFactory strategyFactory;
-
     private int lastThreadId = 0;
 
     public OrderManager(IEmsAdapter emsAdapter,
                         IExchangeAdapter exchangeAdapter,
                         EventIdGenerator eventIdGenerator,
+                        RequestIdGenerator requestIdGenerator,
                         ITimeSource timeSource,
-                        OrderValidator orderValidator,
+                        IStrategyFactory strategyFactory,
+                        MarketMaster marketMaster,
+                        ProductMaster productMaster,
+                        ExtendedAttributeMaster extendedAttributeMaster,
+                        StrategyMaster strategyMaster,
                         Executor eventExecutor,
                         Executor... strategyEventExecutors) {
         this.emsReportSender = new ReportSender(notNull(eventIdGenerator), notNull(timeSource));
         this.emsFillSender = new FillSender(eventIdGenerator, timeSource);
         this.exchangeOrderSender = new OrderSender(eventIdGenerator, timeSource);
         this.eventIdGenerator = notNull(eventIdGenerator);
+        this.requestIdGenerator = notNull(requestIdGenerator);
         this.timeSource = notNull(timeSource);
-        this.orderValidator = notNull(orderValidator);
+        this.orderValidator =  new OrderValidator(marketMaster, productMaster, extendedAttributeMaster);
+        this.strategyFactory = notNull(strategyFactory);
+        this.marketMaster = notNull(marketMaster);
+        this.productMaster = notNull(productMaster);
+        this.strategyMaster = notNull(strategyMaster);
         this.eventExecutor = notNull(eventExecutor);
         this.strategyEventExecutors = notNull(strategyEventExecutors);
 
@@ -76,10 +98,6 @@ public final class OrderManager implements IAsyncOrderListener, IAsyncReportList
         emsAdapter.addEventListener(this);
         exchangeAdapter.addReportListener(this);
         exchangeAdapter.addFillListener(this);
-    }
-
-    public void setStrategyFactory(IStrategyFactory strategyFactory) {
-        this.strategyFactory = strategyFactory;
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -923,11 +941,31 @@ public final class OrderManager implements IAsyncOrderListener, IAsyncReportList
     }
 
     private IStrategy createStrategy(String strategyName, IOrder order) {
-        if (strategyFactory == null) {
+        IStrategyDescriptor strategyDescriptor = strategyMaster.getByName(strategyName);
+        if (strategyDescriptor == null) {
+            logger.warn("strategyName invalid. (strategyName: {})", strategyName);
             return null;
         }
 
-        return strategyFactory.create(strategyName, order);
+        return strategyFactory.create(strategyDescriptor, createStrategyContext(order));
+    }
+
+    private StrategyContext createStrategyContext(IOrder order) {
+        IMarket market = marketMaster.getByMic(order.getMic());
+        IProduct product = productMaster.getBySymbol(order.getSymbol());
+        return new StrategyContext(
+                eventIdGenerator,
+                requestIdGenerator,
+                timeSource,
+                order,
+                market,
+                product,
+                this,
+                this,
+                this,
+                null,   // todo: to be implemented
+                null    // todo: to be implemented
+        );
     }
 
     /**

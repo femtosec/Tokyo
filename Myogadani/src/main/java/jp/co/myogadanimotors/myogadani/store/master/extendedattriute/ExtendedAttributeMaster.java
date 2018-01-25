@@ -1,8 +1,8 @@
-package jp.co.myogadanimotors.myogadani.store.masterdata.extendedattriute;
+package jp.co.myogadanimotors.myogadani.store.master.extendedattriute;
 
-import jp.co.myogadanimotors.myogadani.store.masterdata.AbstractMasterDataStore;
+import jp.co.myogadanimotors.myogadani.store.master.AbstractDataMaster;
 
-public final class ExtendedAttributeMaster extends AbstractMasterDataStore<IExtendedAttributeDescriptor> {
+public final class ExtendedAttributeMaster extends AbstractDataMaster<IExtendedAttributeDescriptor> {
 
     @Override
     protected IExtendedAttributeDescriptor create() {

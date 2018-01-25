@@ -1,6 +1,6 @@
 package jp.co.myogadanimotors.myogadani.strategy;
 
-import jp.co.myogadanimotors.myogadani.store.masterdata.strategy.IStrategyDescriptor;
+import jp.co.myogadanimotors.myogadani.store.master.strategy.IStrategyDescriptor;
 import jp.co.myogadanimotors.myogadani.strategy.strategyevent.childorder.*;
 import jp.co.myogadanimotors.myogadani.strategy.strategyevent.childorderfill.StrategyChildOrderFill;
 import jp.co.myogadanimotors.myogadani.strategy.strategyevent.marketdata.StrategyMarketDataEvent;
