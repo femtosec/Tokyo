@@ -170,7 +170,7 @@ public final class OrderManager implements IAsyncOrderListener, IAsyncReportList
         Order newOrder = createNewOrder(newOrderEvent);
 
         // validation
-        if (orderValidator.isInvalidNewOrder(newOrderEvent, newOrder)) {
+        if (!orderValidator.isValidNewOrder(newOrderEvent, newOrder)) {
             if (newOrder.getOrderer() == Orderer.Strategy) {
                 Order parentStrategyOrder = newOrder.getParentStrategyOrder();
                 if (parentStrategyOrder == null) {
@@ -233,7 +233,7 @@ public final class OrderManager implements IAsyncOrderListener, IAsyncReportList
         }
 
         // validation
-        if (orderValidator.isInvalidAmendOrder(amendOrderEvent, currentOrder)) {
+        if (!orderValidator.isValidAmendOrder(amendOrderEvent, currentOrder)) {
             if (currentOrder.getOrderer() == Orderer.Strategy) {
                 Order parentStrategyOrder = currentOrder.getParentStrategyOrder();
                 if (parentStrategyOrder == null) {
@@ -302,7 +302,7 @@ public final class OrderManager implements IAsyncOrderListener, IAsyncReportList
         }
 
         // validation
-        if (orderValidator.isInvalidCancelOrder(cancelOrderEvent, currentOrder)) {
+        if (!orderValidator.isValidCancelOrder(cancelOrderEvent, currentOrder)) {
             if (currentOrder.getOrderer() == Orderer.Strategy) {
                 Order parentStrategyOrder = currentOrder.getParentStrategyOrder();
                 if (parentStrategyOrder == null) {

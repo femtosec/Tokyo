@@ -14,7 +14,7 @@ class BaseStrategyParametersTest {
     @BeforeClass
     void setup() {
         def config = new ConfigAccessor()
-        config.parse("development", Constants.CONFIG_FILE_NAME)
+        config.parse("development", getClass().getClassLoader().getResource(Constants.CONFIG_FILE_NAME))
 
         def strategyConfig = new ConfigAccessor()
         strategyConfig.parse("development", new File(config.getString("myogadani.strategyConfig.jsonFileLocation")))

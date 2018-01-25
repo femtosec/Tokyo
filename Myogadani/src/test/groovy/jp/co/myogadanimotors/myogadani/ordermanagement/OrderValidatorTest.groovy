@@ -28,7 +28,7 @@ class OrderValidatorTest {
         def marketMaster = new MarketMaster()
         def productMaster = new ProductMaster()
         def extendedAttributeMaster = new ExtendedAttributeMaster()
-        configAccessor.parse("development", Constants.CONFIG_FILE_NAME)
+        configAccessor.parse("development", getClass().getClassLoader().getResource(Constants.CONFIG_FILE_NAME))
         marketMaster.init(configAccessor)
         productMaster.init(configAccessor)
         extendedAttributeMaster.init(configAccessor)
@@ -102,7 +102,7 @@ class OrderValidatorTest {
         )
         newOrder.setStrategy(strategy)
 
-        assert orderValidator.isInvalidNewOrder(newOrderEvent, newOrder) == expectedResult
+        assert orderValidator.isValidNewOrder(newOrderEvent, newOrder) == expectedResult
     }
 
 
@@ -159,7 +159,7 @@ class OrderValidatorTest {
                 0
         )
         currentOrder.setOrderState(orderState)
-        assert orderValidator.isInvalidAmendOrder(amendOrderEvent, currentOrder) == expectedResult
+        assert orderValidator.isValidAmendOrder(amendOrderEvent, currentOrder) == expectedResult
     }
 
     @DataProvider(name = "isValidCancelOrder")
@@ -209,6 +209,6 @@ class OrderValidatorTest {
                 0
         )
         currentOrder.setOrderState(orderState)
-        assert orderValidator.isInvalidCancelOrder(cancelOrderEvent, currentOrder) == expectedResult
+        assert orderValidator.isValidCancelOrder(cancelOrderEvent, currentOrder) == expectedResult
     }
 }
