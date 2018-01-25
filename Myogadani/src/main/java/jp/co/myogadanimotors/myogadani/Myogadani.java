@@ -2,7 +2,6 @@ package jp.co.myogadanimotors.myogadani;
 
 import jp.co.myogadanimotors.myogadani.common.Constants;
 import jp.co.myogadanimotors.myogadani.config.ConfigAccessor;
-import jp.co.myogadanimotors.myogadani.config.IConfigAccessor;
 import jp.co.myogadanimotors.myogadani.emsadapter.IEmsAdapter;
 import jp.co.myogadanimotors.myogadani.eventprocessing.EventIdGenerator;
 import jp.co.myogadanimotors.myogadani.eventprocessing.RequestIdGenerator;
@@ -19,6 +18,7 @@ import jp.co.myogadanimotors.myogadani.timesource.SystemTimeSource;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -43,9 +43,18 @@ public class Myogadani implements Runnable {
         logger.info("starting Myogadani. (environment: {})", environment);
 
         // initialize config accessor
-        IConfigAccessor configAccessor = new ConfigAccessor();
+        ConfigAccessor configAccessor = new ConfigAccessor();
         try {
-            configAccessor.parse(environment, Constants.CONFIG_FILE_NAME);
+            configAccessor.parse(environment, getClass().getClassLoader().getResource(Constants.CONFIG_FILE_NAME));
+        } catch (FileNotFoundException e) {
+            logger.error(e.getMessage(), e);
+            return;
+        }
+
+        String strategyConfigLocation = configAccessor.getString("myogadani.strategyConfig.jsonFileLocation");
+        ConfigAccessor strategyConfigAccessor = new ConfigAccessor();
+        try {
+            strategyConfigAccessor.parse(environment, new File(strategyConfigLocation));
         } catch (FileNotFoundException e) {
             logger.error(e.getMessage(), e);
             return;
@@ -101,6 +110,7 @@ public class Myogadani implements Runnable {
                     productMaster,
                     extendedAttributeMaster,
                     strategyMaster,
+                    strategyConfigAccessor,
                     eventExecutor,
                     strategyExecutors
             );

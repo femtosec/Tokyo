@@ -51,12 +51,10 @@ public final class MarketView implements IMarket {
 
     @Override
     public String toString() {
-        return new StringBuilder()
-                .append("marketId: ").append(id)
-                .append(", marketType: ").append(marketType)
-                .append(", name: ").append(name)
-                .append(", mic: ").append(mic)
-                .append(", marketState: ").append(marketState)
-                .toString();
+        return "marketId: " + id +
+                ", marketType: " + marketType +
+                ", name: " + name +
+                ", mic: " + mic +
+                ", marketState: " + marketState;
     }
 }

@@ -11,7 +11,7 @@ public class StrategyPendingAmendProcessor implements IStrategyPendingAmendProce
     private final long requestId;
     private final IChildOrderContainer childOrderContainer;
     private final IChildOrderSender childOrderSender;
-    private final long maxNumberOfProcessing;
+    private final int maxNumberOfProcessing;
     private String message;
     private PendingAmendCancelResult result = PendingAmendCancelResult.Working;
     private int numberOfProcessing = 0;
@@ -19,7 +19,7 @@ public class StrategyPendingAmendProcessor implements IStrategyPendingAmendProce
     public StrategyPendingAmendProcessor(long requestId,
                                          IChildOrderContainer childOrderContainer,
                                          IChildOrderSender childOrderSender,
-                                         long maxNumberOfProcessing) {
+                                         int maxNumberOfProcessing) {
         this.requestId = requestId;
         this.childOrderContainer = childOrderContainer;
         this.childOrderSender = childOrderSender;

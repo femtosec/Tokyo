@@ -61,12 +61,10 @@ public final class Product implements IProduct {
 
     @Override
     public String toString() {
-        return new StringBuilder()
-                .append("productId: ").append(id)
-                .append(", productType: ").append(productType)
-                .append(", symbol: ").append(symbol)
-                .append(", marketId: ").append(marketId)
-                .append(" description: ").append(description)
-                .toString();
+        return "productId: " + id +
+                ", productType: " + productType +
+                ", symbol: " + symbol +
+                ", marketId: " + marketId +
+                ", description: " + description;
     }
 }

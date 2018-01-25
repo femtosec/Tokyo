@@ -1,6 +1,7 @@
 package jp.co.myogadanimotors.myogadani.ordermanagement;
 
 import jp.co.myogadanimotors.myogadani.common.Constants;
+import jp.co.myogadanimotors.myogadani.config.IConfigAccessor;
 import jp.co.myogadanimotors.myogadani.emsadapter.IEmsAdapter;
 import jp.co.myogadanimotors.myogadani.eventprocessing.EventIdGenerator;
 import jp.co.myogadanimotors.myogadani.eventprocessing.IEvent;
@@ -57,6 +58,7 @@ public final class OrderManager implements IAsyncOrderListener, IAsyncReportList
     private final MarketMaster marketMaster;
     private final ProductMaster productMaster;
     private final StrategyMaster strategyMaster;
+    private final IConfigAccessor strategyConfigAccessor;
     private final Executor eventExecutor;
     private final Executor[] strategyEventExecutors;
     private final Map<Long, Order> ordersByOrderId = new ConcurrentHashMap<>();
@@ -75,6 +77,7 @@ public final class OrderManager implements IAsyncOrderListener, IAsyncReportList
                         ProductMaster productMaster,
                         ExtendedAttributeMaster extendedAttributeMaster,
                         StrategyMaster strategyMaster,
+                        IConfigAccessor strategyConfigAccessor,
                         Executor eventExecutor,
                         Executor... strategyEventExecutors) {
         this.emsReportSender = new ReportSender(notNull(eventIdGenerator), notNull(timeSource));
@@ -88,6 +91,7 @@ public final class OrderManager implements IAsyncOrderListener, IAsyncReportList
         this.marketMaster = notNull(marketMaster);
         this.productMaster = notNull(productMaster);
         this.strategyMaster = notNull(strategyMaster);
+        this.strategyConfigAccessor = notNull(strategyConfigAccessor);
         this.eventExecutor = notNull(eventExecutor);
         this.strategyEventExecutors = notNull(strategyEventExecutors);
 
@@ -947,7 +951,7 @@ public final class OrderManager implements IAsyncOrderListener, IAsyncReportList
             return null;
         }
 
-        return strategyFactory.create(strategyDescriptor, createStrategyContext(order));
+        return strategyFactory.create(strategyDescriptor, createStrategyContext(order), strategyConfigAccessor);
     }
 
     private StrategyContext createStrategyContext(IOrder order) {

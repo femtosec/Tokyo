@@ -2,11 +2,13 @@ environments {
     development {
         strategy {
             '*' {
-                test = true
+                defaultValueTest = 100
+
+                maxNumberOfPendingCancelProcessing = 7
             }
 
             Peg {
-
+                maxNumberOfPendingAmendProcessing = 5
             }
 
             Arbitrage {

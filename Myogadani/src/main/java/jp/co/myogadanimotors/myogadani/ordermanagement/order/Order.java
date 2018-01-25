@@ -231,8 +231,7 @@ public final class Order implements IOrder {
 
     @Override
     public String toString() {
-        // todo: add more
-        return new StringBuilder()
+        StringBuilder sb = new StringBuilder()
                 .append("orderId: ").append(orderId)
                 .append(", accountId: ").append(accountId)
                 .append(", symbol: ").append(symbol)
@@ -247,6 +246,20 @@ public final class Order implements IOrder {
                 .append(", exposedQuantity: ").append(exposedQuantity)
                 .append(", remainingQuantity: ").append(getRemainingQuantity())
                 .append(", priceLimit: ").append(priceLimit)
-                .toString();
+                .append(", orderer: ").append(orderer)
+                .append(", destination: ").append(destination)
+                .append(", parentOrderId: ");
+
+        if (parentStrategyOrder != null) {
+            sb.append(parentStrategyOrder.getOrderId());
+        } else {
+            sb.append("NA");
+        }
+
+        for (Map.Entry<String, String> entry : extendedAttributes.entrySet()) {
+            sb.append(", [").append(entry.getKey()).append(":").append(entry.getValue()).append("]");
+        }
+
+        return sb.toString();
     }
 }

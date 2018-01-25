@@ -5,25 +5,38 @@ import groovy.util.ConfigSlurper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.io.File;
 import java.io.FileNotFoundException;
+import java.net.MalformedURLException;
+import java.net.URL;
 
 public class ConfigAccessor implements IConfigAccessor {
 
     private final Logger logger = LogManager.getLogger(getClass().getName());
     private ConfigObject configObject;
 
-    public ConfigAccessor() {
-
+    public void parse(String environment, File configFile) throws FileNotFoundException {
+        URL configUrl;
+        try {
+            configUrl = configFile.toURI().toURL();
+        } catch (MalformedURLException e) {
+            throw new FileNotFoundException("cannot parse config file.");
+        }
+        parse(environment, configUrl);
     }
 
-    @Override
-    public void parse(String environment, String configFileName) throws FileNotFoundException {
+    public void parse(String environment, URL configUrl) throws FileNotFoundException {
         try {
-            logger.info("parsing a config file. (configFileName: {})", configFileName);
-            configObject = new ConfigSlurper(environment).parse(getClass().getClassLoader().getResource(configFileName));
+            logger.info("parsing a config file. (URL: {})", configUrl);
+            configObject = new ConfigSlurper(environment).parse(configUrl);
         } catch (NullPointerException e) {
             throw new FileNotFoundException("cannot parse config file.");
         }
+    }
+
+    @Override
+    public int getInt(String key) {
+        return getInt(key, Integer.MIN_VALUE);
     }
 
     @Override
@@ -36,6 +49,28 @@ public class ConfigAccessor implements IConfigAccessor {
             e.printStackTrace();
             return defaultValue;
         }
+    }
+
+    @Override
+    public long getLong(String key) {
+        return getLong(key, Long.MIN_VALUE);
+    }
+
+    @Override
+    public long getLong(String key, long defaultValue) {
+        String rawValue = getRawValue(key);
+        if (rawValue == null) return defaultValue;
+        try {
+            return Long.parseLong(rawValue);
+        } catch (NumberFormatException e) {
+            e.printStackTrace();
+            return defaultValue;
+        }
+    }
+
+    @Override
+    public double getDouble(String key) {
+        return getDouble(key, Double.NaN);
     }
 
     @Override
@@ -55,6 +90,11 @@ public class ConfigAccessor implements IConfigAccessor {
         String rawValue = getRawValue(key);
         if (rawValue == null) return defaultValue;
         return Boolean.parseBoolean(getRawValue(key));
+    }
+
+    @Override
+    public String getString(String key) {
+        return getString(key, null);
     }
 
     @Override

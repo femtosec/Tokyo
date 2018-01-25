@@ -5,7 +5,7 @@ environments {
             numberOfStrategyThreads = 2
         }
 
-        masterdata {
+        master {
             marketmaster.jsonFileLocation = "/C:/Users/alpha/IdeaProjects/Narashino/out/production/Myogadani/market_master.json"
             productmaster.jsonFileLocation = "/C:/Users/alpha/IdeaProjects/Narashino/out/production/Myogadani/product_master.json"
             strategymaster.jsonFileLocation = "/C:/Users/alpha/IdeaProjects/Narashino/out/production/Itabashi/strategy_master.json"

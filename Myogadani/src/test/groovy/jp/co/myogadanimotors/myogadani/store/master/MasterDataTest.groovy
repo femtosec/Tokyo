@@ -12,16 +12,16 @@ import jp.co.myogadanimotors.myogadani.store.master.product.ProductMaster
 import jp.co.myogadanimotors.myogadani.store.master.product.ProductType
 import jp.co.myogadanimotors.myogadani.store.master.strategy.IStrategyDescriptor
 import jp.co.myogadanimotors.myogadani.store.master.strategy.StrategyMaster
-import org.junit.Before
-import org.junit.Test
+import org.testng.annotations.BeforeClass
+import org.testng.annotations.Test
 
 class MasterDataTest {
 
     def config = new ConfigAccessor()
 
-    @Before
+    @BeforeClass
     void setup() {
-        config.parse("development", Constants.CONFIG_FILE_NAME)
+        config.parse("development", getClass().getClassLoader().getResource(Constants.CONFIG_FILE_NAME))
     }
 
     @Test

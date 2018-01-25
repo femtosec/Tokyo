@@ -3,13 +3,13 @@ package jp.co.myogadanimotors.myogadani.strategy;
 import jp.co.myogadanimotors.myogadani.common.Constants;
 import jp.co.myogadanimotors.myogadani.ordermanagement.order.OrderState;
 import jp.co.myogadanimotors.myogadani.store.master.strategy.IStrategyDescriptor;
-import jp.co.myogadanimotors.myogadani.store.master.strategy.StrategyDescriptor;
 import jp.co.myogadanimotors.myogadani.strategy.context.*;
 import jp.co.myogadanimotors.myogadani.strategy.strategyevent.childorder.*;
 import jp.co.myogadanimotors.myogadani.strategy.strategyevent.childorderfill.StrategyChildOrderFill;
 import jp.co.myogadanimotors.myogadani.strategy.strategyevent.marketdata.StrategyMarketDataEvent;
 import jp.co.myogadanimotors.myogadani.strategy.strategyevent.order.*;
 import jp.co.myogadanimotors.myogadani.strategy.strategyevent.timer.StrategyTimerEvent;
+import jp.co.myogadanimotors.myogadani.strategy.strategyparameter.IStrategyParameters;
 import jp.co.myogadanimotors.myogadani.strategy.validator.IValidator;
 import jp.co.myogadanimotors.myogadani.strategy.validator.RejectMessage;
 import jp.co.myogadanimotors.myogadani.strategy.validator.StrategyStateValidator;
@@ -28,11 +28,13 @@ public abstract class AbstractStrategy implements IStrategy {
 
     private final IStrategyDescriptor strategyDescriptor;
     private final StrategyContext context;
+    private final IStrategyParameters strategyParameters;
     private final List<IValidator> validators = new ArrayList<>();
 
-    public AbstractStrategy(IStrategyDescriptor strategyDescriptor, StrategyContext context) {
-        this.strategyDescriptor = new StrategyDescriptor(notNull(strategyDescriptor));
+    public AbstractStrategy(IStrategyDescriptor strategyDescriptor, StrategyContext context, IStrategyParameters strategyParameters) {
+        this.strategyDescriptor = notNull(strategyDescriptor);
         this.context = notNull(context);
+        this.strategyParameters = notNull(strategyParameters);
     }
 
     @Override
@@ -40,11 +42,18 @@ public abstract class AbstractStrategy implements IStrategy {
         return strategyDescriptor;
     }
 
+    protected final IStrategyContext getStrategyContext() {
+        return context;
+    }
+
     protected final void addValidator(IValidator validator) {
         validators.add(validator);
     }
 
     protected void init() {
+        // init strategy parameters
+        strategyParameters.init();
+
         // add validators
         addValidator(new StrategyStateValidator());
     }
@@ -62,7 +71,7 @@ public abstract class AbstractStrategy implements IStrategy {
                 requestId,
                 context.getChildOrderContainer(),
                 context.getChildOrderSender(),
-                5   // todo: need to get the number from config
+                strategyParameters.getMaxNumberOfPendingAmendProcessing()
         );
     }
 
@@ -71,7 +80,7 @@ public abstract class AbstractStrategy implements IStrategy {
                 requestId,
                 context.getChildOrderContainer(),
                 context.getChildOrderSender(),
-                5   // todo: need to get the number from config
+                strategyParameters.getMaxNumberOfPendingCancelProcessing()
         );
     }
 
@@ -116,17 +125,21 @@ public abstract class AbstractStrategy implements IStrategy {
         // update context
         context.updateOrderView(strategyAmend.getOrderView());
 
+        // todo: call init() here if type amend
+
         // create pending amend context
         IStrategyPendingAmendContext pac = createPendingAmendContext();
-
 
         // validate report amend report request
         List<RejectMessage> rejectMessages = new ArrayList<>();
         if (isValid(validators, (validator) -> validator.isValidStrategyRequestAmend(strategyAmend, context, pac, rejectMessages))) {
             context.setStrategyState(StrategyState.PendingAmend);
             context.setStrategyPendingAmendProcessor(createPendingAmendProcessor(strategyAmend.getRequestId()));
-            // todo: need to get repetitive timer interval from config
-            context.getTimerRegistry().registerRepetitiveTimer(Constants.PENDING_AMEND_CANCEL_REPETITIVE_TIMER_TAG, 100000, context.getCurrentTime());
+            context.getTimerRegistry().registerRepetitiveTimer(
+                    Constants.PENDING_AMEND_CANCEL_REPETITIVE_TIMER_TAG,
+                    strategyParameters.getPendingAmendProcessingTimerInterval(),
+                    context.getCurrentTime()
+            );
         } else {
             context.getReportSender().sendAmendReject(context.getOrder().getOrderId(), strategyAmend.getRequestId(), combineRejectMessages(rejectMessages));
         }
@@ -142,8 +155,11 @@ public abstract class AbstractStrategy implements IStrategy {
         if (isValid(validators, (validator) -> validator.isValidStrategyRequestCancel(strategyCancel, context, rejectMessages))) {
             context.setStrategyState(StrategyState.PendingCancel);
             context.setStrategyPendingCancelProcessor(createPendingCancelProcessor(strategyCancel.getRequestId()));
-            // todo: need to get repetitive timer interval from config
-            context.getTimerRegistry().registerRepetitiveTimer(Constants.PENDING_AMEND_CANCEL_REPETITIVE_TIMER_TAG, 100000, context.getCurrentTime());
+            context.getTimerRegistry().registerRepetitiveTimer(
+                    Constants.PENDING_AMEND_CANCEL_REPETITIVE_TIMER_TAG,
+                    strategyParameters.getPendingCancelProcessingTimerInterval(),
+                    context.getCurrentTime()
+            );
         } else {
             context.getReportSender().sendCancelReject(context.getOrder().getOrderId(), strategyCancel.getRequestId(), combineRejectMessages(rejectMessages));
         }
