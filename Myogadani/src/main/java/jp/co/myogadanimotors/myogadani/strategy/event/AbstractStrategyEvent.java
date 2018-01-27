@@ -3,7 +3,7 @@ package jp.co.myogadanimotors.myogadani.strategy.event;
 import jp.co.myogadanimotors.myogadani.eventprocessing.IEvent;
 import jp.co.myogadanimotors.myogadani.strategy.IStrategy;
 
-import static jp.co.myogadanimotors.myogadani.common.Utility.notNull;
+import static java.util.Objects.requireNonNull;
 
 public abstract class AbstractStrategyEvent implements IEvent {
 
@@ -14,7 +14,7 @@ public abstract class AbstractStrategyEvent implements IEvent {
     public AbstractStrategyEvent(long eventId, long creationTime, IStrategy strategy) {
         this.eventId = eventId;
         this.creationTime = creationTime;
-        this.strategy = notNull(strategy);
+        this.strategy = requireNonNull(strategy);
     }
 
     protected abstract void callEventListener(IStrategy strategy);

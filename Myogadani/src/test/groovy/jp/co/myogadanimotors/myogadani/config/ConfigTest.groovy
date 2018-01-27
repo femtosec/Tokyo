@@ -1,7 +1,6 @@
 package jp.co.myogadanimotors.myogadani.config
 
 import jp.co.myogadanimotors.myogadani.common.Constants
-import jp.co.myogadanimotors.myogadani.config.ConfigAccessor
 import org.testng.annotations.BeforeClass
 import org.testng.annotations.Test
 

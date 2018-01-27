@@ -20,7 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
 
-import static jp.co.myogadanimotors.myogadani.common.Utility.notNull;
+import static java.util.Objects.requireNonNull;
 
 public abstract class AbstractStrategy implements IStrategy {
 
@@ -32,9 +32,9 @@ public abstract class AbstractStrategy implements IStrategy {
     private final List<IValidator> validators = new ArrayList<>();
 
     public AbstractStrategy(IStrategyDescriptor strategyDescriptor, StrategyContext context, IStrategyParameters strategyParameters) {
-        this.strategyDescriptor = notNull(strategyDescriptor);
-        this.context = notNull(context);
-        this.strategyParameters = notNull(strategyParameters);
+        this.strategyDescriptor = requireNonNull(strategyDescriptor);
+        this.context = requireNonNull(context);
+        this.strategyParameters = requireNonNull(strategyParameters);
     }
 
     @Override

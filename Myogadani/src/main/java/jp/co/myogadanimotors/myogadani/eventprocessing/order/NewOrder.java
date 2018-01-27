@@ -6,7 +6,7 @@ import java.math.BigDecimal;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static jp.co.myogadanimotors.myogadani.common.Utility.notNull;
+import static java.util.Objects.requireNonNull;
 
 public final class NewOrder extends BaseEvent<IAsyncOrderListener> {
 
@@ -40,13 +40,13 @@ public final class NewOrder extends BaseEvent<IAsyncOrderListener> {
         this.requestId = requestId;
         this.parentOrderId = parentOrderId;
         this.accountId = accountId;
-        this.symbol = notNull(symbol);
-        this.mic = notNull(mic);
-        this.orderSide = notNull(orderSide);
+        this.symbol = requireNonNull(symbol);
+        this.mic = requireNonNull(mic);
+        this.orderSide = requireNonNull(orderSide);
         this.orderQuantity = orderQuantity;
         this.priceLimit = priceLimit;
-        this.orderer = notNull(orderer);
-        this.destination = notNull(destination);
+        this.orderer = requireNonNull(orderer);
+        this.destination = requireNonNull(destination);
         if (extendedAttributes != null) {
             this.extendedAttributes.putAll(extendedAttributes);
         }

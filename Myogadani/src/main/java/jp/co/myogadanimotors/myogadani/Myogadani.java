@@ -6,6 +6,7 @@ import jp.co.myogadanimotors.myogadani.emsadapter.IEmsAdapter;
 import jp.co.myogadanimotors.myogadani.eventprocessing.EventIdGenerator;
 import jp.co.myogadanimotors.myogadani.eventprocessing.RequestIdGenerator;
 import jp.co.myogadanimotors.myogadani.exchangeadapter.IExchangeAdapter;
+import jp.co.myogadanimotors.myogadani.marketdataprovider.IMarketDataProvider;
 import jp.co.myogadanimotors.myogadani.ordermanagement.OrderManager;
 import jp.co.myogadanimotors.myogadani.store.master.MasterDataInitializeException;
 import jp.co.myogadanimotors.myogadani.store.master.extendedattriute.ExtendedAttributeMaster;
@@ -14,7 +15,9 @@ import jp.co.myogadanimotors.myogadani.store.master.product.ProductMaster;
 import jp.co.myogadanimotors.myogadani.store.master.strategy.StrategyMaster;
 import jp.co.myogadanimotors.myogadani.strategy.IStrategyFactory;
 import jp.co.myogadanimotors.myogadani.timesource.ITimeSource;
+import jp.co.myogadanimotors.myogadani.timesource.ITimerEventSource;
 import jp.co.myogadanimotors.myogadani.timesource.SystemTimeSource;
+import jp.co.myogadanimotors.myogadani.timesource.TimerEventSource;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -23,7 +26,7 @@ import java.io.FileNotFoundException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import static jp.co.myogadanimotors.myogadani.common.Utility.notNull;
+import static java.util.Objects.requireNonNull;
 
 public class Myogadani implements Runnable {
 
@@ -32,7 +35,7 @@ public class Myogadani implements Runnable {
 
     public Myogadani(String environment, IStrategyFactory strategyFactory) {
         this.environment = (environment != null) ? environment : "development";
-        this.strategyFactory = notNull(strategyFactory);
+        this.strategyFactory = requireNonNull(strategyFactory);
     }
 
     @Override
@@ -76,32 +79,34 @@ public class Myogadani implements Runnable {
         }
 
         try {
-            // create executor services
+            // create event queues
             int numberOfStrategyThreads = configAccessor.getInt("myogadani.numberOfStrategyThreads", Constants.DEFAULT_NUMBER_OF_STRATEGY_THREADS);
 
             logger.info("creating executor service. (numberOfStrategyThreads: {})", numberOfStrategyThreads);
 
-            ExecutorService eventExecutor = Executors.newSingleThreadExecutor();
-            ExecutorService[] strategyExecutors = new ExecutorService[numberOfStrategyThreads];
+            ExecutorService eventQueue = Executors.newSingleThreadExecutor();
+            ExecutorService[] strategyEventQueues = new ExecutorService[numberOfStrategyThreads];
             for (int i = 0; i < numberOfStrategyThreads; i++) {
-                strategyExecutors[i] = Executors.newSingleThreadExecutor();
+                strategyEventQueues[i] = Executors.newSingleThreadExecutor();
             }
 
             // create ID generators
             EventIdGenerator eventIdGenerator = new EventIdGenerator(0);
             RequestIdGenerator requestIdGenerator = new RequestIdGenerator(0);
 
-            // create adapters
+            // create time source
+            ITimeSource timeSource = new SystemTimeSource();
+
+            // create event sources
             IEmsAdapter emsAdapter = null;  // todo: to be implemented
             IExchangeAdapter exchangeAdapter = null;    // todo: to be implemented
-            ITimeSource timeSource = new SystemTimeSource();
+            IMarketDataProvider marketDataProvider = null;  // todo: to be implemented
+            ITimerEventSource timerEventSource = new TimerEventSource(eventIdGenerator, timeSource, 0, eventQueue);
 
             // create order manager
             logger.info("creating order manager.");
 
             OrderManager orderManager = new OrderManager(
-                    emsAdapter,
-                    exchangeAdapter,
                     eventIdGenerator,
                     requestIdGenerator,
                     timeSource,
@@ -111,9 +116,16 @@ public class Myogadani implements Runnable {
                     extendedAttributeMaster,
                     strategyMaster,
                     strategyConfigAccessor,
-                    eventExecutor,
-                    strategyExecutors
+                    eventQueue,
+                    strategyEventQueues
             );
+
+            // add event listeners
+            orderManager.addEventListeners(emsAdapter, emsAdapter, exchangeAdapter);
+            emsAdapter.addEventListener(orderManager);
+            exchangeAdapter.addFillListener(orderManager);
+            timerEventSource.addEventListener(orderManager);
+
         } catch (NullPointerException e) {
             logger.error(e.getMessage(), e);
         }

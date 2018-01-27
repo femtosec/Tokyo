@@ -12,7 +12,7 @@ import org.apache.logging.log4j.Logger;
 
 import java.util.Map;
 
-import static jp.co.myogadanimotors.myogadani.common.Utility.notNull;
+import static java.util.Objects.requireNonNull;
 
 public final class OrderValidator {
 
@@ -23,9 +23,9 @@ public final class OrderValidator {
     private final ExtendedAttributeMaster extendedAttributeMaster;
 
     public OrderValidator(MarketMaster marketMaster, ProductMaster productMaster, ExtendedAttributeMaster extendedAttributeMaster) {
-        this.marketMaster = notNull(marketMaster);
-        this.productMaster = notNull(productMaster);
-        this.extendedAttributeMaster = notNull(extendedAttributeMaster);
+        this.marketMaster = requireNonNull(marketMaster);
+        this.productMaster = requireNonNull(productMaster);
+        this.extendedAttributeMaster = requireNonNull(extendedAttributeMaster);
     }
 
     public boolean isValidNewOrder(NewOrder newOrderEvent, Order newOrder) {

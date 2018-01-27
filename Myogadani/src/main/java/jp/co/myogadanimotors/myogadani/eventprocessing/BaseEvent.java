@@ -1,6 +1,6 @@
 package jp.co.myogadanimotors.myogadani.eventprocessing;
 
-import static jp.co.myogadanimotors.myogadani.common.Utility.notNull;
+import static java.util.Objects.requireNonNull;
 
 public abstract class BaseEvent<T extends IAsyncEventListener> implements IEvent {
 
@@ -11,7 +11,7 @@ public abstract class BaseEvent<T extends IAsyncEventListener> implements IEvent
     public BaseEvent(long eventId, long creationTime, T eventListener) {
         this.eventId = eventId;
         this.creationTime = creationTime;
-        this.eventListener = notNull(eventListener);
+        this.eventListener = requireNonNull(eventListener);
     }
 
     protected abstract void callEventListener(T eventListener);

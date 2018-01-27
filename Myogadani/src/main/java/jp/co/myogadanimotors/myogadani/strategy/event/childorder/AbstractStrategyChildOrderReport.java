@@ -4,7 +4,7 @@ import jp.co.myogadanimotors.myogadani.strategy.IStrategy;
 import jp.co.myogadanimotors.myogadani.strategy.context.OrderView;
 import jp.co.myogadanimotors.myogadani.strategy.event.AbstractStrategyEvent;
 
-import static jp.co.myogadanimotors.myogadani.common.Utility.notNull;
+import static java.util.Objects.requireNonNull;
 
 public abstract class AbstractStrategyChildOrderReport extends AbstractStrategyEvent {
 
@@ -21,9 +21,9 @@ public abstract class AbstractStrategyChildOrderReport extends AbstractStrategyE
                                             String childOrderTag,
                                             String message) {
         super(eventId, creationTime, strategy);
-        this.orderView = notNull(orderView);
-        this.childOrderView = notNull(childOrderView);
-        this.childOrderTag = notNull(childOrderTag);
+        this.orderView = requireNonNull(orderView);
+        this.childOrderView = requireNonNull(childOrderView);
+        this.childOrderTag = requireNonNull(childOrderTag);
         this.message = message;
     }
 

@@ -5,6 +5,10 @@ environments {
             numberOfStrategyThreads = 2
         }
 
+        timeSource {
+            timerEventResolution = 100
+        }
+
         master {
             marketmaster.jsonFileLocation = "/C:/Users/alpha/IdeaProjects/Narashino/out/production/Myogadani/market_master.json"
             productmaster.jsonFileLocation = "/C:/Users/alpha/IdeaProjects/Narashino/out/production/Myogadani/product_master.json"

@@ -3,7 +3,7 @@ package jp.co.myogadanimotors.myogadani.strategy.parameter;
 import jp.co.myogadanimotors.myogadani.common.Constants;
 import jp.co.myogadanimotors.myogadani.config.IConfigAccessor;
 
-import static jp.co.myogadanimotors.myogadani.common.Utility.notNull;
+import static java.util.Objects.requireNonNull;
 
 public class BaseStrategyParameters implements IStrategyParameters {
 
@@ -16,8 +16,8 @@ public class BaseStrategyParameters implements IStrategyParameters {
     private long pendingCancelProcessingTimerInterval = Long.MIN_VALUE;
 
     public BaseStrategyParameters(String strategyName, IConfigAccessor strategyConfigAccessor) {
-        this.strategyName = notNull(strategyName);
-        this.strategyConfigAccessor = notNull(strategyConfigAccessor);
+        this.strategyName = requireNonNull(strategyName);
+        this.strategyConfigAccessor = requireNonNull(strategyConfigAccessor);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////

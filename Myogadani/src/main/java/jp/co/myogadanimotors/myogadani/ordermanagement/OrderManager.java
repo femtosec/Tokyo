@@ -2,7 +2,6 @@ package jp.co.myogadanimotors.myogadani.ordermanagement;
 
 import jp.co.myogadanimotors.myogadani.common.Constants;
 import jp.co.myogadanimotors.myogadani.config.IConfigAccessor;
-import jp.co.myogadanimotors.myogadani.emsadapter.IEmsAdapter;
 import jp.co.myogadanimotors.myogadani.eventprocessing.EventIdGenerator;
 import jp.co.myogadanimotors.myogadani.eventprocessing.IEvent;
 import jp.co.myogadanimotors.myogadani.eventprocessing.RequestIdGenerator;
@@ -10,7 +9,6 @@ import jp.co.myogadanimotors.myogadani.eventprocessing.order.*;
 import jp.co.myogadanimotors.myogadani.eventprocessing.report.*;
 import jp.co.myogadanimotors.myogadani.eventprocessing.timer.IAsyncTimerEventListener;
 import jp.co.myogadanimotors.myogadani.eventprocessing.timer.TimerEvent;
-import jp.co.myogadanimotors.myogadani.exchangeadapter.IExchangeAdapter;
 import jp.co.myogadanimotors.myogadani.idgenerator.IIdGenerator;
 import jp.co.myogadanimotors.myogadani.idgenerator.IdGenerator;
 import jp.co.myogadanimotors.myogadani.ordermanagement.order.IOrder;
@@ -40,7 +38,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 
-import static jp.co.myogadanimotors.myogadani.common.Utility.notNull;
+import static java.util.Objects.requireNonNull;
 
 public final class OrderManager implements IAsyncOrderListener, IAsyncReportListener, IAsyncFillListener, IAsyncTimerEventListener {
 
@@ -59,17 +57,15 @@ public final class OrderManager implements IAsyncOrderListener, IAsyncReportList
     private final ProductMaster productMaster;
     private final StrategyMaster strategyMaster;
     private final IConfigAccessor strategyConfigAccessor;
-    private final Executor eventExecutor;
-    private final Executor[] strategyEventExecutors;
+    private final Executor eventQueue;
+    private final Executor[] strategyEventQueues;
     private final Map<Long, Order> ordersByOrderId = new ConcurrentHashMap<>();
     private final Map<Long, Order> amendOrdersByRequestId = new ConcurrentHashMap<>();
     private final Map<Long, Order> terminatedOrdersByOrderId = new ConcurrentHashMap<>();
 
     private int lastThreadId = 0;
 
-    public OrderManager(IEmsAdapter emsAdapter,
-                        IExchangeAdapter exchangeAdapter,
-                        EventIdGenerator eventIdGenerator,
+    public OrderManager(EventIdGenerator eventIdGenerator,
                         RequestIdGenerator requestIdGenerator,
                         ITimeSource timeSource,
                         IStrategyFactory strategyFactory,
@@ -78,30 +74,28 @@ public final class OrderManager implements IAsyncOrderListener, IAsyncReportList
                         ExtendedAttributeMaster extendedAttributeMaster,
                         StrategyMaster strategyMaster,
                         IConfigAccessor strategyConfigAccessor,
-                        Executor eventExecutor,
-                        Executor... strategyEventExecutors) {
-        this.emsReportSender = new ReportSender(notNull(eventIdGenerator), notNull(timeSource));
+                        Executor eventQueue,
+                        Executor... strategyEventQueues) {
+        this.emsReportSender = new ReportSender(requireNonNull(eventIdGenerator), requireNonNull(timeSource));
         this.emsFillSender = new FillSender(eventIdGenerator, timeSource);
         this.exchangeOrderSender = new OrderSender(eventIdGenerator, timeSource);
-        this.eventIdGenerator = notNull(eventIdGenerator);
-        this.requestIdGenerator = notNull(requestIdGenerator);
-        this.timeSource = notNull(timeSource);
+        this.eventIdGenerator = requireNonNull(eventIdGenerator);
+        this.requestIdGenerator = requireNonNull(requestIdGenerator);
+        this.timeSource = requireNonNull(timeSource);
         this.orderValidator =  new OrderValidator(marketMaster, productMaster, extendedAttributeMaster);
-        this.strategyFactory = notNull(strategyFactory);
-        this.marketMaster = notNull(marketMaster);
-        this.productMaster = notNull(productMaster);
-        this.strategyMaster = notNull(strategyMaster);
-        this.strategyConfigAccessor = notNull(strategyConfigAccessor);
-        this.eventExecutor = notNull(eventExecutor);
-        this.strategyEventExecutors = notNull(strategyEventExecutors);
+        this.strategyFactory = requireNonNull(strategyFactory);
+        this.marketMaster = requireNonNull(marketMaster);
+        this.productMaster = requireNonNull(productMaster);
+        this.strategyMaster = requireNonNull(strategyMaster);
+        this.strategyConfigAccessor = requireNonNull(strategyConfigAccessor);
+        this.eventQueue = requireNonNull(eventQueue);
+        this.strategyEventQueues = requireNonNull(strategyEventQueues);
+    }
 
-        emsReportSender.addAsyncEventListener(notNull(emsAdapter));
-        emsFillSender.addAsyncEventListener(notNull(emsAdapter));
-        exchangeOrderSender.addAsyncEventListener(notNull(exchangeAdapter));
-
-        emsAdapter.addEventListener(this);
-        exchangeAdapter.addReportListener(this);
-        exchangeAdapter.addFillListener(this);
+    public void addEventListeners(IAsyncReportListener emsReportListener, IAsyncFillListener emsFillListener, IAsyncOrderListener exchangeOrderListener) {
+        emsReportSender.addAsyncEventListener(emsReportListener);
+        emsFillSender.addAsyncEventListener(emsFillListener);
+        exchangeOrderSender.addAsyncEventListener(exchangeOrderListener);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -109,8 +103,8 @@ public final class OrderManager implements IAsyncOrderListener, IAsyncReportList
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     @Override
-    public Executor getExecutor() {
-        return eventExecutor;
+    public Executor getEventQueue() {
+        return eventQueue;
     }
 
     // todo: revisit here
@@ -123,7 +117,7 @@ public final class OrderManager implements IAsyncOrderListener, IAsyncReportList
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     private void sendStrategyEvent(int threadId, IEvent strategyEvent) {
-        Executor strategyEventExecutor = strategyEventExecutors[threadId];
+        Executor strategyEventExecutor = strategyEventQueues[threadId];
         strategyEventExecutor.execute(strategyEvent);
     }
 
@@ -933,7 +927,7 @@ public final class OrderManager implements IAsyncOrderListener, IAsyncReportList
         if (parentStrategyOrder != null) return parentStrategyOrder.getThreadId();
 
         lastThreadId++;
-        if (strategyEventExecutors.length == lastThreadId) {
+        if (strategyEventQueues.length == lastThreadId) {
             lastThreadId = 0;
         }
 
