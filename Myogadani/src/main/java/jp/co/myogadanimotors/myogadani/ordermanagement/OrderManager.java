@@ -15,16 +15,14 @@ import jp.co.myogadanimotors.myogadani.ordermanagement.order.IOrder;
 import jp.co.myogadanimotors.myogadani.ordermanagement.order.Order;
 import jp.co.myogadanimotors.myogadani.ordermanagement.order.OrderState;
 import jp.co.myogadanimotors.myogadani.store.master.extendedattriute.ExtendedAttributeMaster;
-import jp.co.myogadanimotors.myogadani.store.master.market.IMarket;
 import jp.co.myogadanimotors.myogadani.store.master.market.MarketMaster;
-import jp.co.myogadanimotors.myogadani.store.master.product.IProduct;
 import jp.co.myogadanimotors.myogadani.store.master.product.ProductMaster;
 import jp.co.myogadanimotors.myogadani.store.master.strategy.IStrategyDescriptor;
 import jp.co.myogadanimotors.myogadani.store.master.strategy.StrategyMaster;
 import jp.co.myogadanimotors.myogadani.strategy.IStrategy;
 import jp.co.myogadanimotors.myogadani.strategy.IStrategyFactory;
 import jp.co.myogadanimotors.myogadani.strategy.context.OrderView;
-import jp.co.myogadanimotors.myogadani.strategy.context.StrategyContext;
+import jp.co.myogadanimotors.myogadani.strategy.context.StrategyContextFactory;
 import jp.co.myogadanimotors.myogadani.strategy.event.childorder.*;
 import jp.co.myogadanimotors.myogadani.strategy.event.childorderfill.StrategyChildOrderFill;
 import jp.co.myogadanimotors.myogadani.strategy.event.order.*;
@@ -52,6 +50,7 @@ public final class OrderManager implements IAsyncOrderListener, IAsyncReportList
     private final IIdGenerator orderIdGenerator = new IdGenerator(0L);
     private final ITimeSource timeSource;
     private final OrderValidator orderValidator;
+    private final StrategyContextFactory strategyContextFactory;
     private final IStrategyFactory strategyFactory;
     private final MarketMaster marketMaster;
     private final ProductMaster productMaster;
@@ -68,6 +67,7 @@ public final class OrderManager implements IAsyncOrderListener, IAsyncReportList
     public OrderManager(EventIdGenerator eventIdGenerator,
                         RequestIdGenerator requestIdGenerator,
                         ITimeSource timeSource,
+                        StrategyContextFactory strategyContextFactory,
                         IStrategyFactory strategyFactory,
                         MarketMaster marketMaster,
                         ProductMaster productMaster,
@@ -83,6 +83,7 @@ public final class OrderManager implements IAsyncOrderListener, IAsyncReportList
         this.requestIdGenerator = requireNonNull(requestIdGenerator);
         this.timeSource = requireNonNull(timeSource);
         this.orderValidator =  new OrderValidator(marketMaster, productMaster, extendedAttributeMaster);
+        this.strategyContextFactory = requireNonNull(strategyContextFactory);
         this.strategyFactory = requireNonNull(strategyFactory);
         this.marketMaster = requireNonNull(marketMaster);
         this.productMaster = requireNonNull(productMaster);
@@ -96,6 +97,10 @@ public final class OrderManager implements IAsyncOrderListener, IAsyncReportList
         emsReportSender.addAsyncEventListener(emsReportListener);
         emsFillSender.addAsyncEventListener(emsFillListener);
         exchangeOrderSender.addAsyncEventListener(exchangeOrderListener);
+    }
+
+    public void addStrategyFactories(IStrategyFactory strategyFactory) {
+
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -945,25 +950,7 @@ public final class OrderManager implements IAsyncOrderListener, IAsyncReportList
             return null;
         }
 
-        return strategyFactory.create(strategyDescriptor, createStrategyContext(order), strategyConfigAccessor);
-    }
-
-    private StrategyContext createStrategyContext(IOrder order) {
-        IMarket market = marketMaster.getByMic(order.getMic());
-        IProduct product = productMaster.getBySymbol(order.getSymbol());
-        return new StrategyContext(
-                eventIdGenerator,
-                requestIdGenerator,
-                timeSource,
-                order,
-                market,
-                product,
-                this,
-                this,
-                this,
-                null,   // todo: to be implemented
-                null    // todo: to be implemented
-        );
+        return strategyFactory.create(strategyDescriptor, strategyContextFactory.create(order), strategyConfigAccessor);
     }
 
     /**

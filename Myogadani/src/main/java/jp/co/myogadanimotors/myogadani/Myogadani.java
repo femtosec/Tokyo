@@ -14,6 +14,7 @@ import jp.co.myogadanimotors.myogadani.store.master.market.MarketMaster;
 import jp.co.myogadanimotors.myogadani.store.master.product.ProductMaster;
 import jp.co.myogadanimotors.myogadani.store.master.strategy.StrategyMaster;
 import jp.co.myogadanimotors.myogadani.strategy.IStrategyFactory;
+import jp.co.myogadanimotors.myogadani.strategy.context.StrategyContextFactory;
 import jp.co.myogadanimotors.myogadani.timesource.ITimeSource;
 import jp.co.myogadanimotors.myogadani.timesource.ITimerEventSource;
 import jp.co.myogadanimotors.myogadani.timesource.SystemTimeSource;
@@ -103,6 +104,15 @@ public class Myogadani implements Runnable {
             IMarketDataProvider marketDataProvider = null;  // todo: to be implemented
             ITimerEventSource timerEventSource = new TimerEventSource(eventIdGenerator, timeSource, 0, eventQueue);
 
+            // create strategy context factory
+            StrategyContextFactory strategyContextFactory = new StrategyContextFactory(
+                    eventIdGenerator,
+                    requestIdGenerator,
+                    timeSource,
+                    marketMaster,
+                    productMaster
+            );
+
             // create order manager
             logger.info("creating order manager.");
 
@@ -110,6 +120,7 @@ public class Myogadani implements Runnable {
                     eventIdGenerator,
                     requestIdGenerator,
                     timeSource,
+                    strategyContextFactory,
                     strategyFactory,
                     marketMaster,
                     productMaster,
@@ -125,6 +136,7 @@ public class Myogadani implements Runnable {
             emsAdapter.addEventListener(orderManager);
             exchangeAdapter.addFillListener(orderManager);
             timerEventSource.addEventListener(orderManager);
+            strategyContextFactory.addEventListeners(orderManager, orderManager, orderManager, marketDataProvider, timerEventSource);
 
         } catch (NullPointerException e) {
             logger.error(e.getMessage(), e);
