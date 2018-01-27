@@ -3,7 +3,7 @@ package jp.co.myogadanimotors.itabashi.strategy.peg;
 import jp.co.myogadanimotors.myogadani.store.master.strategy.IStrategyDescriptor;
 import jp.co.myogadanimotors.myogadani.strategy.AbstractStrategy;
 import jp.co.myogadanimotors.myogadani.strategy.context.StrategyContext;
-import jp.co.myogadanimotors.myogadani.strategy.strategyparameter.IStrategyParameters;
+import jp.co.myogadanimotors.myogadani.strategy.parameter.IStrategyParameters;
 
 public class Peg extends AbstractStrategy {
 

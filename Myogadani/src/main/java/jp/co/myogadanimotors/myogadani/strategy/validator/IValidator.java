@@ -2,9 +2,9 @@ package jp.co.myogadanimotors.myogadani.strategy.validator;
 
 import jp.co.myogadanimotors.myogadani.strategy.context.IStrategyContext;
 import jp.co.myogadanimotors.myogadani.strategy.context.IStrategyPendingAmendContext;
-import jp.co.myogadanimotors.myogadani.strategy.strategyevent.order.StrategyAmend;
-import jp.co.myogadanimotors.myogadani.strategy.strategyevent.order.StrategyCancel;
-import jp.co.myogadanimotors.myogadani.strategy.strategyevent.order.StrategyNew;
+import jp.co.myogadanimotors.myogadani.strategy.event.order.StrategyAmend;
+import jp.co.myogadanimotors.myogadani.strategy.event.order.StrategyCancel;
+import jp.co.myogadanimotors.myogadani.strategy.event.order.StrategyNew;
 
 import java.util.List;
 

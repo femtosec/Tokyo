@@ -1,11 +1,11 @@
 package jp.co.myogadanimotors.myogadani.strategy;
 
 import jp.co.myogadanimotors.myogadani.store.master.strategy.IStrategyDescriptor;
-import jp.co.myogadanimotors.myogadani.strategy.strategyevent.childorder.*;
-import jp.co.myogadanimotors.myogadani.strategy.strategyevent.childorderfill.StrategyChildOrderFill;
-import jp.co.myogadanimotors.myogadani.strategy.strategyevent.marketdata.StrategyMarketDataEvent;
-import jp.co.myogadanimotors.myogadani.strategy.strategyevent.order.*;
-import jp.co.myogadanimotors.myogadani.strategy.strategyevent.timer.StrategyTimerEvent;
+import jp.co.myogadanimotors.myogadani.strategy.event.childorder.*;
+import jp.co.myogadanimotors.myogadani.strategy.event.childorderfill.StrategyChildOrderFill;
+import jp.co.myogadanimotors.myogadani.strategy.event.marketdata.StrategyMarketDataEvent;
+import jp.co.myogadanimotors.myogadani.strategy.event.order.*;
+import jp.co.myogadanimotors.myogadani.strategy.event.timer.StrategyTimerEvent;
 
 public interface IStrategy {
     IStrategyDescriptor getStrategyDescriptor();
