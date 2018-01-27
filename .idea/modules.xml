@@ -2,6 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/Chiba/Chiba.iml" filepath="$PROJECT_DIR$/Chiba/Chiba.iml" />
       <module fileurl="file://$PROJECT_DIR$/Itabashi/Itabashi.iml" filepath="$PROJECT_DIR$/Itabashi/Itabashi.iml" />
       <module fileurl="file://$PROJECT_DIR$/Myogadani/Myogadani.iml" filepath="$PROJECT_DIR$/Myogadani/Myogadani.iml" />
       <module fileurl="file://$PROJECT_DIR$/Narashino.iml" filepath="$PROJECT_DIR$/Narashino.iml" />

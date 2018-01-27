@@ -12,20 +12,23 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Executor;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static java.lang.Thread.sleep;
 
-public class TimerEventSource implements ITimerEventSource, Runnable  {
+public class TimerEventSource implements ITimerEventSource  {
 
     private final Logger logger = LogManager.getLogger(getClass().getName());
+    
+    private final int RUNNING = 0;
+    private final int TERMINATED = 1;
+    private final AtomicInteger state = new AtomicInteger(RUNNING);
 
     private final ITimeSource timeSource;
     private final long timerEventResolution;
     private final Executor eventQueue;
     private final TimerEventSender timerEventSender;
     private final List<TimerRegistration> timerRegistrations = Collections.synchronizedList(new ArrayList<>());
-
-    private boolean isRunning = false;
 
     public TimerEventSource(EventIdGenerator eventIdGenerator, ITimeSource timeSource, long timerEventResolution, Executor eventQueue) {
         this.timeSource = timeSource;
@@ -37,6 +40,29 @@ public class TimerEventSource implements ITimerEventSource, Runnable  {
     @Override
     public void addEventListener(IAsyncTimerEventListener asyncTimerEventListener) {
         timerEventSender.addAsyncEventListener(asyncTimerEventListener);
+    }
+
+    @Override
+    public void shutdown() {
+        int TERMINATING = 2;
+        state.set(TERMINATING);
+        logger.info("terminating.");
+    }
+
+    @Override
+    public boolean awaitTermination(long timeOut) throws InterruptedException {
+        if (state.get() == TERMINATED) {
+            return true;
+        }
+
+        if (timeOut > 0) {
+            logger.info("awaiting termination. (timeOut: {})", timeOut);
+            sleep(timeOut);
+
+            return awaitTermination(0);
+        }
+
+        return false;
     }
 
     @Override
@@ -52,9 +78,11 @@ public class TimerEventSource implements ITimerEventSource, Runnable  {
 
     @Override
     public void run() {
+        state.set(RUNNING);
+        
         logger.info("starting timer event loop. (currentTime: {})", timeSource.getCurrentTime());
 
-        while (isRunning) {
+        while (state.get() == RUNNING) {
             try {
                 sleep(timerEventResolution);
             } catch (InterruptedException e) {
@@ -74,6 +102,8 @@ public class TimerEventSource implements ITimerEventSource, Runnable  {
         }
 
         logger.info("shutdown succeeded.");
+        
+        state.set(TERMINATED);
     }
 
     private boolean raiseTimerEventIfNecessary(TimerRegistration timerRegistration, long currentTime) {
@@ -86,10 +116,5 @@ public class TimerEventSource implements ITimerEventSource, Runnable  {
         timerEventSender.sendTimerEvent(timerRegistration.getOrderId(), timerRegistration.getTimerTag(), timerRegistration.getTimerEventTime());
 
         return true;
-    }
-
-    public void terminate() {
-        logger.info("shutting down the event loop.");
-        isRunning = false;
     }
 }

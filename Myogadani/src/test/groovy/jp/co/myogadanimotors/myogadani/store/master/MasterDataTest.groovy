@@ -30,8 +30,7 @@ class MasterDataTest {
         marketMaster.init(config)
 
         assertMarket(marketMaster.get(0L), MarketType.CryptoCurrencyExchange, "bitFlyer", "BFL")
-        assertMarket(marketMaster.get(1L), MarketType.CryptoCurrencyExchange, "Coincheck", "CCH")
-        assertMarket(marketMaster.get(2L), MarketType.CryptoCurrencyExchange, "Zaif", "ZAI")
+        assertMarket(marketMaster.get(1L), MarketType.CryptoCurrencyExchange, "Zaif", "ZAI")
     }
 
     private static void assertMarket(IMarket market, MarketType marketType, String name, String mic) {
@@ -46,11 +45,9 @@ class MasterDataTest {
         productMaster.init(config)
 
         assertProduct(productMaster.get(0L), ProductType.CryptoCurrency, "BTC/JPY", 0L, "Bitcoin @ bitFlyer")
-        assertProduct(productMaster.get(1L), ProductType.CryptoCurrency, "BTC/JPY", 1L, "Bitcoin @ Coincheck")
-        assertProduct(productMaster.get(2L), ProductType.CryptoCurrency, "BTC/JPY", 2L, "Bitcoin @ Zaif")
-        assertProduct(productMaster.get(3L), ProductType.CryptoCurrency, "ETH/JPY", 0L, "Ethereum @ bitFlyer")
-        assertProduct(productMaster.get(4L), ProductType.CryptoCurrency, "ETH/JPY", 1L, "Ethereum @ Coincheck")
-        assertProduct(productMaster.get(5L), ProductType.CryptoCurrency, "ETH/JPY", 2L, "Ethereum @ Zaif")
+        assertProduct(productMaster.get(1L), ProductType.CryptoCurrency, "BTC/JPY", 1L, "Bitcoin @ Zaif")
+        assertProduct(productMaster.get(2L), ProductType.CryptoCurrency, "ETH/JPY", 0L, "Ethereum @ bitFlyer")
+        assertProduct(productMaster.get(3L), ProductType.CryptoCurrency, "ETH/JPY", 1L, "Ethereum @ Zaif")
     }
 
     private static void assertProduct(IProduct product, ProductType productType, String symbol, long marketId, String description) {

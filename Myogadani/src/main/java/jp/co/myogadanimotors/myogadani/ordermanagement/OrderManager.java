@@ -4,7 +4,6 @@ import jp.co.myogadanimotors.myogadani.common.Constants;
 import jp.co.myogadanimotors.myogadani.config.IConfigAccessor;
 import jp.co.myogadanimotors.myogadani.eventprocessing.EventIdGenerator;
 import jp.co.myogadanimotors.myogadani.eventprocessing.IEvent;
-import jp.co.myogadanimotors.myogadani.eventprocessing.RequestIdGenerator;
 import jp.co.myogadanimotors.myogadani.eventprocessing.order.*;
 import jp.co.myogadanimotors.myogadani.eventprocessing.report.*;
 import jp.co.myogadanimotors.myogadani.eventprocessing.timer.IAsyncTimerEventListener;
@@ -46,14 +45,11 @@ public final class OrderManager implements IAsyncOrderListener, IAsyncReportList
     private final FillSender emsFillSender;
     private final OrderSender exchangeOrderSender;
     private final EventIdGenerator eventIdGenerator;
-    private final RequestIdGenerator requestIdGenerator;
     private final IIdGenerator orderIdGenerator = new IdGenerator(0L);
     private final ITimeSource timeSource;
     private final OrderValidator orderValidator;
     private final StrategyContextFactory strategyContextFactory;
     private final IStrategyFactory strategyFactory;
-    private final MarketMaster marketMaster;
-    private final ProductMaster productMaster;
     private final StrategyMaster strategyMaster;
     private final IConfigAccessor strategyConfigAccessor;
     private final Executor eventQueue;
@@ -65,7 +61,6 @@ public final class OrderManager implements IAsyncOrderListener, IAsyncReportList
     private int lastThreadId = 0;
 
     public OrderManager(EventIdGenerator eventIdGenerator,
-                        RequestIdGenerator requestIdGenerator,
                         ITimeSource timeSource,
                         StrategyContextFactory strategyContextFactory,
                         IStrategyFactory strategyFactory,
@@ -80,13 +75,10 @@ public final class OrderManager implements IAsyncOrderListener, IAsyncReportList
         this.emsFillSender = new FillSender(eventIdGenerator, timeSource);
         this.exchangeOrderSender = new OrderSender(eventIdGenerator, timeSource);
         this.eventIdGenerator = requireNonNull(eventIdGenerator);
-        this.requestIdGenerator = requireNonNull(requestIdGenerator);
         this.timeSource = requireNonNull(timeSource);
         this.orderValidator =  new OrderValidator(marketMaster, productMaster, extendedAttributeMaster);
         this.strategyContextFactory = requireNonNull(strategyContextFactory);
         this.strategyFactory = requireNonNull(strategyFactory);
-        this.marketMaster = requireNonNull(marketMaster);
-        this.productMaster = requireNonNull(productMaster);
         this.strategyMaster = requireNonNull(strategyMaster);
         this.strategyConfigAccessor = requireNonNull(strategyConfigAccessor);
         this.eventQueue = requireNonNull(eventQueue);

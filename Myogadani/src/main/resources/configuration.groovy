@@ -2,7 +2,7 @@ environments {
     development {
         myogadani {
             strategyConfig.jsonFileLocation = "/C:/Users/alpha/IdeaProjects/Narashino/out/production/Itabashi/strategy_config.groovy"
-            numberOfStrategyThreads = 2
+            numberOfStrategyThreads = 1
         }
 
         timeSource {

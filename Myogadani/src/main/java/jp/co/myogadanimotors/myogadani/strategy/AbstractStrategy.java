@@ -37,6 +37,16 @@ public abstract class AbstractStrategy implements IStrategy {
         this.strategyParameters = requireNonNull(strategyParameters);
     }
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    // do action
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    protected abstract void doAction();
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    // getters
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
     @Override
     public final IStrategyDescriptor getStrategyDescriptor() {
         return strategyDescriptor;
@@ -46,9 +56,17 @@ public abstract class AbstractStrategy implements IStrategy {
         return context;
     }
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    // validation related
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
     protected final void addValidator(IValidator validator) {
         validators.add(validator);
     }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    // strategy lifecycle related
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     protected void init() {
         // init strategy parameters
@@ -61,6 +79,10 @@ public abstract class AbstractStrategy implements IStrategy {
     protected void terminate(String message) {
         logger.info("terminating strategy. ({})", message);
     }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    // pending amend/cancel related
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     protected IStrategyPendingAmendContext createPendingAmendContext() {
         return new StrategyPendingAmendContext();
@@ -85,7 +107,7 @@ public abstract class AbstractStrategy implements IStrategy {
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    // process strategy event processing
+    // strategy event processing
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     @Override
@@ -110,7 +132,7 @@ public abstract class AbstractStrategy implements IStrategy {
         // initialize strategy
         init();
 
-        // validate report report request
+        // validate new order
         List<RejectMessage> rejectMessages = new ArrayList<>();
         if (isValid(validators, (validator) -> validator.isValidStrategyRequestNew(strategyNew, context, rejectMessages))) {
             context.getReportSender().sendNewAck(context.getOrder().getOrderId(), strategyNew.getRequestId());
@@ -130,7 +152,7 @@ public abstract class AbstractStrategy implements IStrategy {
         // create pending amend context
         IStrategyPendingAmendContext pac = createPendingAmendContext();
 
-        // validate report amend report request
+        // validate amend order
         List<RejectMessage> rejectMessages = new ArrayList<>();
         if (isValid(validators, (validator) -> validator.isValidStrategyRequestAmend(strategyAmend, context, pac, rejectMessages))) {
             context.setStrategyState(StrategyState.PendingAmend);
@@ -150,7 +172,7 @@ public abstract class AbstractStrategy implements IStrategy {
         // update context
         context.updateOrderView(strategyCancel.getOrderView());
 
-        // validate report cancel report request
+        // validate cancel order
         List<RejectMessage> rejectMessages = new ArrayList<>();
         if (isValid(validators, (validator) -> validator.isValidStrategyRequestCancel(strategyCancel, context, rejectMessages))) {
             context.setStrategyState(StrategyState.PendingCancel);
@@ -326,7 +348,7 @@ public abstract class AbstractStrategy implements IStrategy {
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    // process strategy state
+    // strategy state processing
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     private void processStrategyState() {
@@ -336,7 +358,7 @@ public abstract class AbstractStrategy implements IStrategy {
             case FullyFilled:       processStrategyStateFullyFilled(); break;
             case Cancelled:         processStrategyStateCancelled(); break;
             case UnsolicitedCancel: processStrategyStateUnsolicitedCancel(); break;
-            case PendingNew:        break; // not doing anything
+            case PendingNew:        processStrategyStatePendingNew(); break;
             case PendingAmend:      processStrategyStatePendingAmend(); break;
             case PendingCancel:     processStrategyStatePendingCancel(); break;
             case PostAmend:         processStrategyStatePostAmend(); break;
@@ -346,6 +368,9 @@ public abstract class AbstractStrategy implements IStrategy {
 
     private void processStrategyStateWorking() {
         logger.trace("processing working state.");
+        if (canProcessWorkingState()) {
+            doAction();
+        }
     }
 
     private void processStrategyStateRejected() {
@@ -364,8 +389,12 @@ public abstract class AbstractStrategy implements IStrategy {
         terminate("new order is unsolicited cancelled.");
     }
 
+    private void processStrategyStatePendingNew() {
+        logger.trace("not doing anything.");
+    }
+
     private void processStrategyStatePendingAmend() {
-        logger.trace("processing pending amend.");
+        logger.trace("processing pending amend state.");
 
         IStrategyPendingAmendProcessor pap = context.getStrategyPendingAmendProcessor();
         pap.process(context.getStrategyPendingAmendContext());
@@ -387,7 +416,7 @@ public abstract class AbstractStrategy implements IStrategy {
     }
 
     private void processStrategyStatePendingCancel() {
-        logger.trace("processing pending cancel.");
+        logger.trace("processing pending cancel state.");
 
         IStrategyPendingCancelProcessor pcp = context.getStrategyPendingCancelProcessor();
         pcp.process();
@@ -419,6 +448,15 @@ public abstract class AbstractStrategy implements IStrategy {
     private void checkSpamming() {
         logger.trace("checking spamming.");
         // todo: if spamming happened, change strategy state to "UnsolicitedCancel"
+    }
+
+    private boolean canProcessWorkingState() {
+        if (context.getChildOrderContainer().hasOnTheWireChildOrders()) {
+            logger.trace("cannot proceed since some on-the-wire child orders exist.");
+            return false;
+        }
+
+        return true;
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////

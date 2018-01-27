@@ -20,7 +20,7 @@ public class BaseEventSender<T extends IAsyncEventListener> implements IAsyncEve
 
     @Override
     public final void addAsyncEventListener(T asyncEventListener) {
-        asyncEventListenerList.add(asyncEventListener);
+        asyncEventListenerList.add(requireNonNull(asyncEventListener));
     }
 
     protected final void send(IEventFactory<T> eventFactory) {

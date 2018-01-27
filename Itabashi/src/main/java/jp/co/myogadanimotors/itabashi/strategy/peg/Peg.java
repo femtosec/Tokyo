@@ -10,4 +10,9 @@ public class Peg extends AbstractStrategy {
     public Peg(IStrategyDescriptor strategyDescriptor, StrategyContext context, IStrategyParameters strategyParameters) {
         super(strategyDescriptor, context, strategyParameters);
     }
+
+    @Override
+    protected void doAction() {
+        // todo: to be implemented
+    }
 }

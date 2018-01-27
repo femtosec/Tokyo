@@ -14,6 +14,8 @@ import jp.co.myogadanimotors.myogadani.store.master.product.IProduct;
 import jp.co.myogadanimotors.myogadani.store.master.product.ProductMaster;
 import jp.co.myogadanimotors.myogadani.timesource.ITimeSource;
 
+import static java.util.Objects.requireNonNull;
+
 public class StrategyContextFactory {
 
     private final EventIdGenerator eventIdGenerator;
@@ -32,11 +34,11 @@ public class StrategyContextFactory {
                                   ITimeSource timeSource,
                                   MarketMaster marketMaster,
                                   ProductMaster productMaster) {
-        this.eventIdGenerator = eventIdGenerator;
-        this.requestIdGenerator = requestIdGenerator;
-        this.timeSource = timeSource;
-        this.marketMaster = marketMaster;
-        this.productMaster = productMaster;
+        this.eventIdGenerator = requireNonNull(eventIdGenerator);
+        this.requestIdGenerator = requireNonNull(requestIdGenerator);
+        this.timeSource = requireNonNull(timeSource);
+        this.marketMaster = requireNonNull(marketMaster);
+        this.productMaster = requireNonNull(productMaster);
     }
 
     public void addEventListeners(IAsyncOrderListener asyncOrderListener,
@@ -44,11 +46,11 @@ public class StrategyContextFactory {
                                   IAsyncFillListener asyncFillListener,
                                   IAsyncMarketDataRequestListener asyncMarketDataRequestListener,
                                   IAsyncTimerRegistrationListener asyncTimerRegistrationListener) {
-        this.asyncOrderListener = asyncOrderListener;
-        this.asyncReportListener = asyncReportListener;
-        this.asyncFillListener = asyncFillListener;
-        this.asyncMarketDataRequestListener = asyncMarketDataRequestListener;
-        this.asyncTimerRegistrationListener = asyncTimerRegistrationListener;
+        this.asyncOrderListener = requireNonNull(asyncOrderListener);
+        this.asyncReportListener = requireNonNull(asyncReportListener);
+        this.asyncFillListener = requireNonNull(asyncFillListener);
+        this.asyncMarketDataRequestListener = requireNonNull(asyncMarketDataRequestListener);
+        this.asyncTimerRegistrationListener = requireNonNull(asyncTimerRegistrationListener);
     }
 
     public StrategyContext create(IOrder order) {

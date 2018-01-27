@@ -33,7 +33,7 @@ public class Main {
         // create StrategyFactory
         IStrategyFactory strategyFactory = new StrategyFactory();
 
-        // initialize Myogadani
+        // create Myogadani
         Myogadani myogadani = new Myogadani(environment, strategyFactory);
 
         // run Myogadani
