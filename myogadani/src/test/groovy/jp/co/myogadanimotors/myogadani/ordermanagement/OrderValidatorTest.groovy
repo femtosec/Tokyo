@@ -1,13 +1,12 @@
 package jp.co.myogadanimotors.myogadani.ordermanagement
 
-import jp.co.myogadanimotors.myogadani.common.Constants
-import jp.co.myogadanimotors.myogadani.config.ConfigAccessor
-import jp.co.myogadanimotors.myogadani.eventprocessing.order.*
+import jp.co.myogadanimotors.bunkyo.config.ConfigAccessor
+import jp.co.myogadanimotors.myogadani.event.order.*
+import jp.co.myogadanimotors.myogadani.master.extendedattriute.ExtendedAttributeMaster
+import jp.co.myogadanimotors.myogadani.master.market.MarketMaster
+import jp.co.myogadanimotors.myogadani.master.product.ProductMaster
 import jp.co.myogadanimotors.myogadani.ordermanagement.order.Order
 import jp.co.myogadanimotors.myogadani.ordermanagement.order.OrderState
-import jp.co.myogadanimotors.myogadani.store.master.extendedattriute.ExtendedAttributeMaster
-import jp.co.myogadanimotors.myogadani.store.master.market.MarketMaster
-import jp.co.myogadanimotors.myogadani.store.master.product.ProductMaster
 import jp.co.myogadanimotors.myogadani.strategy.IStrategy
 import org.testng.annotations.BeforeClass
 import org.testng.annotations.DataProvider
@@ -28,7 +27,7 @@ class OrderValidatorTest {
         def marketMaster = new MarketMaster()
         def productMaster = new ProductMaster()
         def extendedAttributeMaster = new ExtendedAttributeMaster()
-        configAccessor.parse("development", getClass().getClassLoader().getResource(Constants.CONFIG_FILE_NAME))
+        configAccessor.parse("development", getClass().getClassLoader().getResource("configuration.groovy"))
         marketMaster.init(configAccessor)
         productMaster.init(configAccessor)
         extendedAttributeMaster.init(configAccessor)

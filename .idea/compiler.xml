@@ -2,12 +2,16 @@
 <project version="4">
   <component name="CompilerConfiguration">
     <bytecodeTargetLevel>
+      <module name="bunkyo_main" target="1.8" />
+      <module name="bunkyo_test" target="1.8" />
       <module name="kohinata_main" target="1.8" />
       <module name="kohinata_test" target="1.8" />
       <module name="myogadani_main" target="1.8" />
       <module name="myogadani_test" target="1.8" />
       <module name="narashino_main" target="1.8" />
       <module name="narashino_test" target="1.8" />
+      <module name="yushima_main" target="1.8" />
+      <module name="yushima_test" target="1.8" />
     </bytecodeTargetLevel>
   </component>
 </project>

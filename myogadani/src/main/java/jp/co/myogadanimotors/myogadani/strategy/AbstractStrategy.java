@@ -1,15 +1,13 @@
 package jp.co.myogadanimotors.myogadani.strategy;
 
-import jp.co.myogadanimotors.myogadani.common.Constants;
+import jp.co.myogadanimotors.myogadani.master.strategy.IStrategyDescriptor;
 import jp.co.myogadanimotors.myogadani.ordermanagement.order.OrderState;
-import jp.co.myogadanimotors.myogadani.store.master.strategy.IStrategyDescriptor;
 import jp.co.myogadanimotors.myogadani.strategy.context.*;
 import jp.co.myogadanimotors.myogadani.strategy.event.childorder.*;
 import jp.co.myogadanimotors.myogadani.strategy.event.childorderfill.StrategyChildOrderFill;
 import jp.co.myogadanimotors.myogadani.strategy.event.marketdata.StrategyMarketDataEvent;
 import jp.co.myogadanimotors.myogadani.strategy.event.order.*;
 import jp.co.myogadanimotors.myogadani.strategy.event.timer.StrategyTimerEvent;
-import jp.co.myogadanimotors.myogadani.strategy.parameter.IStrategyParameters;
 import jp.co.myogadanimotors.myogadani.strategy.validator.IValidator;
 import jp.co.myogadanimotors.myogadani.strategy.validator.RejectMessage;
 import jp.co.myogadanimotors.myogadani.strategy.validator.StrategyStateValidator;
@@ -158,7 +156,7 @@ public abstract class AbstractStrategy implements IStrategy {
             context.setStrategyState(StrategyState.PendingAmend);
             context.setStrategyPendingAmendProcessor(createPendingAmendProcessor(strategyAmend.getRequestId()));
             context.getTimerRegistry().registerRepetitiveTimer(
-                    Constants.PENDING_AMEND_CANCEL_REPETITIVE_TIMER_TAG,
+                    strategyParameters.getPendingAmendCancelRepetitiveTimerTag(),
                     strategyParameters.getPendingAmendProcessingTimerInterval(),
                     context.getCurrentTime()
             );
@@ -178,7 +176,7 @@ public abstract class AbstractStrategy implements IStrategy {
             context.setStrategyState(StrategyState.PendingCancel);
             context.setStrategyPendingCancelProcessor(createPendingCancelProcessor(strategyCancel.getRequestId()));
             context.getTimerRegistry().registerRepetitiveTimer(
-                    Constants.PENDING_AMEND_CANCEL_REPETITIVE_TIMER_TAG,
+                    strategyParameters.getPendingAmendCancelRepetitiveTimerTag(),
                     strategyParameters.getPendingCancelProcessingTimerInterval(),
                     context.getCurrentTime()
             );
@@ -404,7 +402,7 @@ public abstract class AbstractStrategy implements IStrategy {
         }
 
         context.setStrategyState(StrategyState.PostAmend);
-        context.getTimerRegistry().removeRepetitiveTimer(Constants.PENDING_AMEND_CANCEL_REPETITIVE_TIMER_TAG);
+        context.getTimerRegistry().removeRepetitiveTimer(strategyParameters.getPendingAmendCancelRepetitiveTimerTag());
 
         if (pap.getResult() == PendingAmendCancelResult.Succeeded) {
             logger.info("PendingAmendProcessor succeeded.");
@@ -426,7 +424,7 @@ public abstract class AbstractStrategy implements IStrategy {
         }
 
         context.setStrategyState(StrategyState.PostCancel);
-        context.getTimerRegistry().removeRepetitiveTimer(Constants.PENDING_AMEND_CANCEL_REPETITIVE_TIMER_TAG);
+        context.getTimerRegistry().removeRepetitiveTimer(strategyParameters.getPendingAmendCancelRepetitiveTimerTag());
 
         if (pcp.getResult() == PendingAmendCancelResult.Succeeded) {
             logger.info("PendingCancelProcessor succeeded.");

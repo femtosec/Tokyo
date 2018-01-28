@@ -1,9 +1,9 @@
 package jp.co.myogadanimotors.myogadani.strategy.context;
 
-import jp.co.myogadanimotors.myogadani.eventprocessing.EventIdGenerator;
-import jp.co.myogadanimotors.myogadani.eventprocessing.timer.IAsyncTimerRegistrationListener;
-import jp.co.myogadanimotors.myogadani.eventprocessing.timer.TimerRegistrationSender;
-import jp.co.myogadanimotors.myogadani.timesource.ITimeSource;
+import jp.co.myogadanimotors.bunkyo.eventprocessing.EventIdGenerator;
+import jp.co.myogadanimotors.bunkyo.timesource.ITimeSource;
+import jp.co.myogadanimotors.myogadani.event.timer.IAsyncTimerRegistrationListener;
+import jp.co.myogadanimotors.myogadani.event.timer.TimerRegistrationSender;
 
 import java.util.ArrayList;
 import java.util.List;

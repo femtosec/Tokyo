@@ -1,6 +1,6 @@
 package jp.co.myogadanimotors.myogadani.strategy.context;
 
-import jp.co.myogadanimotors.myogadani.eventprocessing.order.OrderSide;
+import jp.co.myogadanimotors.myogadani.event.order.OrderSide;
 
 import java.math.BigDecimal;
 

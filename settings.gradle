@@ -1,3 +1,6 @@
 rootProject.name = 'narashino'
 include 'kohinata'
 include 'myogadani'
+include 'yushima'
+include 'bunkyo'
+

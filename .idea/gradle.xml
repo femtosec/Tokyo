@@ -10,8 +10,10 @@
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$" />
+            <option value="$PROJECT_DIR$/bunkyo" />
             <option value="$PROJECT_DIR$/kohinata" />
             <option value="$PROJECT_DIR$/myogadani" />
+            <option value="$PROJECT_DIR$/yushima" />
           </set>
         </option>
       </GradleProjectSettings>

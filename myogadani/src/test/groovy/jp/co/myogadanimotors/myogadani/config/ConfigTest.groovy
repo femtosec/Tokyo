@@ -1,6 +1,6 @@
 package jp.co.myogadanimotors.myogadani.config
 
-import jp.co.myogadanimotors.myogadani.common.Constants
+import jp.co.myogadanimotors.bunkyo.config.ConfigAccessor
 import org.testng.annotations.BeforeClass
 import org.testng.annotations.Test
 
@@ -10,7 +10,7 @@ class ConfigTest {
 
     @BeforeClass
     void setup() {
-        config.parse("development", getClass().getClassLoader().getResource(Constants.CONFIG_FILE_NAME))
+        config.parse("development", getClass().getClassLoader().getResource("configuration.groovy"))
     }
 
     @Test

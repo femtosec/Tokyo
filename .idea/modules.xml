@@ -2,6 +2,9 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/bunkyo.iml" filepath="$PROJECT_DIR$/.idea/modules/bunkyo.iml" group="bunkyo" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/bunkyo/bunkyo_main.iml" filepath="$PROJECT_DIR$/.idea/modules/bunkyo/bunkyo_main.iml" group="bunkyo" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/bunkyo/bunkyo_test.iml" filepath="$PROJECT_DIR$/.idea/modules/bunkyo/bunkyo_test.iml" group="bunkyo" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/kohinata/kohinata.iml" filepath="$PROJECT_DIR$/.idea/modules/kohinata/kohinata.iml" group="kohinata" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/kohinata/kohinata_main.iml" filepath="$PROJECT_DIR$/.idea/modules/kohinata/kohinata_main.iml" group="kohinata" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/kohinata/kohinata_test.iml" filepath="$PROJECT_DIR$/.idea/modules/kohinata/kohinata_test.iml" group="kohinata" />
@@ -11,6 +14,9 @@
       <module fileurl="file://$PROJECT_DIR$/narashino.iml" filepath="$PROJECT_DIR$/narashino.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/narashino_main.iml" filepath="$PROJECT_DIR$/.idea/modules/narashino_main.iml" group="narashino" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/narashino_test.iml" filepath="$PROJECT_DIR$/.idea/modules/narashino_test.iml" group="narashino" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/yushima/yushima.iml" filepath="$PROJECT_DIR$/.idea/modules/yushima/yushima.iml" group="yushima" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/yushima/yushima_main.iml" filepath="$PROJECT_DIR$/.idea/modules/yushima/yushima_main.iml" group="yushima" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/yushima/yushima_test.iml" filepath="$PROJECT_DIR$/.idea/modules/yushima/yushima_test.iml" group="yushima" />
     </modules>
   </component>
 </project>

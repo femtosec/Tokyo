@@ -1,6 +1,6 @@
 package jp.co.myogadanimotors.myogadani.strategy.event;
 
-import jp.co.myogadanimotors.myogadani.eventprocessing.IEvent;
+import jp.co.myogadanimotors.bunkyo.eventprocessing.IEvent;
 import jp.co.myogadanimotors.myogadani.strategy.IStrategy;
 
 import static java.util.Objects.requireNonNull;

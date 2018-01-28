@@ -1,28 +1,27 @@
 package jp.co.myogadanimotors.myogadani;
 
+import jp.co.myogadanimotors.bunkyo.config.ConfigAccessor;
+import jp.co.myogadanimotors.bunkyo.eventprocessing.EventIdGenerator;
+import jp.co.myogadanimotors.bunkyo.master.MasterDataInitializeException;
+import jp.co.myogadanimotors.bunkyo.timesource.ITimeSource;
+import jp.co.myogadanimotors.bunkyo.timesource.SystemTimeSource;
 import jp.co.myogadanimotors.myogadani.common.Constants;
-import jp.co.myogadanimotors.myogadani.config.ConfigAccessor;
 import jp.co.myogadanimotors.myogadani.emsadapter.IEmsAdapter;
-import jp.co.myogadanimotors.myogadani.eventprocessing.EventIdGenerator;
-import jp.co.myogadanimotors.myogadani.eventprocessing.RequestIdGenerator;
+import jp.co.myogadanimotors.myogadani.event.RequestIdGenerator;
 import jp.co.myogadanimotors.myogadani.exchangeadapter.IExchangeAdapter;
 import jp.co.myogadanimotors.myogadani.marketdataprovider.IMarketDataProvider;
+import jp.co.myogadanimotors.myogadani.master.extendedattriute.ExtendedAttributeMaster;
+import jp.co.myogadanimotors.myogadani.master.market.MarketMaster;
+import jp.co.myogadanimotors.myogadani.master.product.ProductMaster;
+import jp.co.myogadanimotors.myogadani.master.strategy.StrategyMaster;
 import jp.co.myogadanimotors.myogadani.ordermanagement.OrderManager;
-import jp.co.myogadanimotors.myogadani.store.master.MasterDataInitializeException;
-import jp.co.myogadanimotors.myogadani.store.master.extendedattriute.ExtendedAttributeMaster;
-import jp.co.myogadanimotors.myogadani.store.master.market.MarketMaster;
-import jp.co.myogadanimotors.myogadani.store.master.product.ProductMaster;
-import jp.co.myogadanimotors.myogadani.store.master.strategy.StrategyMaster;
 import jp.co.myogadanimotors.myogadani.strategy.IStrategyFactory;
 import jp.co.myogadanimotors.myogadani.strategy.context.StrategyContextFactory;
-import jp.co.myogadanimotors.myogadani.timesource.ITimeSource;
-import jp.co.myogadanimotors.myogadani.timesource.ITimerEventSource;
-import jp.co.myogadanimotors.myogadani.timesource.SystemTimeSource;
-import jp.co.myogadanimotors.myogadani.timesource.TimerEventSource;
+import jp.co.myogadanimotors.myogadani.timereventsource.ITimerEventSource;
+import jp.co.myogadanimotors.myogadani.timereventsource.TimerEventSource;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -37,6 +36,7 @@ public final class Myogadani implements Runnable {
     private final Logger logger = LogManager.getLogger(getClass().getName());
 
     private final String environment;
+    private final StrategyMaster strategyMaster;
     private final IStrategyFactory strategyFactory;
 
     private final int RUNNING = 0;
@@ -50,10 +50,10 @@ public final class Myogadani implements Runnable {
     private IExchangeAdapter exchangeAdapter;
     private IMarketDataProvider marketDataProvider;
     private ITimerEventSource timerEventSource;
-    private OrderManager orderManager;
 
-    public Myogadani(String environment, IStrategyFactory strategyFactory) {
+    public Myogadani(String environment, StrategyMaster strategyMaster, IStrategyFactory strategyFactory) {
         this.environment = (environment != null) ? environment : "development";
+        this.strategyMaster = requireNonNull(strategyMaster);
         this.strategyFactory = requireNonNull(strategyFactory);
     }
 
@@ -66,16 +66,7 @@ public final class Myogadani implements Runnable {
         // initialize config accessor
         ConfigAccessor configAccessor = new ConfigAccessor();
         try {
-            configAccessor.parse(environment, getClass().getClassLoader().getResource(Constants.CONFIG_FILE_NAME));
-        } catch (FileNotFoundException e) {
-            logger.error(e.getMessage(), e);
-            return false;
-        }
-
-        String strategyConfigLocation = configAccessor.getString("myogadani.strategyConfig.jsonFileLocation");
-        ConfigAccessor strategyConfigAccessor = new ConfigAccessor();
-        try {
-            strategyConfigAccessor.parse(environment, new File(strategyConfigLocation));
+            configAccessor.parse(environment, getClass().getClassLoader().getResource("configuration.groovy"));
         } catch (FileNotFoundException e) {
             logger.error(e.getMessage(), e);
             return false;
@@ -84,12 +75,10 @@ public final class Myogadani implements Runnable {
         // initialize master data stores
         MarketMaster marketMaster = new MarketMaster();
         ProductMaster productMaster = new ProductMaster();
-        StrategyMaster strategyMaster = new StrategyMaster();
         ExtendedAttributeMaster extendedAttributeMaster = new ExtendedAttributeMaster();
         try {
             marketMaster.init(configAccessor);
             productMaster.init(configAccessor);
-            strategyMaster.init(configAccessor);
             extendedAttributeMaster.init(configAccessor);
         } catch (MasterDataInitializeException e) {
             logger.error(e.getMessage(), e);
@@ -142,7 +131,7 @@ public final class Myogadani implements Runnable {
             logger.info("timer event source created.");
 
             // create order manager
-            orderManager = new OrderManager(
+            OrderManager orderManager = new OrderManager(
                     eventIdGenerator,
                     timeSource,
                     strategyContextFactory,
@@ -151,7 +140,6 @@ public final class Myogadani implements Runnable {
                     productMaster,
                     extendedAttributeMaster,
                     strategyMaster,
-                    strategyConfigAccessor,
                     eventQueue,
                     strategyEventQueues
             );

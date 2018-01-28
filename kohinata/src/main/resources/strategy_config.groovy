@@ -1,5 +1,7 @@
 environments {
     development {
+        master.strategymaster.jsonFileName = "strategy_master.json"
+
         strategy {
             '*' {
                 defaultValueTest = 100

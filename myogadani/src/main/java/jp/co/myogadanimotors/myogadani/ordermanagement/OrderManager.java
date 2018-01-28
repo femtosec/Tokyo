@@ -1,23 +1,22 @@
 package jp.co.myogadanimotors.myogadani.ordermanagement;
 
+import jp.co.myogadanimotors.bunkyo.eventprocessing.EventIdGenerator;
+import jp.co.myogadanimotors.bunkyo.eventprocessing.IEvent;
+import jp.co.myogadanimotors.bunkyo.idgenerator.IdGenerator;
+import jp.co.myogadanimotors.bunkyo.timesource.ITimeSource;
 import jp.co.myogadanimotors.myogadani.common.Constants;
-import jp.co.myogadanimotors.myogadani.config.IConfigAccessor;
-import jp.co.myogadanimotors.myogadani.eventprocessing.EventIdGenerator;
-import jp.co.myogadanimotors.myogadani.eventprocessing.IEvent;
-import jp.co.myogadanimotors.myogadani.eventprocessing.order.*;
-import jp.co.myogadanimotors.myogadani.eventprocessing.report.*;
-import jp.co.myogadanimotors.myogadani.eventprocessing.timer.IAsyncTimerEventListener;
-import jp.co.myogadanimotors.myogadani.eventprocessing.timer.TimerEvent;
-import jp.co.myogadanimotors.myogadani.idgenerator.IIdGenerator;
-import jp.co.myogadanimotors.myogadani.idgenerator.IdGenerator;
+import jp.co.myogadanimotors.myogadani.event.order.*;
+import jp.co.myogadanimotors.myogadani.event.report.*;
+import jp.co.myogadanimotors.myogadani.event.timer.IAsyncTimerEventListener;
+import jp.co.myogadanimotors.myogadani.event.timer.TimerEvent;
+import jp.co.myogadanimotors.myogadani.master.extendedattriute.ExtendedAttributeMaster;
+import jp.co.myogadanimotors.myogadani.master.market.MarketMaster;
+import jp.co.myogadanimotors.myogadani.master.product.ProductMaster;
+import jp.co.myogadanimotors.myogadani.master.strategy.IStrategyDescriptor;
+import jp.co.myogadanimotors.myogadani.master.strategy.StrategyMaster;
 import jp.co.myogadanimotors.myogadani.ordermanagement.order.IOrder;
 import jp.co.myogadanimotors.myogadani.ordermanagement.order.Order;
 import jp.co.myogadanimotors.myogadani.ordermanagement.order.OrderState;
-import jp.co.myogadanimotors.myogadani.store.master.extendedattriute.ExtendedAttributeMaster;
-import jp.co.myogadanimotors.myogadani.store.master.market.MarketMaster;
-import jp.co.myogadanimotors.myogadani.store.master.product.ProductMaster;
-import jp.co.myogadanimotors.myogadani.store.master.strategy.IStrategyDescriptor;
-import jp.co.myogadanimotors.myogadani.store.master.strategy.StrategyMaster;
 import jp.co.myogadanimotors.myogadani.strategy.IStrategy;
 import jp.co.myogadanimotors.myogadani.strategy.IStrategyFactory;
 import jp.co.myogadanimotors.myogadani.strategy.context.OrderView;
@@ -26,7 +25,6 @@ import jp.co.myogadanimotors.myogadani.strategy.event.childorder.*;
 import jp.co.myogadanimotors.myogadani.strategy.event.childorderfill.StrategyChildOrderFill;
 import jp.co.myogadanimotors.myogadani.strategy.event.order.*;
 import jp.co.myogadanimotors.myogadani.strategy.event.timer.StrategyTimerEvent;
-import jp.co.myogadanimotors.myogadani.timesource.ITimeSource;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -45,13 +43,12 @@ public final class OrderManager implements IAsyncOrderListener, IAsyncReportList
     private final FillSender emsFillSender;
     private final OrderSender exchangeOrderSender;
     private final EventIdGenerator eventIdGenerator;
-    private final IIdGenerator orderIdGenerator = new IdGenerator(0L);
+    private final IdGenerator orderIdGenerator = new IdGenerator(0L);
     private final ITimeSource timeSource;
     private final OrderValidator orderValidator;
     private final StrategyContextFactory strategyContextFactory;
     private final IStrategyFactory strategyFactory;
     private final StrategyMaster strategyMaster;
-    private final IConfigAccessor strategyConfigAccessor;
     private final Executor eventQueue;
     private final Executor[] strategyEventQueues;
     private final Map<Long, Order> ordersByOrderId = new ConcurrentHashMap<>();
@@ -68,7 +65,6 @@ public final class OrderManager implements IAsyncOrderListener, IAsyncReportList
                         ProductMaster productMaster,
                         ExtendedAttributeMaster extendedAttributeMaster,
                         StrategyMaster strategyMaster,
-                        IConfigAccessor strategyConfigAccessor,
                         Executor eventQueue,
                         Executor... strategyEventQueues) {
         this.emsReportSender = new ReportSender(requireNonNull(eventIdGenerator), requireNonNull(timeSource));
@@ -80,7 +76,6 @@ public final class OrderManager implements IAsyncOrderListener, IAsyncReportList
         this.strategyContextFactory = requireNonNull(strategyContextFactory);
         this.strategyFactory = requireNonNull(strategyFactory);
         this.strategyMaster = requireNonNull(strategyMaster);
-        this.strategyConfigAccessor = requireNonNull(strategyConfigAccessor);
         this.eventQueue = requireNonNull(eventQueue);
         this.strategyEventQueues = requireNonNull(strategyEventQueues);
     }
@@ -942,7 +937,7 @@ public final class OrderManager implements IAsyncOrderListener, IAsyncReportList
             return null;
         }
 
-        return strategyFactory.create(strategyDescriptor, strategyContextFactory.create(order), strategyConfigAccessor);
+        return strategyFactory.create(strategyDescriptor, strategyContextFactory.create(order));
     }
 
     /**

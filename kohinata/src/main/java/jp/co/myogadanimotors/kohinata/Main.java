@@ -1,10 +1,16 @@
 package jp.co.myogadanimotors.kohinata;
 
 import groovyjarjarcommonscli.*;
+import jp.co.myogadanimotors.bunkyo.config.ConfigAccessor;
+import jp.co.myogadanimotors.bunkyo.master.MasterDataInitializeException;
 import jp.co.myogadanimotors.kohinata.strategy.StrategyFactory;
 import jp.co.myogadanimotors.myogadani.Myogadani;
+import jp.co.myogadanimotors.myogadani.master.strategy.StrategyMaster;
 import jp.co.myogadanimotors.myogadani.strategy.IStrategyFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
+import java.io.FileNotFoundException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -30,11 +36,39 @@ public class Main {
             environment = cl.getOptionValue("e");
         }
 
+        // start
+        Main main = new Main();
+        main.start(environment);
+    }
+
+    private void start(String environment) {
+        // initialize logger
+        // todo: to be implemented
+        Logger logger = LogManager.getLogger(getClass().getName());
+
+        // initialize config accessor
+        ConfigAccessor strategyConfigAccessor = new ConfigAccessor();
+        try {
+            strategyConfigAccessor.parse(environment, getClass().getClassLoader().getResource("strategy_config.groovy"));
+        } catch (FileNotFoundException e) {
+            logger.error(e.getMessage(), e);
+            return;
+        }
+
+        // initialize master data stores
+        StrategyMaster strategyMaster = new StrategyMaster();
+        try {
+            strategyMaster.init(strategyConfigAccessor);
+        } catch (MasterDataInitializeException e) {
+            logger.error(e.getMessage(), e);
+            return;
+        }
+
         // create StrategyFactory
-        IStrategyFactory strategyFactory = new StrategyFactory();
+        IStrategyFactory strategyFactory = new StrategyFactory(strategyConfigAccessor);
 
         // create Myogadani
-        Myogadani myogadani = new Myogadani(environment, strategyFactory);
+        Myogadani myogadani = new Myogadani(environment, strategyMaster, strategyFactory);
 
         // run Myogadani
         ExecutorService executorService = Executors.newSingleThreadExecutor();

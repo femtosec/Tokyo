@@ -1,6 +1,6 @@
 package jp.co.myogadanimotors.myogadani.strategy.event.marketdata;
 
-import jp.co.myogadanimotors.myogadani.eventprocessing.marketdata.DepthEntry;
+import jp.co.myogadanimotors.myogadani.event.marketdata.DepthEntry;
 import jp.co.myogadanimotors.myogadani.strategy.IStrategy;
 import jp.co.myogadanimotors.myogadani.strategy.event.AbstractStrategyEvent;
 
