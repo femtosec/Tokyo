@@ -15,6 +15,6 @@ class ConfigTest {
 
     @Test
     void testConfigAccessor() {
-        assert config.getInt("myogadani.numberOfStrategyThreads", -1) == 2
+        assert config.getInt("myogadani.numberOfStrategyThreads", -1) == 1
     }
 }

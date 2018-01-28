@@ -2,10 +2,18 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/Chiba/Chiba.iml" filepath="$PROJECT_DIR$/Chiba/Chiba.iml" />
-      <module fileurl="file://$PROJECT_DIR$/Itabashi/Itabashi.iml" filepath="$PROJECT_DIR$/Itabashi/Itabashi.iml" />
-      <module fileurl="file://$PROJECT_DIR$/Myogadani/Myogadani.iml" filepath="$PROJECT_DIR$/Myogadani/Myogadani.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/Chiba/Chiba.iml" filepath="$PROJECT_DIR$/.idea/modules/Chiba/Chiba.iml" group="Chiba" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/Chiba/Chiba_main.iml" filepath="$PROJECT_DIR$/.idea/modules/Chiba/Chiba_main.iml" group="Chiba" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/Chiba/Chiba_test.iml" filepath="$PROJECT_DIR$/.idea/modules/Chiba/Chiba_test.iml" group="Chiba" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/Itabashi/Itabashi.iml" filepath="$PROJECT_DIR$/.idea/modules/Itabashi/Itabashi.iml" group="Itabashi" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/Itabashi/Itabashi_main.iml" filepath="$PROJECT_DIR$/.idea/modules/Itabashi/Itabashi_main.iml" group="Itabashi" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/Itabashi/Itabashi_test.iml" filepath="$PROJECT_DIR$/.idea/modules/Itabashi/Itabashi_test.iml" group="Itabashi" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/Myogadani/Myogadani.iml" filepath="$PROJECT_DIR$/.idea/modules/Myogadani/Myogadani.iml" group="Myogadani" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/Myogadani/Myogadani_main.iml" filepath="$PROJECT_DIR$/.idea/modules/Myogadani/Myogadani_main.iml" group="Myogadani" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/Myogadani/Myogadani_test.iml" filepath="$PROJECT_DIR$/.idea/modules/Myogadani/Myogadani_test.iml" group="Myogadani" />
       <module fileurl="file://$PROJECT_DIR$/Narashino.iml" filepath="$PROJECT_DIR$/Narashino.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/Narashino_main.iml" filepath="$PROJECT_DIR$/.idea/modules/Narashino_main.iml" group="Narashino" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/Narashino_test.iml" filepath="$PROJECT_DIR$/.idea/modules/Narashino_test.iml" group="Narashino" />
     </modules>
   </component>
 </project>

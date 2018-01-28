@@ -1,9 +1,9 @@
 package jp.co.myogadanimotors.itabashi;
 
+import groovyjarjarcommonscli.*;
 import jp.co.myogadanimotors.itabashi.strategy.StrategyFactory;
 import jp.co.myogadanimotors.myogadani.Myogadani;
 import jp.co.myogadanimotors.myogadani.strategy.IStrategyFactory;
-import org.apache.commons.cli.*;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;

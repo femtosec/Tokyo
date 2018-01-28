@@ -27,7 +27,7 @@ class BaseStrategyParametersTest {
     void testBaseStrategyParametersTest() {
         assert baseStrategyParameters.getMaxNumberOfPendingAmendProcessing() == 5
         assert baseStrategyParameters.getMaxNumberOfPendingCancelProcessing() == 7
-        assert baseStrategyParameters.getPendingAmendProcessingTimerInterval() == TimeUnit.MILLISECONDS.toNanos(100)
-        assert baseStrategyParameters.getPendingCancelProcessingTimerInterval() == TimeUnit.MILLISECONDS.toNanos(100)
+        assert baseStrategyParameters.getPendingAmendProcessingTimerInterval() == 100
+        assert baseStrategyParameters.getPendingCancelProcessingTimerInterval() == 100
     }
 }
