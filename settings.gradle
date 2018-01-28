@@ -1,5 +1,3 @@
-rootProject.name = 'Narashino'
-include 'Itabashi'
-include 'Myogadani'
-include 'Chiba'
-
+rootProject.name = 'narashino'
+include 'kohinata'
+include 'myogadani'
