@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/bunkyo.iml" filepath="$PROJECT_DIR$/.idea/modules/bunkyo.iml" group="bunkyo" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/bunkyo/bunkyo.iml" filepath="$PROJECT_DIR$/.idea/modules/bunkyo/bunkyo.iml" group="bunkyo" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/bunkyo/bunkyo_main.iml" filepath="$PROJECT_DIR$/.idea/modules/bunkyo/bunkyo_main.iml" group="bunkyo" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/bunkyo/bunkyo_test.iml" filepath="$PROJECT_DIR$/.idea/modules/bunkyo/bunkyo_test.iml" group="bunkyo" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/kohinata/kohinata.iml" filepath="$PROJECT_DIR$/.idea/modules/kohinata/kohinata.iml" group="kohinata" />
