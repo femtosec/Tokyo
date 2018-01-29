@@ -1,6 +1,0 @@
-[
-  { "id": 0,    "productTypeString": "CryptoCurrency",    "symbol": "BTC/JPY",    "marketId": 0,    "description": "Bitcoin @ bitFlyer" },
-  { "id": 1,    "productTypeString": "CryptoCurrency",    "symbol": "BTC/JPY",    "marketId": 1,    "description": "Bitcoin @ Zaif" },
-  { "id": 2,    "productTypeString": "CryptoCurrency",    "symbol": "ETH/JPY",    "marketId": 0,    "description": "Ethereum @ bitFlyer" },
-  { "id": 3,    "productTypeString": "CryptoCurrency",    "symbol": "ETH/JPY",    "marketId": 1,    "description": "Ethereum @ Zaif" }
-]

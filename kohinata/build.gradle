@@ -2,5 +2,5 @@ group 'jp.co.myogadanimotors'
 version '1.0-SNAPSHOT'
 
 dependencies {
-    compile project(':myogadani')
+    compile project(':bunkyo')
 }

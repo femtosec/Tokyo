@@ -14,10 +14,10 @@ repositories {
 }
 
 dependencies {
-    testCompile group: 'junit', name: 'junit', version: "${junitVersion}"
+    compile project(':kohinata')
 }
 
-subprojects {
+allprojects {
     apply plugin: 'java'
     apply plugin: 'groovy'
 

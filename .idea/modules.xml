@@ -8,12 +8,9 @@
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/kohinata/kohinata.iml" filepath="$PROJECT_DIR$/.idea/modules/kohinata/kohinata.iml" group="kohinata" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/kohinata/kohinata_main.iml" filepath="$PROJECT_DIR$/.idea/modules/kohinata/kohinata_main.iml" group="kohinata" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/kohinata/kohinata_test.iml" filepath="$PROJECT_DIR$/.idea/modules/kohinata/kohinata_test.iml" group="kohinata" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/myogadani/myogadani.iml" filepath="$PROJECT_DIR$/.idea/modules/myogadani/myogadani.iml" group="myogadani" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/myogadani/myogadani_main.iml" filepath="$PROJECT_DIR$/.idea/modules/myogadani/myogadani_main.iml" group="myogadani" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/myogadani/myogadani_test.iml" filepath="$PROJECT_DIR$/.idea/modules/myogadani/myogadani_test.iml" group="myogadani" />
-      <module fileurl="file://$PROJECT_DIR$/narashino.iml" filepath="$PROJECT_DIR$/narashino.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/narashino_main.iml" filepath="$PROJECT_DIR$/.idea/modules/narashino_main.iml" group="narashino" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/narashino_test.iml" filepath="$PROJECT_DIR$/.idea/modules/narashino_test.iml" group="narashino" />
+      <module fileurl="file://$PROJECT_DIR$/myogadani.iml" filepath="$PROJECT_DIR$/myogadani.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/myogadani_main.iml" filepath="$PROJECT_DIR$/.idea/modules/myogadani_main.iml" group="myogadani" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/myogadani_test.iml" filepath="$PROJECT_DIR$/.idea/modules/myogadani_test.iml" group="myogadani" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/yushima/yushima.iml" filepath="$PROJECT_DIR$/.idea/modules/yushima/yushima.iml" group="yushima" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/yushima/yushima_main.iml" filepath="$PROJECT_DIR$/.idea/modules/yushima/yushima_main.iml" group="yushima" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/yushima/yushima_test.iml" filepath="$PROJECT_DIR$/.idea/modules/yushima/yushima_test.iml" group="yushima" />

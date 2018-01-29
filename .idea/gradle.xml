@@ -3,7 +3,7 @@
   <component name="GradleSettings">
     <option name="linkedExternalProjectsSettings">
       <GradleProjectSettings>
-        <option name="distributionType" value="LOCAL" />
+        <option name="distributionType" value="WRAPPED" />
         <option name="externalProjectPath" value="$PROJECT_DIR$" />
         <option name="gradleHome" value="$USER_HOME$/gradle-4.4" />
         <option name="gradleJvm" value="9.0" />
@@ -12,7 +12,6 @@
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/bunkyo" />
             <option value="$PROJECT_DIR$/kohinata" />
-            <option value="$PROJECT_DIR$/myogadani" />
             <option value="$PROJECT_DIR$/yushima" />
           </set>
         </option>
