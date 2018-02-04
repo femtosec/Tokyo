@@ -11,6 +11,7 @@ public class RawDataSender extends BaseEventSender<IAsyncRawDataListener> {
 
     private MarketDataType marketDataType;
     private String symbol;
+    private String name;
     private String mic;
     private JsonElement jsonElement;
     private String zaifRawData;
@@ -19,17 +20,19 @@ public class RawDataSender extends BaseEventSender<IAsyncRawDataListener> {
         super(idGenerator, timeSource);
     }
 
-    public void sendBitFlyerRawData(MarketDataType marketDataType, String symbol, String mic, JsonElement jsonElement) {
+    public void sendBitFlyerRawData(MarketDataType marketDataType, String symbol, String name, String mic, JsonElement jsonElement) {
         this.marketDataType = marketDataType;
         this.symbol = symbol;
+        this.name = name;
         this.mic = mic;
         this.jsonElement = jsonElement;
         send(this::createBitFlyerRawData);
     }
 
-    public void sendZaifRawData(MarketDataType marketDataType, String symbol, String mic, String rawData) {
+    public void sendZaifRawData(MarketDataType marketDataType, String symbol, String name, String mic, String rawData) {
         this.marketDataType = marketDataType;
         this.symbol = symbol;
+        this.name = name;
         this.mic = mic;
         this.zaifRawData = rawData;
         send(this::createZaifRawData);
@@ -42,6 +45,7 @@ public class RawDataSender extends BaseEventSender<IAsyncRawDataListener> {
                 asyncEventListener,
                 marketDataType,
                 symbol,
+                name,
                 mic,
                 jsonElement
         );
@@ -54,6 +58,7 @@ public class RawDataSender extends BaseEventSender<IAsyncRawDataListener> {
                 asyncEventListener,
                 marketDataType,
                 symbol,
+                name,
                 mic,
                 zaifRawData
         );

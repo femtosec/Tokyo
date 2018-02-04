@@ -5,6 +5,7 @@ public final class Product implements IProduct {
     private long id = Long.MIN_VALUE;
     private ProductType productType;
     private String symbol;
+    private String name;
     private long marketId = Long.MIN_VALUE;
     private String description;
 
@@ -40,6 +41,15 @@ public final class Product implements IProduct {
     }
 
     @Override
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    @Override
     public long getMarketId() {
         return marketId;
     }
@@ -62,6 +72,7 @@ public final class Product implements IProduct {
         return "productId: " + id +
                 ", productType: " + productType +
                 ", symbol: " + symbol +
+                ", name: " + name +
                 ", marketId: " + marketId +
                 ", description: " + description;
     }

@@ -73,7 +73,14 @@ public class BitFlyerSubscriber implements IMarketDataSubscriber {
             IMarket market = marketMaster.get(product.getMarketId());
 
             PubNub pubNub = new PubNub(pnConf);
-            pubNub.addListener(new Listener(subscription.getMarketDataType(), product.getSymbol(), market.getMic()));
+            pubNub.addListener(
+                    new Listener(
+                            subscription.getMarketDataType(),
+                            product.getSymbol(),
+                            product.getName(),
+                            market.getMic()
+                    )
+            );
             pubNub.subscribe().channels(Collections.singletonList(subscription.getChannel())).execute();
             pubNubs.add(pubNub);
         });
@@ -93,11 +100,13 @@ public class BitFlyerSubscriber implements IMarketDataSubscriber {
 
         private final MarketDataType marketDataType;
         private final String symbol;
+        private final String name;
         private final String mic;
 
-        private Listener(MarketDataType marketDataType, String symbol, String mic) {
+        private Listener(MarketDataType marketDataType, String symbol, String name, String mic) {
             this.marketDataType = marketDataType;
             this.symbol = symbol;
+            this.name = name;
             this.mic = mic;
         }
 
@@ -109,9 +118,9 @@ public class BitFlyerSubscriber implements IMarketDataSubscriber {
         @Override
         public void message(PubNub pubnub, PNMessageResult message) {
             if (logger.getLevel() == Level.TRACE) {
-                logger.trace("{} // {} // {} // {} // {}", marketDataType, symbol, mic, message.getChannel(), message.getMessage());
+                logger.trace("{} // {} // {} // {} // {} // {}", marketDataType, symbol, name, mic, message.getChannel(), message.getMessage());
             }
-            rawDataSender.sendBitFlyerRawData(marketDataType, symbol, mic, message.getMessage());
+            rawDataSender.sendBitFlyerRawData(marketDataType, symbol, name, mic, message.getMessage());
         }
 
         @Override

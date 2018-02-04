@@ -68,7 +68,17 @@ public class ZaifSubscriber implements IMarketDataSubscriber {
                 IProduct product = productMaster.get(subscription.getProductId());
                 IMarket market = marketMaster.get(product.getMarketId());
 
-                sessions.add(wsc.connectToServer(new Listener(subscription.getMarketDataType(), product.getSymbol(), market.getMic()), uri));
+                sessions.add(
+                        wsc.connectToServer(
+                                new Listener(
+                                        subscription.getMarketDataType(),
+                                        product.getSymbol(),
+                                        product.getName(),
+                                        market.getMic()
+                                ),
+                                uri
+                        )
+                );
             } catch (DeploymentException | IOException e) {
                 e.printStackTrace();
                 disconnect();
@@ -96,11 +106,13 @@ public class ZaifSubscriber implements IMarketDataSubscriber {
 
         private final MarketDataType marketDataType;
         private final String symbol;
+        private final String name;
         private final String mic;
 
-        private Listener(MarketDataType marketDataType, String symbol, String mic) {
+        private Listener(MarketDataType marketDataType, String symbol, String name, String mic) {
             this.marketDataType = marketDataType;
             this.symbol = symbol;
+            this.name = name;
             this.mic = mic;
         }
 
@@ -112,9 +124,9 @@ public class ZaifSubscriber implements IMarketDataSubscriber {
         @OnMessage
         public void onMessage(String message) {
             if (logger.getLevel() == Level.TRACE) {
-                logger.trace("{} // {} // {} // {}", marketDataType, symbol, mic, message);
+                logger.trace("{} // {} // {} // {} // {}", marketDataType, symbol, name, mic, message);
             }
-            rawDataSender.sendZaifRawData(marketDataType, symbol, mic, message);
+            rawDataSender.sendZaifRawData(marketDataType, symbol, name, mic, message);
         }
 
         @OnError

@@ -1,4 +1,4 @@
 [
-  { "id": 0,    "productTypeString": "CryptoCurrency",    "symbol": "BTC/JPY",    "marketId": 0,    "description": "Bitcoin @ bitFlyer" },
-  { "id": 1,    "productTypeString": "CryptoCurrency",    "symbol": "BTC/JPY",    "marketId": 1,    "description": "Bitcoin @ Zaif" }
+  { "id": 0,    "productTypeString": "CryptoCurrency",  "symbol": "BTC/JPY.BFL",  "name": "BTC/JPY",  "marketId": 0,  "description": "Bitcoin @ bitFlyer" },
+  { "id": 1,    "productTypeString": "CryptoCurrency",  "symbol": "BTC/JPY.ZAI",  "name": "BTC/JPY",  "marketId": 1,  "description": "Bitcoin @ Zaif" }
 ]

@@ -41,13 +41,14 @@ class MasterDataTest {
         def productMaster = new ProductMaster()
         productMaster.init(config)
 
-        assertProduct(productMaster.get(0L), ProductType.CryptoCurrency, "BTC/JPY", 0L, "Bitcoin @ bitFlyer")
-        assertProduct(productMaster.get(1L), ProductType.CryptoCurrency, "BTC/JPY", 1L, "Bitcoin @ Zaif")
+        assertProduct(productMaster.get(0L), ProductType.CryptoCurrency, "BTC/JPY.BFL", "BTC/JPY", 0L, "Bitcoin @ bitFlyer")
+        assertProduct(productMaster.get(1L), ProductType.CryptoCurrency, "BTC/JPY.ZAI", "BTC/JPY", 1L, "Bitcoin @ Zaif")
     }
 
-    private static void assertProduct(IProduct product, ProductType productType, String symbol, long marketId, String description) {
+    private static void assertProduct(IProduct product, ProductType productType, String symbol, String name, long marketId, String description) {
         assert product.getProductType() == productType
         assert product.getSymbol() == symbol
+        assert product.getName() == name
         assert product.getMarketId() == marketId
         assert product.getDescription() == description
     }

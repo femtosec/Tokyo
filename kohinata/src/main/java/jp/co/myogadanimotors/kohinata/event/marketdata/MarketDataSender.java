@@ -12,6 +12,7 @@ public class MarketDataSender extends BaseEventSender<IAsyncMarketDataListener> 
     private long requestId;
     private long productId;
     private String symbol;
+    private String name;
     private String mic;
     private BigDecimal lastPrice;
     private BigDecimal lastTradeVolume;
@@ -25,6 +26,7 @@ public class MarketDataSender extends BaseEventSender<IAsyncMarketDataListener> 
     public void sendMarketData(long requestId,
                                long productId,
                                String symbol,
+                               String name,
                                String mic,
                                BigDecimal lastPrice,
                                BigDecimal lastTradeVolume,
@@ -33,6 +35,7 @@ public class MarketDataSender extends BaseEventSender<IAsyncMarketDataListener> 
         this.requestId = requestId;
         this.productId = productId;
         this.symbol = symbol;
+        this.name = name;
         this.mic = mic;
         this.lastPrice = lastPrice;
         this.lastTradeVolume = lastTradeVolume;
@@ -48,6 +51,7 @@ public class MarketDataSender extends BaseEventSender<IAsyncMarketDataListener> 
                 requestId,
                 productId,
                 symbol,
+                name,
                 mic,
                 lastPrice,
                 lastTradeVolume,

@@ -18,4 +18,5 @@ dependencies {
     compile group: 'org.slf4j', name: 'slf4j-log4j12', version: "${slf4jVersion}"
     compile group: 'com.pubnub', name: 'pubnub-gson', version: "${pubnubVersion}"
     compile group: 'com.google.code.gson', name: 'gson', version: "${gsonVersion}"
+    compile group: 'org.apache.activemq', name: 'activemq-all', version: "${activeMqVersion}"
 }

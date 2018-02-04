@@ -1,7 +1,7 @@
 environments {
     development {
         yushima {
-
+            maxNumberOfDepths = 10
         }
 
         master {
@@ -9,6 +9,10 @@ environments {
             productmaster.jsonFileName = "product_master.json"
             bitflyersubscriptionlist.jsonFileName = "bitflyer_subscription_list.json"
             zaifsubscriptionlist.jsonFileName = "zaif_subscription_list.json"
+        }
+
+        jms {
+            brokerUrl = "failover://tcp://localhost:61616"
         }
 
         bitflyer {

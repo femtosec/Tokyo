@@ -8,7 +8,8 @@ import jp.co.myogadanimotors.bunkyo.master.market.MarketMaster;
 import jp.co.myogadanimotors.bunkyo.master.product.ProductMaster;
 import jp.co.myogadanimotors.bunkyo.timesource.ITimeSource;
 import jp.co.myogadanimotors.bunkyo.timesource.SystemTimeSource;
-import jp.co.myogadanimotors.yushima.marketdatamanager.MarketDataManager;
+import jp.co.myogadanimotors.yushima.mdmanager.MarketDataManager;
+import jp.co.myogadanimotors.yushima.publisher.*;
 import jp.co.myogadanimotors.yushima.subscriber.bitflyer.BitFlyerSubscriber;
 import jp.co.myogadanimotors.yushima.subscriber.zaif.ZaifSubscriber;
 import org.apache.logging.log4j.LogManager;
@@ -54,6 +55,8 @@ public class Yushima implements Runnable {
         executorService.shutdown();
     }
 
+    private final int DEFAULT_MAX_NUMBER_OF_DEPTHS = 10;
+
     private final Logger logger = LogManager.getLogger(getClass().getName());
     private final String environment;
 
@@ -62,6 +65,8 @@ public class Yushima implements Runnable {
     private final AtomicInteger state = new AtomicInteger(RUNNING);
 
     private ExecutorService eventQueue;
+
+    private JmsMarketDataPublisherFactory marketDataPublisherFactory;
 
     private BitFlyerSubscriber bitFlyerSubscriber;
     private ZaifSubscriber zaifSubscriber;
@@ -102,6 +107,15 @@ public class Yushima implements Runnable {
         // create time source
         ITimeSource timeSource = new SystemTimeSource();
 
+        // create market data publisher factory
+        marketDataPublisherFactory = new JmsMarketDataPublisherFactory();
+        try {
+            marketDataPublisherFactory.init(configAccessor);
+        } catch (MarketDataPublisherException e) {
+            logger.error(e.getMessage(), e);
+            return false;
+        }
+
         try {
             // create bitFlyer subscriber
             bitFlyerSubscriber = new BitFlyerSubscriber(eventIdGenerator, timeSource, marketMaster, productMaster);
@@ -112,7 +126,8 @@ public class Yushima implements Runnable {
             logger.info("Zaif subscriber created.");
 
             // create market data manager
-            MarketDataManager marketDataManager = new MarketDataManager(eventQueue);
+            int maxNumberOfDepths = configAccessor.getInt("yushima.maxNumberOfDepths", DEFAULT_MAX_NUMBER_OF_DEPTHS);
+            MarketDataManager marketDataManager = new MarketDataManager(marketDataPublisherFactory, maxNumberOfDepths, eventQueue);
             logger.info("market data manager created.");
 
             // add event listeners
@@ -173,6 +188,12 @@ public class Yushima implements Runnable {
         try {
             eventQueue.awaitTermination(1000, TimeUnit.MILLISECONDS);
         } catch (InterruptedException e) {
+            logger.error(e.getMessage(), e);
+        }
+
+        try {
+            marketDataPublisherFactory.close();
+        } catch (MarketDataPublisherException e) {
             logger.error(e.getMessage(), e);
         }
 

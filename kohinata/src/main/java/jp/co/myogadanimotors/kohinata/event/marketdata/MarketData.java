@@ -9,6 +9,7 @@ public final class MarketData extends BaseEvent<IAsyncMarketDataListener> {
     private final long requestId;
     private final long productId;
     private final String symbol;
+    private final String name;
     private final String mic;
     private final BigDecimal lastPrice;
     private final BigDecimal lastTradeVolume;
@@ -20,6 +21,7 @@ public final class MarketData extends BaseEvent<IAsyncMarketDataListener> {
                       long requestId,
                       long productId,
                       String symbol,
+                      String name,
                       String mic,
                       BigDecimal lastPrice,
                       BigDecimal lastTradeVolume,
@@ -30,6 +32,7 @@ public final class MarketData extends BaseEvent<IAsyncMarketDataListener> {
         this.requestId = requestId;
         this.productId = productId;
         this.symbol = symbol;
+        this.name = name;
         this.mic = mic;
         this.lastPrice = lastPrice;
         this.lastTradeVolume = lastTradeVolume;
@@ -47,6 +50,10 @@ public final class MarketData extends BaseEvent<IAsyncMarketDataListener> {
 
     public String getSymbol() {
         return symbol;
+    }
+
+    public String getName() {
+        return name;
     }
 
     public String getMic() {
@@ -80,6 +87,7 @@ public final class MarketData extends BaseEvent<IAsyncMarketDataListener> {
                 .append(", requestId: ").append(requestId)
                 .append(", productId: ").append(productId)
                 .append(", symbol: ").append(symbol)
+                .append(", name: ").append(name)
                 .append(", mic: ").append(mic)
                 .append(", lastPrice: ").append(lastPrice)
                 .append(", lastTradeVolume: ").append(lastTradeVolume)
