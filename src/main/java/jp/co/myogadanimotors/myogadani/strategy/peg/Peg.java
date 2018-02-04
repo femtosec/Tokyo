@@ -1,9 +1,9 @@
 package jp.co.myogadanimotors.myogadani.strategy.peg;
 
 import jp.co.myogadanimotors.kohinata.master.strategy.IStrategyDescriptor;
-import jp.co.myogadanimotors.myogadani.strategy.AbstractStrategy;
-import jp.co.myogadanimotors.myogadani.strategy.IStrategyParameters;
-import jp.co.myogadanimotors.myogadani.strategy.context.StrategyContext;
+import jp.co.myogadanimotors.kohinata.strategy.AbstractStrategy;
+import jp.co.myogadanimotors.kohinata.strategy.IStrategyParameters;
+import jp.co.myogadanimotors.kohinata.strategy.context.StrategyContext;
 
 public class Peg extends AbstractStrategy {
 

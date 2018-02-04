@@ -1,8 +1,8 @@
 package jp.co.myogadanimotors.myogadani.strategy.parameter;
 
 import jp.co.myogadanimotors.bunkyo.config.IConfigAccessor;
+import jp.co.myogadanimotors.kohinata.strategy.IStrategyParameters;
 import jp.co.myogadanimotors.myogadani.strategy.StrategyConstants;
-import jp.co.myogadanimotors.myogadani.strategy.IStrategyParameters;
 
 import static java.util.Objects.requireNonNull;
 

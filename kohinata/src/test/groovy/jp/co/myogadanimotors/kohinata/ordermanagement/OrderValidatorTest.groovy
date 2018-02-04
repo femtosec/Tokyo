@@ -1,13 +1,13 @@
 package jp.co.myogadanimotors.kohinata.ordermanagement
 
 import jp.co.myogadanimotors.bunkyo.config.ConfigAccessor
+import jp.co.myogadanimotors.bunkyo.master.market.MarketMaster
+import jp.co.myogadanimotors.bunkyo.master.product.ProductMaster
 import jp.co.myogadanimotors.kohinata.event.order.*
 import jp.co.myogadanimotors.kohinata.master.extendedattriute.ExtendedAttributeMaster
-import jp.co.myogadanimotors.kohinata.master.market.MarketMaster
-import jp.co.myogadanimotors.kohinata.master.product.ProductMaster
 import jp.co.myogadanimotors.kohinata.ordermanagement.order.Order
 import jp.co.myogadanimotors.kohinata.ordermanagement.order.OrderState
-import jp.co.myogadanimotors.myogadani.strategy.IStrategy
+import jp.co.myogadanimotors.kohinata.strategy.IStrategy
 import org.testng.annotations.BeforeClass
 import org.testng.annotations.DataProvider
 import org.testng.annotations.Test
@@ -39,7 +39,6 @@ class OrderValidatorTest {
     Object[][] createTestCasesForIsValidNewOrder() {
         [
                 [ "BTC/JPY",    "BFL",      OrderSide.Buy,      Orderer.Strategy,   OrderDestination.Exchange,      0L,     "symbolList",   null,           true ],
-                [ "ETH/JPY",    "BFL",      OrderSide.Buy,      Orderer.Strategy,   OrderDestination.Exchange,      0L,     "symbolList",   null,           true ],
                 [ "XXX/XXX",    "BFL",      OrderSide.Buy,      Orderer.Strategy,   OrderDestination.Exchange,      0L,     "symbolList",   null,           false ],
                 [ "BTC/JPY",    "ZAI",      OrderSide.Buy,      Orderer.Strategy,   OrderDestination.Exchange,      0L,     "symbolList",   null,           true ],
                 [ "BTC/JPY",    "XXX",      OrderSide.Buy,      Orderer.Strategy,   OrderDestination.Exchange,      0L,     "symbolList",   null,           false ],

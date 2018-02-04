@@ -11,6 +11,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 public abstract class AbstractMaster<T extends IStoredObject> implements IMaster<T> {
@@ -79,5 +80,12 @@ public abstract class AbstractMaster<T extends IStoredObject> implements IMaster
             if (predicate.test(object)) return object;
         }
         return null;
+    }
+
+    @Override
+    public void forEach(Consumer<T> visitor) {
+        for (T obj: objectsById.values()) {
+            visitor.accept(obj);
+        }
     }
 }

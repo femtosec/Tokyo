@@ -1,6 +1,6 @@
 environments {
     development {
-        myogadani {
+        kohinata {
             numberOfStrategyThreads = 1
         }
 

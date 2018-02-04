@@ -28,10 +28,10 @@ allprojects {
     }
 
     dependencies {
-        compile "org.codehaus.groovy:groovy-all:${groovyVersion}"
+        compile group: 'org.codehaus.groovy', name: 'groovy-all', version: "${groovyVersion}"
         compile group: 'org.apache.logging.log4j', name: 'log4j-api', version: "${log4jVersion}"
         compile group: 'org.apache.logging.log4j', name: 'log4j-core', version: "${log4jVersion}"
         testCompile group: 'junit', name: 'junit', version: "${junitVersion}"
-        testCompile "org.testng:testng:${testngVersion}"
+        testCompile group: 'org.testng', name: 'testng', version: "${testngVersion}"
     }
 }

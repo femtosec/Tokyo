@@ -3,6 +3,8 @@ package jp.co.myogadanimotors.kohinata;
 import jp.co.myogadanimotors.bunkyo.config.ConfigAccessor;
 import jp.co.myogadanimotors.bunkyo.eventprocessing.EventIdGenerator;
 import jp.co.myogadanimotors.bunkyo.master.MasterDataInitializeException;
+import jp.co.myogadanimotors.bunkyo.master.market.MarketMaster;
+import jp.co.myogadanimotors.bunkyo.master.product.ProductMaster;
 import jp.co.myogadanimotors.bunkyo.timesource.ITimeSource;
 import jp.co.myogadanimotors.bunkyo.timesource.SystemTimeSource;
 import jp.co.myogadanimotors.kohinata.common.Constants;
@@ -11,12 +13,10 @@ import jp.co.myogadanimotors.kohinata.event.RequestIdGenerator;
 import jp.co.myogadanimotors.kohinata.exchangeadapter.IExchangeAdapter;
 import jp.co.myogadanimotors.kohinata.marketdataprovider.IMarketDataProvider;
 import jp.co.myogadanimotors.kohinata.master.extendedattriute.ExtendedAttributeMaster;
-import jp.co.myogadanimotors.kohinata.master.market.MarketMaster;
-import jp.co.myogadanimotors.kohinata.master.product.ProductMaster;
 import jp.co.myogadanimotors.kohinata.master.strategy.StrategyMaster;
 import jp.co.myogadanimotors.kohinata.ordermanagement.OrderManager;
-import jp.co.myogadanimotors.myogadani.strategy.IStrategyFactory;
-import jp.co.myogadanimotors.myogadani.strategy.context.StrategyContextFactory;
+import jp.co.myogadanimotors.kohinata.strategy.IStrategyFactory;
+import jp.co.myogadanimotors.kohinata.strategy.context.StrategyContextFactory;
 import jp.co.myogadanimotors.kohinata.timereventsource.ITimerEventSource;
 import jp.co.myogadanimotors.kohinata.timereventsource.TimerEventSource;
 import org.apache.logging.log4j.LogManager;
@@ -124,10 +124,11 @@ public final class Kohinata implements Runnable {
 
             // create market data provider
             marketDataProvider = null;  // todo: to be implemented
-            logger.info("market data adapter created.");
+            logger.info("market data provider created.");
 
             // create timer event source
-            timerEventSource = new TimerEventSource(eventIdGenerator, timeSource, 0, eventQueue);
+            long timerEventResolution = configAccessor.getLong("timerSource.timerEventResolution", Constants.DEFAULT_TIMER_EVENT_RESOLUTION);
+            timerEventSource = new TimerEventSource(eventIdGenerator, timeSource, timerEventResolution, eventQueue);
             logger.info("timer event source created.");
 
             // create order manager

@@ -1,10 +1,12 @@
 package jp.co.myogadanimotors.myogadani.strategy;
 
 import jp.co.myogadanimotors.bunkyo.config.IConfigAccessor;
+import jp.co.myogadanimotors.kohinata.master.strategy.IStrategyDescriptor;
+import jp.co.myogadanimotors.kohinata.strategy.IStrategy;
+import jp.co.myogadanimotors.kohinata.strategy.IStrategyFactory;
+import jp.co.myogadanimotors.kohinata.strategy.context.StrategyContext;
 import jp.co.myogadanimotors.myogadani.strategy.parameter.BaseStrategyParameters;
 import jp.co.myogadanimotors.myogadani.strategy.peg.Peg;
-import jp.co.myogadanimotors.kohinata.master.strategy.IStrategyDescriptor;
-import jp.co.myogadanimotors.myogadani.strategy.context.StrategyContext;
 
 public class StrategyFactory implements IStrategyFactory {
 

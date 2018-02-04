@@ -3,7 +3,7 @@ package jp.co.myogadanimotors.kohinata.ordermanagement.order;
 import jp.co.myogadanimotors.kohinata.event.order.OrderDestination;
 import jp.co.myogadanimotors.kohinata.event.order.OrderSide;
 import jp.co.myogadanimotors.kohinata.event.order.Orderer;
-import jp.co.myogadanimotors.myogadani.strategy.IStrategy;
+import jp.co.myogadanimotors.kohinata.strategy.IStrategy;
 
 import java.math.BigDecimal;
 import java.util.Map;

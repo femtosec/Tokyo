@@ -1,14 +1,14 @@
 package jp.co.myogadanimotors.kohinata.master
 
 import jp.co.myogadanimotors.bunkyo.config.ConfigAccessor
+import jp.co.myogadanimotors.bunkyo.master.market.IMarket
+import jp.co.myogadanimotors.bunkyo.master.market.MarketMaster
+import jp.co.myogadanimotors.bunkyo.master.market.MarketType
+import jp.co.myogadanimotors.bunkyo.master.product.IProduct
+import jp.co.myogadanimotors.bunkyo.master.product.ProductMaster
+import jp.co.myogadanimotors.bunkyo.master.product.ProductType
 import jp.co.myogadanimotors.kohinata.master.extendedattriute.ExtendedAttributeMaster
 import jp.co.myogadanimotors.kohinata.master.extendedattriute.IExtendedAttributeDescriptor
-import jp.co.myogadanimotors.kohinata.master.market.IMarket
-import jp.co.myogadanimotors.kohinata.master.market.MarketMaster
-import jp.co.myogadanimotors.kohinata.master.market.MarketType
-import jp.co.myogadanimotors.kohinata.master.product.IProduct
-import jp.co.myogadanimotors.kohinata.master.product.ProductMaster
-import jp.co.myogadanimotors.kohinata.master.product.ProductType
 import org.testng.annotations.BeforeClass
 import org.testng.annotations.Test
 
@@ -43,8 +43,6 @@ class MasterDataTest {
 
         assertProduct(productMaster.get(0L), ProductType.CryptoCurrency, "BTC/JPY", 0L, "Bitcoin @ bitFlyer")
         assertProduct(productMaster.get(1L), ProductType.CryptoCurrency, "BTC/JPY", 1L, "Bitcoin @ Zaif")
-        assertProduct(productMaster.get(2L), ProductType.CryptoCurrency, "ETH/JPY", 0L, "Ethereum @ bitFlyer")
-        assertProduct(productMaster.get(3L), ProductType.CryptoCurrency, "ETH/JPY", 1L, "Ethereum @ Zaif")
     }
 
     private static void assertProduct(IProduct product, ProductType productType, String symbol, long marketId, String description) {

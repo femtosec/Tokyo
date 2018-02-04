@@ -4,9 +4,9 @@ import groovyjarjarcommonscli.*;
 import jp.co.myogadanimotors.bunkyo.config.ConfigAccessor;
 import jp.co.myogadanimotors.bunkyo.master.MasterDataInitializeException;
 import jp.co.myogadanimotors.kohinata.Kohinata;
-import jp.co.myogadanimotors.myogadani.strategy.StrategyFactory;
 import jp.co.myogadanimotors.kohinata.master.strategy.StrategyMaster;
-import jp.co.myogadanimotors.myogadani.strategy.IStrategyFactory;
+import jp.co.myogadanimotors.kohinata.strategy.IStrategyFactory;
+import jp.co.myogadanimotors.myogadani.strategy.StrategyFactory;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
