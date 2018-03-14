@@ -65,10 +65,10 @@ public class Main {
         }
 
         // create StrategyFactory
-        IStrategyFactory strategyFactory = new StrategyFactory(strategyConfigAccessor);
+        IStrategyFactory strategyFactory = new StrategyFactory();
 
         // create Kohinata
-        Kohinata kohinata = new Kohinata(environment, strategyMaster, strategyFactory);
+        Kohinata kohinata = new Kohinata(environment, strategyMaster, strategyConfigAccessor, strategyFactory);
 
         // run Kohinata
         ExecutorService executorService = Executors.newSingleThreadExecutor();

@@ -17,9 +17,9 @@ import jp.co.myogadanimotors.kohinata.master.strategy.StrategyMaster;
 import jp.co.myogadanimotors.kohinata.ordermanagement.order.IOrder;
 import jp.co.myogadanimotors.kohinata.ordermanagement.order.Order;
 import jp.co.myogadanimotors.kohinata.ordermanagement.order.OrderState;
-import jp.co.myogadanimotors.kohinata.strategy.IStrategy;
 import jp.co.myogadanimotors.kohinata.strategy.IStrategyFactory;
 import jp.co.myogadanimotors.kohinata.strategy.context.OrderView;
+import jp.co.myogadanimotors.kohinata.strategy.context.StrategyContext;
 import jp.co.myogadanimotors.kohinata.strategy.context.StrategyContextFactory;
 import jp.co.myogadanimotors.kohinata.strategy.event.childorder.*;
 import jp.co.myogadanimotors.kohinata.strategy.event.childorderfill.StrategyChildOrderFill;
@@ -47,7 +47,6 @@ public final class OrderManager implements IAsyncOrderListener, IAsyncReportList
     private final ITimeSource timeSource;
     private final OrderValidator orderValidator;
     private final StrategyContextFactory strategyContextFactory;
-    private final IStrategyFactory strategyFactory;
     private final StrategyMaster strategyMaster;
     private final Executor eventQueue;
     private final Executor[] strategyEventQueues;
@@ -60,7 +59,6 @@ public final class OrderManager implements IAsyncOrderListener, IAsyncReportList
     public OrderManager(EventIdGenerator eventIdGenerator,
                         ITimeSource timeSource,
                         StrategyContextFactory strategyContextFactory,
-                        IStrategyFactory strategyFactory,
                         MarketMaster marketMaster,
                         ProductMaster productMaster,
                         ExtendedAttributeMaster extendedAttributeMaster,
@@ -74,7 +72,6 @@ public final class OrderManager implements IAsyncOrderListener, IAsyncReportList
         this.timeSource = requireNonNull(timeSource);
         this.orderValidator =  new OrderValidator(marketMaster, productMaster, extendedAttributeMaster);
         this.strategyContextFactory = requireNonNull(strategyContextFactory);
-        this.strategyFactory = requireNonNull(strategyFactory);
         this.strategyMaster = requireNonNull(strategyMaster);
         this.eventQueue = requireNonNull(eventQueue);
         this.strategyEventQueues = requireNonNull(strategyEventQueues);
@@ -170,7 +167,7 @@ public final class OrderManager implements IAsyncOrderListener, IAsyncReportList
                         new StrategyChildOrderNewReject(
                                 eventIdGenerator.generateEventId(),
                                 timeSource.getCurrentTime(),
-                                newOrder.getStrategy(),
+                                newOrder.getStrategyContext(),
                                 new OrderView(parentStrategyOrder),
                                 new OrderView(newOrder),
                                 newOrder.getOrderTag(),
@@ -197,7 +194,7 @@ public final class OrderManager implements IAsyncOrderListener, IAsyncReportList
                     new StrategyNew(
                             eventIdGenerator.generateEventId(),
                             timeSource.getCurrentTime(),
-                            newOrder.getStrategy(),
+                            newOrder.getStrategyContext(),
                             newOrderEvent.getRequestId(),
                             new OrderView(newOrder),
                             newOrderEvent.getOrderer(),
@@ -233,7 +230,7 @@ public final class OrderManager implements IAsyncOrderListener, IAsyncReportList
                         new StrategyChildOrderAmendReject(
                                 eventIdGenerator.generateEventId(),
                                 timeSource.getCurrentTime(),
-                                currentOrder.getStrategy(),
+                                currentOrder.getStrategyContext(),
                                 new OrderView(parentStrategyOrder),
                                 new OrderView(currentOrder),
                                 currentOrder.getOrderTag(),
@@ -264,7 +261,7 @@ public final class OrderManager implements IAsyncOrderListener, IAsyncReportList
                     new StrategyAmend(
                             eventIdGenerator.generateEventId(),
                             timeSource.getCurrentTime(),
-                            amendOrder.getStrategy(),
+                            amendOrder.getStrategyContext(),
                             amendOrderEvent.getRequestId(),
                             new OrderView(currentOrder),
                             new OrderView(amendOrder),
@@ -302,7 +299,7 @@ public final class OrderManager implements IAsyncOrderListener, IAsyncReportList
                         new StrategyChildOrderCancelReject(
                                 eventIdGenerator.generateEventId(),
                                 timeSource.getCurrentTime(),
-                                currentOrder.getStrategy(),
+                                currentOrder.getStrategyContext(),
                                 new OrderView(parentStrategyOrder),
                                 new OrderView(currentOrder),
                                 currentOrder.getOrderTag(),
@@ -329,7 +326,7 @@ public final class OrderManager implements IAsyncOrderListener, IAsyncReportList
                     new StrategyCancel(
                             eventIdGenerator.generateEventId(),
                             timeSource.getCurrentTime(),
-                            currentOrder.getStrategy(),
+                            currentOrder.getStrategyContext(),
                             cancelOrderEvent.getRequestId(),
                             new OrderView(currentOrder),
                             currentOrder.getOrderer(),
@@ -363,7 +360,7 @@ public final class OrderManager implements IAsyncOrderListener, IAsyncReportList
             IEvent strategyEvent = new StrategyNewAck(
                     eventIdGenerator.generateEventId(),
                     timeSource.getCurrentTime(),
-                    order.getStrategy(),
+                    order.getStrategyContext(),
                     new OrderView(order)
             );
             sendStrategyEvent(order.getThreadId(), strategyEvent);
@@ -386,7 +383,7 @@ public final class OrderManager implements IAsyncOrderListener, IAsyncReportList
                     new StrategyChildOrderNewAck(
                             eventIdGenerator.generateEventId(),
                             timeSource.getCurrentTime(),
-                            order.getStrategy(),
+                            order.getStrategyContext(),
                             new OrderView(parentStrategyOrder),
                             new OrderView(order),
                             order.getOrderTag()
@@ -418,7 +415,7 @@ public final class OrderManager implements IAsyncOrderListener, IAsyncReportList
                     new StrategyNewReject(
                             eventIdGenerator.generateEventId(),
                             timeSource.getCurrentTime(),
-                            order.getStrategy(),
+                            order.getStrategyContext(),
                             new OrderView(order),
                             newReject.getMessage()
                     )
@@ -439,7 +436,7 @@ public final class OrderManager implements IAsyncOrderListener, IAsyncReportList
                     new StrategyChildOrderNewReject(
                             eventIdGenerator.generateEventId(),
                             timeSource.getCurrentTime(),
-                            order.getStrategy(),
+                            order.getStrategyContext(),
                             new OrderView(parentStrategyOrder),
                             new OrderView(order),
                             order.getOrderTag(),
@@ -495,7 +492,8 @@ public final class OrderManager implements IAsyncOrderListener, IAsyncReportList
                     new StrategyAmendAck(
                             eventIdGenerator.generateEventId(),
                             timeSource.getCurrentTime(),
-                            order.getStrategy(),new OrderView(order)
+                            order.getStrategyContext(),
+                            new OrderView(order)
                     )
             );
         }
@@ -517,7 +515,7 @@ public final class OrderManager implements IAsyncOrderListener, IAsyncReportList
                     new StrategyChildOrderAmendAck(
                             eventIdGenerator.generateEventId(),
                             timeSource.getCurrentTime(),
-                            order.getStrategy(),
+                            order.getStrategyContext(),
                             new OrderView(parentStrategyOrder),
                             new OrderView(order),
                             order.getOrderTag()
@@ -558,7 +556,7 @@ public final class OrderManager implements IAsyncOrderListener, IAsyncReportList
                     new StrategyAmendReject(
                             eventIdGenerator.generateEventId(),
                             timeSource.getCurrentTime(),
-                            order.getStrategy(),
+                            order.getStrategyContext(),
                             new OrderView(order),
                             amendReject.getMessage()
                     )
@@ -579,7 +577,7 @@ public final class OrderManager implements IAsyncOrderListener, IAsyncReportList
                     new StrategyChildOrderAmendReject(
                             eventIdGenerator.generateEventId(),
                             timeSource.getCurrentTime(),
-                            order.getStrategy(),
+                            order.getStrategyContext(),
                             new OrderView(parentStrategyOrder),
                             new OrderView(order),
                             order.getOrderTag(),
@@ -615,7 +613,7 @@ public final class OrderManager implements IAsyncOrderListener, IAsyncReportList
                     new StrategyCancelAck(
                             eventIdGenerator.generateEventId(),
                             timeSource.getCurrentTime(),
-                            order.getStrategy(),
+                            order.getStrategyContext(),
                             new OrderView(order)
                     )
             );
@@ -638,7 +636,7 @@ public final class OrderManager implements IAsyncOrderListener, IAsyncReportList
                     new StrategyChildOrderCancelAck(
                             eventIdGenerator.generateEventId(),
                             timeSource.getCurrentTime(),
-                            order.getStrategy(),
+                            order.getStrategyContext(),
                             new OrderView(parentStrategyOrder),
                             new OrderView(order),
                             order.getOrderTag()
@@ -672,7 +670,7 @@ public final class OrderManager implements IAsyncOrderListener, IAsyncReportList
                     new StrategyCancelReject(
                             eventIdGenerator.generateEventId(),
                             timeSource.getCurrentTime(),
-                            order.getStrategy(),
+                            order.getStrategyContext(),
                             new OrderView(order),
                             cancelReject.getMessage()
                     )
@@ -693,7 +691,7 @@ public final class OrderManager implements IAsyncOrderListener, IAsyncReportList
                     new StrategyChildOrderCancelReject(
                             eventIdGenerator.generateEventId(),
                             timeSource.getCurrentTime(),
-                            order.getStrategy(),
+                            order.getStrategyContext(),
                             new OrderView(parentStrategyOrder),
                             new OrderView(order),
                             order.getOrderTag(),
@@ -729,7 +727,7 @@ public final class OrderManager implements IAsyncOrderListener, IAsyncReportList
                     new StrategyUnsolicitedCancel(
                             eventIdGenerator.generateEventId(),
                             timeSource.getCurrentTime(),
-                            order.getStrategy(),
+                            order.getStrategyContext(),
                             new OrderView(order),
                             unsolicitedCancel.getMessage()
                     )
@@ -753,7 +751,7 @@ public final class OrderManager implements IAsyncOrderListener, IAsyncReportList
                     new StrategyChildOrderUnsolicitedCancel(
                             eventIdGenerator.generateEventId(),
                             timeSource.getCurrentTime(),
-                            order.getStrategy(),
+                            order.getStrategyContext(),
                             new OrderView(parentStrategyOrder),
                             new OrderView(order),
                             order.getOrderTag(),
@@ -808,7 +806,7 @@ public final class OrderManager implements IAsyncOrderListener, IAsyncReportList
                     new StrategyChildOrderFill(
                             eventIdGenerator.generateEventId(),
                             timeSource.getCurrentTime(),
-                            order.getStrategy(),
+                            order.getStrategyContext(),
                             fillEvent.getExecQuantity(),
                             new OrderView(parentStrategyOrder),
                             new OrderView(order),
@@ -839,7 +837,7 @@ public final class OrderManager implements IAsyncOrderListener, IAsyncReportList
                     new StrategyTimerEvent(
                             eventIdGenerator.generateEventId(),
                             timeSource.getCurrentTime(),
-                            order.getStrategy(),
+                            order.getStrategyContext(),
                             timerEvent.getTimerTag(),
                             timerEvent.getTimerEventTime()
                     )
@@ -876,7 +874,7 @@ public final class OrderManager implements IAsyncOrderListener, IAsyncReportList
         );
 
         if (newOrder.isStrategyOrder()) {
-            newOrder.setStrategy(createStrategy(getStrategyName(newOrder), newOrder));
+            newOrder.setStrategyContext(createStrategyContext(getStrategyName(newOrder), newOrder));
         }
 
         return newOrder;
@@ -901,12 +899,12 @@ public final class OrderManager implements IAsyncOrderListener, IAsyncReportList
 
         if (amendOrder.isStrategyOrder()) {
             // if strategy type amend, create new strategy
-            IStrategy currentStrategy = currentOrder.getStrategy();
+            StrategyContext currentStrategyContext = currentOrder.getStrategyContext();
             String newStrategyName = getStrategyName(amendOrder);
-            if (!currentStrategy.getStrategyDescriptor().getName().equals(newStrategyName)) {
-                amendOrder.setStrategy(createStrategy(newStrategyName, amendOrder));
+            if (!currentStrategyContext.getStrategyDescriptor().getName().equals(newStrategyName)) {
+                amendOrder.setStrategyContext(createStrategyContext(newStrategyName, amendOrder));
             } else {
-                amendOrder.setStrategy(currentStrategy);
+                amendOrder.setStrategyContext(currentStrategyContext);
             }
         }
 
@@ -930,14 +928,14 @@ public final class OrderManager implements IAsyncOrderListener, IAsyncReportList
         return order.getExtendedAttribute("strategyName");
     }
 
-    private IStrategy createStrategy(String strategyName, IOrder order) {
+    private StrategyContext createStrategyContext(String strategyName, IOrder order) {
         IStrategyDescriptor strategyDescriptor = strategyMaster.getByName(strategyName);
         if (strategyDescriptor == null) {
             logger.warn("strategyName invalid. (strategyName: {})", strategyName);
             return null;
         }
 
-        return strategyFactory.create(strategyDescriptor, strategyContextFactory.create(order));
+        return strategyContextFactory.create(order, strategyDescriptor);
     }
 
     /**

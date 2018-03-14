@@ -9,7 +9,8 @@ import jp.co.myogadanimotors.bunkyo.master.product.ProductMaster;
 import jp.co.myogadanimotors.bunkyo.timesource.ITimeSource;
 import jp.co.myogadanimotors.bunkyo.timesource.SystemTimeSource;
 import jp.co.myogadanimotors.yushima.mdmanager.MarketDataManager;
-import jp.co.myogadanimotors.yushima.publisher.*;
+import jp.co.myogadanimotors.yushima.publisher.JmsMarketDataPublisherFactory;
+import jp.co.myogadanimotors.yushima.publisher.MarketDataPublisherException;
 import jp.co.myogadanimotors.yushima.subscriber.bitflyer.BitFlyerSubscriber;
 import jp.co.myogadanimotors.yushima.subscriber.zaif.ZaifSubscriber;
 import org.apache.logging.log4j.LogManager;
@@ -87,7 +88,7 @@ public class Yushima implements Runnable {
             return false;
         }
 
-        // initialize master data stores
+        // initialize master data
         MarketMaster marketMaster = new MarketMaster();
         ProductMaster productMaster = new ProductMaster();
         try {
@@ -118,11 +119,21 @@ public class Yushima implements Runnable {
 
         try {
             // create bitFlyer subscriber
-            bitFlyerSubscriber = new BitFlyerSubscriber(eventIdGenerator, timeSource, marketMaster, productMaster);
+            bitFlyerSubscriber = new BitFlyerSubscriber(
+                    eventIdGenerator,
+                    timeSource,
+                    marketMaster,
+                    productMaster
+            );
             logger.info("bitFlyer subscriber created.");
 
             // create zaif subscriber
-            zaifSubscriber = new ZaifSubscriber(eventIdGenerator, timeSource, marketMaster, productMaster);
+            zaifSubscriber = new ZaifSubscriber(
+                    eventIdGenerator,
+                    timeSource,
+                    marketMaster,
+                    productMaster
+            );
             logger.info("Zaif subscriber created.");
 
             // create market data manager

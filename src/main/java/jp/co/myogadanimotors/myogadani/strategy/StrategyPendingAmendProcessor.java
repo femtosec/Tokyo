@@ -1,6 +1,7 @@
-package jp.co.myogadanimotors.kohinata.strategy.context;
+package jp.co.myogadanimotors.myogadani.strategy;
 
 import jp.co.myogadanimotors.kohinata.ordermanagement.order.IOrder;
+import jp.co.myogadanimotors.kohinata.strategy.context.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

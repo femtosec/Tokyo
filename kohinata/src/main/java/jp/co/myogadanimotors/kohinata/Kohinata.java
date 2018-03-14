@@ -1,6 +1,7 @@
 package jp.co.myogadanimotors.kohinata;
 
 import jp.co.myogadanimotors.bunkyo.config.ConfigAccessor;
+import jp.co.myogadanimotors.bunkyo.config.IConfigAccessor;
 import jp.co.myogadanimotors.bunkyo.eventprocessing.EventIdGenerator;
 import jp.co.myogadanimotors.bunkyo.master.MasterDataInitializeException;
 import jp.co.myogadanimotors.bunkyo.master.market.MarketMaster;
@@ -37,6 +38,7 @@ public final class Kohinata implements Runnable {
 
     private final String environment;
     private final StrategyMaster strategyMaster;
+    private final IConfigAccessor strategyConfigAccessor;
     private final IStrategyFactory strategyFactory;
 
     private final int RUNNING = 0;
@@ -51,9 +53,10 @@ public final class Kohinata implements Runnable {
     private IMarketDataProvider marketDataProvider;
     private ITimerEventSource timerEventSource;
 
-    public Kohinata(String environment, StrategyMaster strategyMaster, IStrategyFactory strategyFactory) {
+    public Kohinata(String environment, StrategyMaster strategyMaster, IConfigAccessor strategyConfigAccessor, IStrategyFactory strategyFactory) {
         this.environment = (environment != null) ? environment : "development";
         this.strategyMaster = requireNonNull(strategyMaster);
+        this.strategyConfigAccessor = requireNonNull(strategyConfigAccessor);
         this.strategyFactory = requireNonNull(strategyFactory);
     }
 
@@ -110,7 +113,9 @@ public final class Kohinata implements Runnable {
                     requestIdGenerator,
                     timeSource,
                     marketMaster,
-                    productMaster
+                    productMaster,
+                    strategyConfigAccessor,
+                    strategyFactory
             );
             logger.info("strategy context factory created.");
 
@@ -136,7 +141,6 @@ public final class Kohinata implements Runnable {
                     eventIdGenerator,
                     timeSource,
                     strategyContextFactory,
-                    strategyFactory,
                     marketMaster,
                     productMaster,
                     extendedAttributeMaster,

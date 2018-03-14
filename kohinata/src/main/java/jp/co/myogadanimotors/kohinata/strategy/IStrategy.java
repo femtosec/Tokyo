@@ -1,58 +1,40 @@
 package jp.co.myogadanimotors.kohinata.strategy;
 
-import jp.co.myogadanimotors.kohinata.master.strategy.IStrategyDescriptor;
-import jp.co.myogadanimotors.kohinata.strategy.event.childorder.*;
-import jp.co.myogadanimotors.kohinata.strategy.event.childorderfill.StrategyChildOrderFill;
-import jp.co.myogadanimotors.kohinata.strategy.event.marketdata.StrategyMarketDataEvent;
-import jp.co.myogadanimotors.kohinata.strategy.event.order.*;
-import jp.co.myogadanimotors.kohinata.strategy.event.timer.StrategyTimerEvent;
+import jp.co.myogadanimotors.kohinata.strategy.context.IStrategyContext;
+import jp.co.myogadanimotors.kohinata.strategy.context.IStrategyPendingAmendContext;
+import jp.co.myogadanimotors.kohinata.strategy.context.IStrategyPendingAmendProcessor;
+import jp.co.myogadanimotors.kohinata.strategy.context.IStrategyPendingCancelProcessor;
+import jp.co.myogadanimotors.kohinata.strategy.validator.IValidator;
 
 public interface IStrategy {
-    IStrategyDescriptor getStrategyDescriptor();
 
-    void preProcessEvent();
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    // strategy lifecycle related
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    void postProcessEvent();
+    void init(IStrategyContext context);
 
-    void processStrategyNew(StrategyNew strategyNew);
+    void terminate(IStrategyContext context);
 
-    void processStrategyAmend(StrategyAmend strategyAmend);
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    // validation related
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    void processStrategyCancel(StrategyCancel strategyCancel);
+    IValidator[] getValidators();
 
-    void processStrategyNewAck(StrategyNewAck strategyNewAck);
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    // pending amend/cancel related
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    void processStrategyNewReject(StrategyNewReject strategyNewReject);
+    IStrategyPendingAmendContext createPendingAmendContext(IStrategyContext context);
 
-    void processStrategyAmendAck(StrategyAmendAck strategyAmendAck);
+    IStrategyPendingAmendProcessor createPendingAmendProcessor(IStrategyContext context, long requestId);
 
-    void processStrategyAmendReject(StrategyAmendReject strategyAmendReject);
+    IStrategyPendingCancelProcessor createPendingCancelProcessor(IStrategyContext context, long requestId);
 
-    void processStrategyCancelAck(StrategyCancelAck strategyCancelAck);
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    // main logic
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    void processStrategyCancelReject(StrategyCancelReject strategyCancelReject);
-
-    void processStrategyUnsolicitedCancel(StrategyUnsolicitedCancel strategyUnsolicitedCancel);
-
-    void processStrategyChildOrderNewAck(StrategyChildOrderNewAck strategyChildOrderNewAck);
-
-    void processStrategyChildOrderNewReject(StrategyChildOrderNewReject strategyChildOrderNewReject);
-
-    void processStrategyChildOrderAmendAck(StrategyChildOrderAmendAck strategyChildOrderAmendAck);
-
-    void processStrategyChildOrderAmendReject(StrategyChildOrderAmendReject strategyChildOrderAmendReject);
-
-    void processStrategyChildOrderCancelAck(StrategyChildOrderCancelAck strategyChildOrderCancelAck);
-
-    void processStrategyChildOrderCancelReject(StrategyChildOrderCancelReject strategyChildOrderCancelReject);
-
-    void processStrategyChildOrderExpire(StrategyChildOrderExpire strategyChildOrderExpire);
-
-    void processStrategyChildOrderUnsolicitedCancel(StrategyChildOrderUnsolicitedCancel strategyChildOrderUnsolicitedCancel);
-
-    void processStrategyChildOrderFill(StrategyChildOrderFill strategyChildOrderFill);
-
-    void processStrategyMarketDataEvent(StrategyMarketDataEvent strategyMarketDataEvent);
-
-    void processStrategyTimerEvent(StrategyTimerEvent strategyTimerEvent);
+    void doAction(IStrategyContext context);
 }

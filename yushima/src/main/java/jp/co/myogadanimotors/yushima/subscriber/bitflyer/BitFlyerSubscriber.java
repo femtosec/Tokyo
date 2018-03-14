@@ -22,10 +22,7 @@ import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 public class BitFlyerSubscriber implements IMarketDataSubscriber {
 
@@ -44,7 +41,7 @@ public class BitFlyerSubscriber implements IMarketDataSubscriber {
         this.rawDataSender = new RawDataSender(idGenerator, timeSource);
         this.marketMaster = marketMaster;
         this.productMaster = productMaster;
-    }
+   }
 
     @Override
     public void addEventListener(IAsyncRawDataListener rawDataListener) {
@@ -72,17 +69,22 @@ public class BitFlyerSubscriber implements IMarketDataSubscriber {
             IProduct product = productMaster.get(subscription.getProductId());
             IMarket market = marketMaster.get(product.getMarketId());
 
-            PubNub pubNub = new PubNub(pnConf);
-            pubNub.addListener(
-                    new Listener(
-                            subscription.getMarketDataType(),
-                            product.getSymbol(),
-                            product.getName(),
-                            market.getMic()
-                    )
-            );
-            pubNub.subscribe().channels(Collections.singletonList(subscription.getChannel())).execute();
-            pubNubs.add(pubNub);
+            for (Map.Entry<String, String> entry: subscription.getChannels().entrySet()) {
+                MarketDataType marketDataType = MarketDataType.valueOf(entry.getKey());
+                String channel = entry.getValue();
+
+                PubNub pubNub = new PubNub(pnConf);
+                pubNub.addListener(
+                        new Listener(
+                                marketDataType,
+                                product.getSymbol(),
+                                product.getName(),
+                                market.getMic()
+                        )
+                );
+                pubNub.subscribe().channels(Collections.singletonList(channel)).execute();
+                pubNubs.add(pubNub);
+            }
         });
     }
 

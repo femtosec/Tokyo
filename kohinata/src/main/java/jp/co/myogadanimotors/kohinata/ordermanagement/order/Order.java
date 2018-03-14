@@ -3,7 +3,7 @@ package jp.co.myogadanimotors.kohinata.ordermanagement.order;
 import jp.co.myogadanimotors.kohinata.event.order.OrderDestination;
 import jp.co.myogadanimotors.kohinata.event.order.OrderSide;
 import jp.co.myogadanimotors.kohinata.event.order.Orderer;
-import jp.co.myogadanimotors.kohinata.strategy.IStrategy;
+import jp.co.myogadanimotors.kohinata.strategy.context.StrategyContext;
 
 import java.math.BigDecimal;
 import java.util.Map;
@@ -32,7 +32,7 @@ public final class Order implements IOrder {
     private BigDecimal priceLimit;
     private OrderState orderState = OrderState.New;
     private int version = 0;
-    private IStrategy strategy;
+    private StrategyContext strategyContext;
 
     public Order(long orderId,
                  long accountId,
@@ -99,8 +99,8 @@ public final class Order implements IOrder {
         this.priceLimit = priceLimit;
     }
 
-    public void setStrategy(IStrategy strategy) {
-        this.strategy = strategy;
+    public void setStrategyContext(StrategyContext strategyContext) {
+        this.strategyContext = strategyContext;
     }
 
     public void setOrderState(OrderState orderState) {
@@ -211,8 +211,8 @@ public final class Order implements IOrder {
         return parentStrategyOrder;
     }
 
-    public IStrategy getStrategy() {
-        return strategy;
+    public StrategyContext getStrategyContext() {
+        return strategyContext;
     }
 
     public int getThreadId() {

@@ -67,28 +67,28 @@ class SubscriberTest {
 
     private class ListenerTest implements IAsyncRawDataListener {
 
-        private final Gson gson = new Gson();
-        private final Executor eventQueue;
+        private final Gson gson = new Gson()
+        private final Executor eventQueue
 
         private ListenerTest(Executor eventQueue) {
-            this.eventQueue = eventQueue;
+            this.eventQueue = eventQueue
         }
 
         @Override
         void processBitFlyerRawData(BitFlyerRawData bitFlyerRawData) {
-            System.out.println(bitFlyerRawData.getMarketDataType().toString() + " // " + bitFlyerRawData.getRawData().toString());
+            System.out.println(bitFlyerRawData.getMarketDataType().toString() + " // " + bitFlyerRawData.getRawData().toString())
         }
 
         @Override
         void processZaifRawData(ZaifRawData zaifRawData) {
-            Map map = gson.fromJson(zaifRawData.getRawData(), Map.class);
+            Map map = gson.fromJson(zaifRawData.getRawData(), Map.class)
 
-            System.out.println(zaifRawData.getMarketDataType().toString() + " // " + zaifRawData.getRawData());
+            System.out.println(zaifRawData.getMarketDataType().toString() + " // " + zaifRawData.getRawData())
         }
 
         @Override
         Executor getEventQueue() {
-            return eventQueue;
+            return eventQueue
         }
     }
 

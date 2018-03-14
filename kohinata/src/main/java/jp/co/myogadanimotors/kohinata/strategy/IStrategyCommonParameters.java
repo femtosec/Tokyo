@@ -1,6 +1,6 @@
 package jp.co.myogadanimotors.kohinata.strategy;
 
-public interface IStrategyParameters {
+public interface IStrategyCommonParameters {
     void init();
     int getMaxNumberOfPendingAmendProcessing();
     int getMaxNumberOfPendingCancelProcessing();

@@ -3,8 +3,9 @@ package jp.co.myogadanimotors.kohinata.strategy.event.order;
 import jp.co.myogadanimotors.kohinata.event.order.OrderDestination;
 import jp.co.myogadanimotors.kohinata.event.order.Orderer;
 import jp.co.myogadanimotors.kohinata.ordermanagement.order.IOrder;
-import jp.co.myogadanimotors.kohinata.strategy.IStrategy;
 import jp.co.myogadanimotors.kohinata.strategy.context.OrderView;
+import jp.co.myogadanimotors.kohinata.strategy.context.StrategyContext;
+import jp.co.myogadanimotors.kohinata.strategy.event.StrategyEventType;
 
 public final class StrategyAmend extends AbstractStrategyOrderEvent {
 
@@ -12,13 +13,13 @@ public final class StrategyAmend extends AbstractStrategyOrderEvent {
 
     public StrategyAmend(long eventId,
                          long creationTime,
-                         IStrategy strategy,
+                         StrategyContext context,
                          long requestId,
                          OrderView orderView,
                          OrderView amendOrderView,
                          Orderer orderer,
                          OrderDestination destination) {
-        super(eventId, creationTime, strategy, requestId, orderView, orderer, destination);
+        super(eventId, creationTime, context, requestId, orderView, orderer, destination);
         this.amendOrderView = amendOrderView;
     }
 
@@ -27,8 +28,13 @@ public final class StrategyAmend extends AbstractStrategyOrderEvent {
     }
 
     @Override
-    protected void callEventListener(IStrategy strategy) {
-        strategy.processStrategyAmend(this);
+    public StrategyEventType getStrategyEventType() {
+        return StrategyEventType.Amend;
+    }
+
+    @Override
+    protected void callEventProcessor(StrategyContext context) {
+        context.processStrategyAmend(this);
     }
 
     @Override

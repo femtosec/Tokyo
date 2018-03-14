@@ -1,22 +1,28 @@
 package jp.co.myogadanimotors.kohinata.strategy.event.childorder;
 
-import jp.co.myogadanimotors.kohinata.strategy.IStrategy;
 import jp.co.myogadanimotors.kohinata.strategy.context.OrderView;
+import jp.co.myogadanimotors.kohinata.strategy.context.StrategyContext;
+import jp.co.myogadanimotors.kohinata.strategy.event.StrategyEventType;
 
 public final class StrategyChildOrderCancelReject extends AbstractStrategyChildOrderReport {
 
     public StrategyChildOrderCancelReject(long eventId,
                                           long creationTime,
-                                          IStrategy strategy,
+                                          StrategyContext context,
                                           OrderView orderView,
                                           OrderView childOrderView,
                                           String childOrderTag,
                                           String message) {
-        super(eventId, creationTime, strategy, orderView, childOrderView, childOrderTag, message);
+        super(eventId, creationTime, context, orderView, childOrderView, childOrderTag, message);
     }
 
     @Override
-    protected void callEventListener(IStrategy strategy) {
-        strategy.processStrategyChildOrderCancelReject(this);
+    public StrategyEventType getStrategyEventType() {
+        return StrategyEventType.ChildOrderCancelReject;
+    }
+
+    @Override
+    protected void callEventProcessor(StrategyContext context) {
+        context.processStrategyChildOrderCancelReject(this);
     }
 }

@@ -1,8 +1,9 @@
 package jp.co.myogadanimotors.kohinata.strategy.event.marketdata;
 
 import jp.co.myogadanimotors.kohinata.event.marketdata.DepthEntry;
-import jp.co.myogadanimotors.kohinata.strategy.IStrategy;
+import jp.co.myogadanimotors.kohinata.strategy.context.StrategyContext;
 import jp.co.myogadanimotors.kohinata.strategy.event.AbstractStrategyEvent;
+import jp.co.myogadanimotors.kohinata.strategy.event.StrategyEventType;
 
 import java.math.BigDecimal;
 
@@ -18,7 +19,7 @@ public final class StrategyMarketDataEvent extends AbstractStrategyEvent {
 
     public StrategyMarketDataEvent(long eventId,
                                    long creationTime,
-                                   IStrategy strategy,
+                                   StrategyContext context,
                                    long productId,
                                    String symbol,
                                    String mic,
@@ -26,7 +27,7 @@ public final class StrategyMarketDataEvent extends AbstractStrategyEvent {
                                    BigDecimal lastTradeVolume,
                                    DepthEntry[] bidDepth,
                                    DepthEntry[] offerDepth) {
-        super(eventId, creationTime, strategy);
+        super(eventId, creationTime, context);
         this.productId = productId;
         this.symbol = symbol;
         this.mic = mic;
@@ -34,6 +35,11 @@ public final class StrategyMarketDataEvent extends AbstractStrategyEvent {
         this.lastTradeVolume = lastTradeVolume;
         this.bidDepth = bidDepth;
         this.offerDepth = offerDepth;
+    }
+
+    @Override
+    public StrategyEventType getStrategyEventType() {
+        return StrategyEventType.MarketData;
     }
 
     public long getProductId() {
@@ -65,8 +71,8 @@ public final class StrategyMarketDataEvent extends AbstractStrategyEvent {
     }
 
     @Override
-    protected void callEventListener(IStrategy strategy) {
-        strategy.processStrategyMarketDataEvent(this);
+    protected void callEventProcessor(StrategyContext context) {
+        context.processStrategyMarketDataEvent(this);
     }
 
     @Override

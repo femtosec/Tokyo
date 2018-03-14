@@ -60,12 +60,12 @@ public final class OrderValidator {
         }
 
         if (newOrder.isStrategyOrder()) {
-            if (newOrder.getStrategy() == null) {
+            if (newOrder.getStrategyContext() == null) {
                 logger.warn("strategy is null despite strategy order. (isStrategyOrder: {})", newOrder.isStrategyOrder());
                 return false;
             }
         } else {
-            if (newOrder.getStrategy() != null) {
+            if (newOrder.getStrategyContext() != null) {
                 logger.warn("strategy is not null despite not strategy order. (isStrategyOrder: {})", newOrder.isStrategyOrder());
                 return false;
             }

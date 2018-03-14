@@ -2,8 +2,8 @@ package jp.co.myogadanimotors.kohinata.strategy.event.order;
 
 import jp.co.myogadanimotors.kohinata.event.order.OrderDestination;
 import jp.co.myogadanimotors.kohinata.event.order.Orderer;
-import jp.co.myogadanimotors.kohinata.strategy.IStrategy;
 import jp.co.myogadanimotors.kohinata.strategy.context.OrderView;
+import jp.co.myogadanimotors.kohinata.strategy.context.StrategyContext;
 import jp.co.myogadanimotors.kohinata.strategy.event.AbstractStrategyEvent;
 
 import static java.util.Objects.requireNonNull;
@@ -17,12 +17,12 @@ public abstract class AbstractStrategyOrderEvent extends AbstractStrategyEvent {
 
     public AbstractStrategyOrderEvent(long eventId,
                                       long creationTime,
-                                      IStrategy strategy,
+                                      StrategyContext context,
                                       long requestId,
                                       OrderView orderView,
                                       Orderer orderer,
                                       OrderDestination destination) {
-        super(eventId, creationTime, strategy);
+        super(eventId, creationTime, context);
         this.requestId = requestId;
         this.orderView = requireNonNull(orderView);
         this.orderer = requireNonNull(orderer);

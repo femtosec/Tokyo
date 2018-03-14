@@ -1,8 +1,9 @@
 package jp.co.myogadanimotors.kohinata.strategy.event.childorderfill;
 
-import jp.co.myogadanimotors.kohinata.strategy.IStrategy;
 import jp.co.myogadanimotors.kohinata.strategy.context.OrderView;
+import jp.co.myogadanimotors.kohinata.strategy.context.StrategyContext;
 import jp.co.myogadanimotors.kohinata.strategy.event.AbstractStrategyEvent;
+import jp.co.myogadanimotors.kohinata.strategy.event.StrategyEventType;
 
 import java.math.BigDecimal;
 
@@ -17,16 +18,21 @@ public final class StrategyChildOrderFill extends AbstractStrategyEvent {
 
     public StrategyChildOrderFill(long eventId,
                                   long creationTime,
-                                  IStrategy strategy,
+                                  StrategyContext context,
                                   BigDecimal execQuantity,
                                   OrderView orderView,
                                   OrderView childOrderView,
                                   String childOrderTag) {
-        super(eventId, creationTime, strategy);
+        super(eventId, creationTime, context);
         this.execQuantity = execQuantity;
         this.orderView = requireNonNull(orderView);
         this.childOrderView = requireNonNull(childOrderView);
         this.childOrderTag = childOrderTag;
+    }
+
+    @Override
+    public StrategyEventType getStrategyEventType() {
+        return StrategyEventType.ChildOrderFill;
     }
 
     public BigDecimal getExecQuantity() {
@@ -46,8 +52,8 @@ public final class StrategyChildOrderFill extends AbstractStrategyEvent {
     }
 
     @Override
-    protected void callEventListener(IStrategy strategy) {
-        strategy.processStrategyChildOrderFill(this);
+    protected void callEventProcessor(StrategyContext context) {
+        context.processStrategyChildOrderFill(this);
     }
 
     @Override

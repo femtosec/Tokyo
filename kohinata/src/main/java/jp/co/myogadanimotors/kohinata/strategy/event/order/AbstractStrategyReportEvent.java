@@ -1,7 +1,7 @@
 package jp.co.myogadanimotors.kohinata.strategy.event.order;
 
-import jp.co.myogadanimotors.kohinata.strategy.IStrategy;
 import jp.co.myogadanimotors.kohinata.strategy.context.OrderView;
+import jp.co.myogadanimotors.kohinata.strategy.context.StrategyContext;
 import jp.co.myogadanimotors.kohinata.strategy.event.AbstractStrategyEvent;
 
 import static java.util.Objects.requireNonNull;
@@ -12,9 +12,9 @@ public abstract class AbstractStrategyReportEvent extends AbstractStrategyEvent 
 
     public AbstractStrategyReportEvent(long eventId,
                                        long creationTime,
-                                       IStrategy strategy,
+                                       StrategyContext context,
                                        OrderView orderView) {
-        super(eventId, creationTime, strategy);
+        super(eventId, creationTime, context);
         this.orderView = requireNonNull(orderView);
     }
 
