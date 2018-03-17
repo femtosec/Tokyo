@@ -6,6 +6,8 @@ import jp.co.myogadanimotors.kohinata.strategy.context.IStrategyPendingAmendProc
 import jp.co.myogadanimotors.kohinata.strategy.context.IStrategyPendingCancelProcessor;
 import jp.co.myogadanimotors.kohinata.strategy.validator.IValidator;
 
+import java.util.List;
+
 public interface IStrategy {
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -20,7 +22,7 @@ public interface IStrategy {
     // validation related
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    IValidator[] getValidators();
+    List<IValidator> getValidatorList();
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     // pending amend/cancel related

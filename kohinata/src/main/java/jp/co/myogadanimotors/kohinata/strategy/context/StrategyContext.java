@@ -61,7 +61,7 @@ public final class StrategyContext implements IStrategyContext, IStrategyEventLi
     private final IStrategyDescriptor strategyDescriptor;
     private final IStrategy strategy;
     private final StrategyParameterAccessor strategyParameterAccessor;
-    private final List<IValidator> validatorList;
+    private final List<IValidator> validatorList = new ArrayList<>();
 
     private BaseStrategyEvent lastStrategyEvent;
     private StrategyState strategyState;
@@ -98,8 +98,8 @@ public final class StrategyContext implements IStrategyContext, IStrategyEventLi
         this.strategyDescriptor = requireNonNull(strategyDescriptor);
         this.strategy = requireNonNull(strategy);
         this.strategyParameterAccessor = new StrategyParameterAccessor(strategyDescriptor.getName(), strategyConfigAccessor);
-        this.validatorList = Arrays.asList(strategy.getValidators());
 
+        validatorList.addAll(strategy.getValidatorList());
         validatorList.add(new StrategyStateValidator());
         strategyParameterAccessor.updateExtendedAttributes(order.getExtendedAttributes());
         strategyState = StrategyState.PendingNew;

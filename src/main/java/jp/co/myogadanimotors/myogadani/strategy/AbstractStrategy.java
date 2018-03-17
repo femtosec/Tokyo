@@ -23,8 +23,8 @@ public abstract class AbstractStrategy implements IStrategy {
     }
 
     @Override
-    public final IValidator[] getValidators() {
-        return validatorList.toArray(new IValidator[validatorList.size()]);
+    public final List<IValidator> getValidatorList() {
+        return validatorList;
     }
 
     @Override
