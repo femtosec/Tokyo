@@ -8,7 +8,7 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class ChildOrderContainer implements IChildOrderContainer {
+public final class ChildOrderContainer implements IChildOrderContainer {
 
     private final Logger logger = LogManager.getLogger(getClass().getName());
 

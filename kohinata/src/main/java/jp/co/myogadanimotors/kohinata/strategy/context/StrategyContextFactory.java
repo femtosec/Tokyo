@@ -20,7 +20,7 @@ import jp.co.myogadanimotors.kohinata.strategy.IStrategyFactory;
 
 import static java.util.Objects.requireNonNull;
 
-public class StrategyContextFactory {
+public final class StrategyContextFactory {
 
     private final EventIdGenerator eventIdGenerator;
     private final RequestIdGenerator requestIdGenerator;

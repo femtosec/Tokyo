@@ -7,7 +7,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import static java.util.Objects.requireNonNull;
 
-public class StrategyParameterAccessor implements IStrategyParameterAccessor {
+public final class StrategyParameterAccessor implements IStrategyParameterAccessor {
 
     private final String strategyName;
     private final IConfigAccessor strategyConfigAccessor;
