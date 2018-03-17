@@ -1,10 +1,11 @@
 package jp.co.myogadanimotors.kohinata.strategy.event.timer;
 
 import jp.co.myogadanimotors.kohinata.strategy.context.StrategyContext;
-import jp.co.myogadanimotors.kohinata.strategy.event.AbstractStrategyEvent;
+import jp.co.myogadanimotors.kohinata.strategy.event.BaseStrategyEvent;
+import jp.co.myogadanimotors.kohinata.strategy.event.IStrategyEventListener;
 import jp.co.myogadanimotors.kohinata.strategy.event.StrategyEventType;
 
-public final class StrategyTimerEvent extends AbstractStrategyEvent {
+public final class StrategyTimerEvent extends BaseStrategyEvent {
 
     private final long timerTag;
     private final long timerEventTime;
@@ -33,8 +34,8 @@ public final class StrategyTimerEvent extends AbstractStrategyEvent {
     }
 
     @Override
-    protected void callEventProcessor(StrategyContext context) {
-        context.processStrategyTimerEvent(this);
+    protected void callStrategyEventListener(IStrategyEventListener strategyEventListener) {
+        strategyEventListener.processStrategyTimerEvent(this);
     }
 
     @Override

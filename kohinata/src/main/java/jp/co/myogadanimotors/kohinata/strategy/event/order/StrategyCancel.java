@@ -4,9 +4,10 @@ import jp.co.myogadanimotors.kohinata.event.order.OrderDestination;
 import jp.co.myogadanimotors.kohinata.event.order.Orderer;
 import jp.co.myogadanimotors.kohinata.strategy.context.OrderView;
 import jp.co.myogadanimotors.kohinata.strategy.context.StrategyContext;
+import jp.co.myogadanimotors.kohinata.strategy.event.IStrategyEventListener;
 import jp.co.myogadanimotors.kohinata.strategy.event.StrategyEventType;
 
-public final class StrategyCancel extends AbstractStrategyOrderEvent {
+public final class StrategyCancel extends BaseStrategyOrderEvent {
 
     public StrategyCancel(long eventId,
                           long creationTime,
@@ -24,7 +25,7 @@ public final class StrategyCancel extends AbstractStrategyOrderEvent {
     }
 
     @Override
-    protected void callEventProcessor(StrategyContext context) {
-        context.processStrategyCancel(this);
+    protected void callStrategyEventListener(IStrategyEventListener strategyEventListener) {
+        strategyEventListener.processStrategyCancel(this);
     }
 }

@@ -2,9 +2,10 @@ package jp.co.myogadanimotors.kohinata.strategy.event.order;
 
 import jp.co.myogadanimotors.kohinata.strategy.context.OrderView;
 import jp.co.myogadanimotors.kohinata.strategy.context.StrategyContext;
+import jp.co.myogadanimotors.kohinata.strategy.event.IStrategyEventListener;
 import jp.co.myogadanimotors.kohinata.strategy.event.StrategyEventType;
 
-public final class StrategyNewAck extends AbstractStrategyReportEvent {
+public final class StrategyNewAck extends BaseStrategyReportEvent {
 
     public StrategyNewAck(long eventId,
                           long creationTime,
@@ -19,7 +20,7 @@ public final class StrategyNewAck extends AbstractStrategyReportEvent {
     }
 
     @Override
-    protected void callEventProcessor(StrategyContext context) {
-        context.processStrategyNewAck(this);
+    protected void callStrategyEventListener(IStrategyEventListener strategyEventListener) {
+        strategyEventListener.processStrategyNewAck(this);
     }
 }

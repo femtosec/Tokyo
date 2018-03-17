@@ -2,9 +2,10 @@ package jp.co.myogadanimotors.kohinata.strategy.event.order;
 
 import jp.co.myogadanimotors.kohinata.strategy.context.OrderView;
 import jp.co.myogadanimotors.kohinata.strategy.context.StrategyContext;
+import jp.co.myogadanimotors.kohinata.strategy.event.IStrategyEventListener;
 import jp.co.myogadanimotors.kohinata.strategy.event.StrategyEventType;
 
-public final class StrategyCancelReject extends AbstractStrategyReportEvent {
+public final class StrategyCancelReject extends BaseStrategyReportEvent {
 
     private final String message;
 
@@ -27,8 +28,8 @@ public final class StrategyCancelReject extends AbstractStrategyReportEvent {
     }
 
     @Override
-    protected void callEventProcessor(StrategyContext context) {
-        context.processStrategyCancelReject(this);
+    protected void callStrategyEventListener(IStrategyEventListener strategyEventListener) {
+        strategyEventListener.processStrategyCancelReject(this);
     }
 
     @Override

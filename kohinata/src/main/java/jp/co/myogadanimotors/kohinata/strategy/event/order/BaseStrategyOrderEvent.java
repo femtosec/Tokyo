@@ -3,26 +3,26 @@ package jp.co.myogadanimotors.kohinata.strategy.event.order;
 import jp.co.myogadanimotors.kohinata.event.order.OrderDestination;
 import jp.co.myogadanimotors.kohinata.event.order.Orderer;
 import jp.co.myogadanimotors.kohinata.strategy.context.OrderView;
-import jp.co.myogadanimotors.kohinata.strategy.context.StrategyContext;
-import jp.co.myogadanimotors.kohinata.strategy.event.AbstractStrategyEvent;
+import jp.co.myogadanimotors.kohinata.strategy.event.BaseStrategyEvent;
+import jp.co.myogadanimotors.kohinata.strategy.event.IStrategyEventListener;
 
 import static java.util.Objects.requireNonNull;
 
-public abstract class AbstractStrategyOrderEvent extends AbstractStrategyEvent {
+public abstract class BaseStrategyOrderEvent extends BaseStrategyEvent {
 
     private final long requestId;
     private final OrderView orderView;
     private final Orderer orderer;
     private final OrderDestination destination;
 
-    public AbstractStrategyOrderEvent(long eventId,
-                                      long creationTime,
-                                      StrategyContext context,
-                                      long requestId,
-                                      OrderView orderView,
-                                      Orderer orderer,
-                                      OrderDestination destination) {
-        super(eventId, creationTime, context);
+    public BaseStrategyOrderEvent(long eventId,
+                                  long creationTime,
+                                  IStrategyEventListener eventListener,
+                                  long requestId,
+                                  OrderView orderView,
+                                  Orderer orderer,
+                                  OrderDestination destination) {
+        super(eventId, creationTime, eventListener);
         this.requestId = requestId;
         this.orderView = requireNonNull(orderView);
         this.orderer = requireNonNull(orderer);

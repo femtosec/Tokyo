@@ -5,9 +5,10 @@ import jp.co.myogadanimotors.kohinata.event.order.Orderer;
 import jp.co.myogadanimotors.kohinata.ordermanagement.order.IOrder;
 import jp.co.myogadanimotors.kohinata.strategy.context.OrderView;
 import jp.co.myogadanimotors.kohinata.strategy.context.StrategyContext;
+import jp.co.myogadanimotors.kohinata.strategy.event.IStrategyEventListener;
 import jp.co.myogadanimotors.kohinata.strategy.event.StrategyEventType;
 
-public final class StrategyAmend extends AbstractStrategyOrderEvent {
+public final class StrategyAmend extends BaseStrategyOrderEvent {
 
     private final OrderView amendOrderView;
 
@@ -33,8 +34,8 @@ public final class StrategyAmend extends AbstractStrategyOrderEvent {
     }
 
     @Override
-    protected void callEventProcessor(StrategyContext context) {
-        context.processStrategyAmend(this);
+    protected void callStrategyEventListener(IStrategyEventListener strategyEventListener) {
+        strategyEventListener.processStrategyAmend(this);
     }
 
     @Override

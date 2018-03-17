@@ -2,9 +2,10 @@ package jp.co.myogadanimotors.kohinata.strategy.event.childorder;
 
 import jp.co.myogadanimotors.kohinata.strategy.context.OrderView;
 import jp.co.myogadanimotors.kohinata.strategy.context.StrategyContext;
+import jp.co.myogadanimotors.kohinata.strategy.event.IStrategyEventListener;
 import jp.co.myogadanimotors.kohinata.strategy.event.StrategyEventType;
 
-public final class StrategyChildOrderCancelAck extends AbstractStrategyChildOrderReport {
+public final class StrategyChildOrderCancelAck extends BaseStrategyChildOrderReport {
 
     public StrategyChildOrderCancelAck(long eventId,
                                        long creationTime,
@@ -21,7 +22,7 @@ public final class StrategyChildOrderCancelAck extends AbstractStrategyChildOrde
     }
 
     @Override
-    protected void callEventProcessor(StrategyContext context) {
-        context.processStrategyChildOrderCancelAck(this);
+    protected void callStrategyEventListener(IStrategyEventListener strategyEventListener) {
+        strategyEventListener.processStrategyChildOrderCancelAck(this);
     }
 }

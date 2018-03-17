@@ -5,7 +5,7 @@ import jp.co.myogadanimotors.bunkyo.master.product.IProduct;
 import jp.co.myogadanimotors.kohinata.master.strategy.IStrategyDescriptor;
 import jp.co.myogadanimotors.kohinata.ordermanagement.order.IOrder;
 import jp.co.myogadanimotors.kohinata.strategy.StrategyState;
-import jp.co.myogadanimotors.kohinata.strategy.event.AbstractStrategyEvent;
+import jp.co.myogadanimotors.kohinata.strategy.event.BaseStrategyEvent;
 
 public interface IStrategyContext {
     StrategyState getStrategyState();
@@ -17,7 +17,7 @@ public interface IStrategyContext {
     IChildOrderContainer getChildOrderContainer();
     IChildOrderSender getChildOrderSender();
     ITimerRegistry getTimerRegistry();
-    AbstractStrategyEvent getLastStrategyEvent();
+    BaseStrategyEvent getLastStrategyEvent();
     long getCurrentTime();
     void subscribeMarketData(String symbol, String mic);
 }

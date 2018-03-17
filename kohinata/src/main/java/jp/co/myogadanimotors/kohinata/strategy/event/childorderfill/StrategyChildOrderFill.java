@@ -1,15 +1,15 @@
 package jp.co.myogadanimotors.kohinata.strategy.event.childorderfill;
 
 import jp.co.myogadanimotors.kohinata.strategy.context.OrderView;
-import jp.co.myogadanimotors.kohinata.strategy.context.StrategyContext;
-import jp.co.myogadanimotors.kohinata.strategy.event.AbstractStrategyEvent;
+import jp.co.myogadanimotors.kohinata.strategy.event.BaseStrategyEvent;
+import jp.co.myogadanimotors.kohinata.strategy.event.IStrategyEventListener;
 import jp.co.myogadanimotors.kohinata.strategy.event.StrategyEventType;
 
 import java.math.BigDecimal;
 
 import static java.util.Objects.requireNonNull;
 
-public final class StrategyChildOrderFill extends AbstractStrategyEvent {
+public final class StrategyChildOrderFill extends BaseStrategyEvent {
 
     private final BigDecimal execQuantity;
     private final OrderView orderView;
@@ -18,12 +18,12 @@ public final class StrategyChildOrderFill extends AbstractStrategyEvent {
 
     public StrategyChildOrderFill(long eventId,
                                   long creationTime,
-                                  StrategyContext context,
+                                  IStrategyEventListener eventListener,
                                   BigDecimal execQuantity,
                                   OrderView orderView,
                                   OrderView childOrderView,
                                   String childOrderTag) {
-        super(eventId, creationTime, context);
+        super(eventId, creationTime, eventListener);
         this.execQuantity = execQuantity;
         this.orderView = requireNonNull(orderView);
         this.childOrderView = requireNonNull(childOrderView);
@@ -52,8 +52,8 @@ public final class StrategyChildOrderFill extends AbstractStrategyEvent {
     }
 
     @Override
-    protected void callEventProcessor(StrategyContext context) {
-        context.processStrategyChildOrderFill(this);
+    protected void callStrategyEventListener(IStrategyEventListener strategyEventListener) {
+        strategyEventListener.processStrategyChildOrderFill(this);
     }
 
     @Override

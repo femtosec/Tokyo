@@ -20,7 +20,8 @@ import jp.co.myogadanimotors.kohinata.ordermanagement.order.IOrder;
 import jp.co.myogadanimotors.kohinata.ordermanagement.order.OrderState;
 import jp.co.myogadanimotors.kohinata.strategy.IStrategy;
 import jp.co.myogadanimotors.kohinata.strategy.StrategyState;
-import jp.co.myogadanimotors.kohinata.strategy.event.AbstractStrategyEvent;
+import jp.co.myogadanimotors.kohinata.strategy.event.BaseStrategyEvent;
+import jp.co.myogadanimotors.kohinata.strategy.event.IStrategyEventListener;
 import jp.co.myogadanimotors.kohinata.strategy.event.childorder.*;
 import jp.co.myogadanimotors.kohinata.strategy.event.childorderfill.StrategyChildOrderFill;
 import jp.co.myogadanimotors.kohinata.strategy.event.marketdata.StrategyMarketDataEvent;
@@ -36,12 +37,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Executor;
 import java.util.function.Predicate;
 
 import static java.util.Objects.requireNonNull;
 import static jp.co.myogadanimotors.kohinata.strategy.StrategyState.Working;
 
-public final class StrategyContext implements IStrategyContext {
+public final class StrategyContext implements IStrategyContext, IStrategyEventListener {
 
     private final Logger logger = LogManager.getLogger(getClass().getName());
 
@@ -61,7 +63,7 @@ public final class StrategyContext implements IStrategyContext {
     private final StrategyParameterAccessor strategyParameterAccessor;
     private final List<IValidator> validatorList;
 
-    private AbstractStrategyEvent lastStrategyEvent;
+    private BaseStrategyEvent lastStrategyEvent;
     private StrategyState strategyState;
     private IStrategyPendingAmendContext pendingAmendContext;
     private IStrategyPendingAmendProcessor pendingAmendProcessor;
@@ -153,7 +155,7 @@ public final class StrategyContext implements IStrategyContext {
     }
 
     @Override
-    public AbstractStrategyEvent getLastStrategyEvent() {
+    public BaseStrategyEvent getLastStrategyEvent() {
         return lastStrategyEvent;
     }
 
@@ -181,16 +183,19 @@ public final class StrategyContext implements IStrategyContext {
     // strategy event processing
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    private void updateExtendedAttributes(Map<String, String> extendedAttributes) {
-        orderView.updateExtendedAttributes(extendedAttributes);
-        strategyParameterAccessor.updateExtendedAttributes(extendedAttributes);
+    @Override
+    public Executor getEventQueue() {
+        // todo: to be implemented
+        return null;
     }
 
-    public final void preProcessEvent(AbstractStrategyEvent strategyEvent) {
+    @Override
+    public final void preProcessEvent(BaseStrategyEvent strategyEvent) {
         this.lastStrategyEvent = strategyEvent;
         currentTime = timeSource.getCurrentTime();
     }
 
+    @Override
     public final void postProcessEvent() {
         processStrategyState();
     }
@@ -199,6 +204,7 @@ public final class StrategyContext implements IStrategyContext {
     // order event
     //////////////////////////////////////////////////
 
+    @Override
     public final void processStrategyNew(StrategyNew strategyNew) {
         // update context
         orderView.update(strategyNew.getOrderView());
@@ -216,6 +222,7 @@ public final class StrategyContext implements IStrategyContext {
         }
     }
 
+    @Override
     public final void processStrategyAmend(StrategyAmend strategyAmend) {
         // update context
         orderView.update(strategyAmend.getOrderView());
@@ -240,6 +247,7 @@ public final class StrategyContext implements IStrategyContext {
         }
     }
 
+    @Override
     public final void processStrategyCancel(StrategyCancel strategyCancel) {
         // update context
         orderView.update(strategyCancel.getOrderView());
@@ -263,43 +271,53 @@ public final class StrategyContext implements IStrategyContext {
     // order report event
     //////////////////////////////////////////////////
 
+    @Override
     public final void processStrategyNewAck(StrategyNewAck strategyNewAck) {
         // update context
         orderView.update(strategyNewAck.getOrderView());
         strategyState = Working;
     }
 
+    @Override
     public final void processStrategyNewReject(StrategyNewReject strategyNewReject) {
         // update context
         orderView.update(strategyNewReject.getOrderView());
         strategyState = StrategyState.Rejected;
     }
 
+    @Override
     public final void processStrategyAmendAck(StrategyAmendAck strategyAmendAck) {
         // update context
         orderView.update(strategyAmendAck.getOrderView());
-        updateExtendedAttributes(strategyAmendAck.getOrderView().getExtendedAttributes());
         strategyState = Working;
+
+        Map<String, String> extendedAttributes = strategyAmendAck.getOrderView().getExtendedAttributes();
+        orderView.updateExtendedAttributes(extendedAttributes);
+        strategyParameterAccessor.updateExtendedAttributes(extendedAttributes);
     }
 
+    @Override
     public final void processStrategyAmendReject(StrategyAmendReject strategyAmendReject) {
         // update context
         orderView.update(strategyAmendReject.getOrderView());
         strategyState = Working;
     }
 
+    @Override
     public final void processStrategyCancelAck(StrategyCancelAck strategyCancelAck) {
         // update context
         orderView.update(strategyCancelAck.getOrderView());
         strategyState = StrategyState.Cancelled;
     }
 
+    @Override
     public final void processStrategyCancelReject(StrategyCancelReject strategyCancelReject) {
         // update context
         orderView.update(strategyCancelReject.getOrderView());
         strategyState = Working;
     }
 
+    @Override
     public final void processStrategyUnsolicitedCancel(StrategyUnsolicitedCancel strategyUnsolicitedCancel) {
         // update context
         orderView.update(strategyUnsolicitedCancel.getOrderView());
@@ -310,6 +328,7 @@ public final class StrategyContext implements IStrategyContext {
     // child order report
     //////////////////////////////////////////////////
 
+    @Override
     public final void processStrategyChildOrderNewAck(StrategyChildOrderNewAck strategyChildOrderNewAck) {
         // update context
         orderView.update(strategyChildOrderNewAck.getOrderView());
@@ -317,6 +336,7 @@ public final class StrategyContext implements IStrategyContext {
         childOrderContainer.decrementOnTheWireOrdersCount();
     }
 
+    @Override
     public final void processStrategyChildOrderNewReject(StrategyChildOrderNewReject strategyChildOrderNewReject) {
         // update context
         orderView.update(strategyChildOrderNewReject.getOrderView());
@@ -324,6 +344,7 @@ public final class StrategyContext implements IStrategyContext {
         childOrderContainer.decrementOnTheWireOrdersCount();
     }
 
+    @Override
     public final void processStrategyChildOrderAmendAck(StrategyChildOrderAmendAck strategyChildOrderAmendAck) {
         // update context
         orderView.update(strategyChildOrderAmendAck.getOrderView());
@@ -331,6 +352,7 @@ public final class StrategyContext implements IStrategyContext {
         childOrderContainer.decrementOnTheWireOrdersCount();
     }
 
+    @Override
     public final void processStrategyChildOrderAmendReject(StrategyChildOrderAmendReject strategyChildOrderAmendReject) {
         // update context
         orderView.update(strategyChildOrderAmendReject.getOrderView());
@@ -338,6 +360,7 @@ public final class StrategyContext implements IStrategyContext {
         childOrderContainer.decrementOnTheWireOrdersCount();
     }
 
+    @Override
     public final void processStrategyChildOrderCancelAck(StrategyChildOrderCancelAck strategyChildOrderCancelAck) {
         // update context
         orderView.update(strategyChildOrderCancelAck.getOrderView());
@@ -345,6 +368,7 @@ public final class StrategyContext implements IStrategyContext {
         childOrderContainer.decrementOnTheWireOrdersCount();
     }
 
+    @Override
     public final void processStrategyChildOrderCancelReject(StrategyChildOrderCancelReject strategyChildOrderCancelReject) {
         // update context
         orderView.update(strategyChildOrderCancelReject.getOrderView());
@@ -352,12 +376,14 @@ public final class StrategyContext implements IStrategyContext {
         childOrderContainer.decrementOnTheWireOrdersCount();
     }
 
+    @Override
     public final void processStrategyChildOrderExpire(StrategyChildOrderExpire strategyChildOrderExpire) {
         // update context
         orderView.update(strategyChildOrderExpire.getOrderView());
         childOrderContainer.removeChildOrder(strategyChildOrderExpire.getChildOrderView());
     }
 
+    @Override
     public final void processStrategyChildOrderUnsolicitedCancel(StrategyChildOrderUnsolicitedCancel strategyChildOrderUnsolicitedCancel) {
         // update context
         orderView.update(strategyChildOrderUnsolicitedCancel.getOrderView());
@@ -368,6 +394,7 @@ public final class StrategyContext implements IStrategyContext {
     // child order fill
     //////////////////////////////////////////////////
 
+    @Override
     public final void processStrategyChildOrderFill(StrategyChildOrderFill strategyChildOrderFill) {
         // update context
         orderView.update(strategyChildOrderFill.getOrderView());
@@ -386,6 +413,7 @@ public final class StrategyContext implements IStrategyContext {
     // market data event
     //////////////////////////////////////////////////
 
+    @Override
     public final void processStrategyMarketDataEvent(StrategyMarketDataEvent strategyMarketDataEvent) {
         logger.trace("processing market data.");
     }
@@ -394,6 +422,7 @@ public final class StrategyContext implements IStrategyContext {
     // timer event event
     //////////////////////////////////////////////////
 
+    @Override
     public final void processStrategyTimerEvent(StrategyTimerEvent strategyTimerEvent) {
         logger.trace("processing timer event.");
 
