@@ -5,8 +5,8 @@ import jp.co.myogadanimotors.bunkyo.config.ConfigAccessor;
 import jp.co.myogadanimotors.bunkyo.master.MasterDataInitializeException;
 import jp.co.myogadanimotors.kohinata.Kohinata;
 import jp.co.myogadanimotors.kohinata.master.strategy.StrategyMaster;
-import jp.co.myogadanimotors.kohinata.strategy.IStrategyFactory;
-import jp.co.myogadanimotors.myogadani.strategy.StrategyFactory;
+import jp.co.myogadanimotors.kohinata.strategy.IStrategy;
+import jp.co.myogadanimotors.myogadani.strategy.peg.Peg;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -64,15 +64,21 @@ public class Main {
             return;
         }
 
-        // create StrategyFactory
-        IStrategyFactory strategyFactory = new StrategyFactory();
-
         // create Kohinata
-        Kohinata kohinata = new Kohinata(environment, strategyMaster, strategyConfigAccessor, strategyFactory);
+        Kohinata kohinata = new Kohinata(environment, strategyMaster, strategyConfigAccessor, this::createStrategy);
 
         // run Kohinata
         ExecutorService executorService = Executors.newSingleThreadExecutor();
         executorService.execute(kohinata);
         executorService.shutdown();
+    }
+
+    private IStrategy createStrategy(String strategyName) {
+        switch (strategyName) {
+            case "Peg":     // test
+                return new Peg();
+        }
+
+        return null;
     }
 }
