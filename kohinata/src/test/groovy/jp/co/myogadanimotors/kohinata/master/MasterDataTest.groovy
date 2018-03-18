@@ -53,21 +53,6 @@ class MasterDataTest {
         assert product.getDescription() == description
     }
 
-    // todo: move this to kohinata
-//    @Test
-//    void testStrategyMaster() {
-//        def strategyMaster = new StrategyMaster()
-//        strategyMaster.init(config)
-//
-//        assertStrategyDescriptor(strategyMaster.get(0L), "Peg", "This strategy places market making orders pegging at the near touch price.")
-//        assertStrategyDescriptor(strategyMaster.get(1L), "Arbitrage", "Test")
-//    }
-//
-//    private static void assertStrategyDescriptor(IStrategyDescriptor sd, String name, String description) {
-//        assert sd.getName() == name
-//        assert sd.getDescription() == description
-//    }
-
     @Test
     void testExtendedAttributeMaster() {
         def extendedAttributeMaster = new ExtendedAttributeMaster()

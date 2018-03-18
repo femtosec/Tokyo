@@ -1,4 +1,4 @@
 [
-  { "id": 0,  "name": "Peg",        "description": "This strategy places market making orders pegging at the near touch price." },
+  { "id": 0,  "name": "Peg",        "description": "The strategy places market making orders pegging at the near touch price." },
   { "id": 1,  "name": "Arbitrage",  "description": "Test" }
 ]
