@@ -2,35 +2,16 @@ package jp.co.myogadanimotors.kohinata.event.order;
 
 import jp.co.myogadanimotors.bunkyo.eventprocessing.BaseEventSender;
 import jp.co.myogadanimotors.bunkyo.eventprocessing.EventIdGenerator;
-import jp.co.myogadanimotors.bunkyo.eventprocessing.IEvent;
 import jp.co.myogadanimotors.bunkyo.timesource.ITimeSource;
 
 import java.math.BigDecimal;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class OrderSender extends BaseEventSender<IAsyncOrderListener> {
-
-    private long requestId;
-    private long orderId;
-    private long parentOrderId;
-    private long accountId;
-    private String symbol;
-    private String mic;
-    private OrderSide orderSide;
-    private BigDecimal orderQuantity;
-    private BigDecimal priceLimit;
-    private Orderer orderer;
-    private OrderDestination destination;
-    private Map<String, String> extendedAttributes = new ConcurrentHashMap<>();
 
     public OrderSender(EventIdGenerator idGenerator, ITimeSource timeSource) {
         super(idGenerator, timeSource);
     }
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    // event senders
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     public void sendNewOrder(long requestId,
                              long parentOrderId,
@@ -43,18 +24,24 @@ public class OrderSender extends BaseEventSender<IAsyncOrderListener> {
                              Orderer orderer,
                              OrderDestination destination,
                              Map<String, String> extendedAttributes) {
-        this.requestId = requestId;
-        this.parentOrderId = parentOrderId;
-        this.accountId = accountId;
-        this.symbol = symbol;
-        this.mic = mic;
-        this.orderSide = orderSide;
-        this.orderQuantity = orderQuantity;
-        this.priceLimit = priceLimit;
-        this.orderer = orderer;
-        this.destination = destination;
-        this.extendedAttributes = extendedAttributes;
-        send(this::createNewOrder);
+        send((eventId, creationTime, asyncEventListener) ->
+                new NewOrder(
+                        eventId,
+                        creationTime,
+                        asyncEventListener,
+                        requestId,
+                        parentOrderId,
+                        accountId,
+                        symbol,
+                        mic,
+                        orderSide,
+                        orderQuantity,
+                        priceLimit,
+                        orderer,
+                        destination,
+                        extendedAttributes
+                )
+        );
     }
 
     public void sendAmendOrder(long requestId,
@@ -62,63 +49,29 @@ public class OrderSender extends BaseEventSender<IAsyncOrderListener> {
                                BigDecimal orderQuantity,
                                BigDecimal priceLimit,
                                Map<String, String> extendedAttributes) {
-        this.requestId = requestId;
-        this.orderId = orderId;
-        this.orderQuantity = orderQuantity;
-        this.priceLimit = priceLimit;
-        this.extendedAttributes = extendedAttributes;
-        send(this::createAmendOrder);
+        send((eventId, creationTime, asyncEventListener) ->
+                new AmendOrder(
+                        eventId,
+                        creationTime,
+                        asyncEventListener,
+                        requestId,
+                        orderId,
+                        orderQuantity,
+                        priceLimit,
+                        extendedAttributes
+                )
+        );
     }
 
     public void sendCancelOrder(long requestId, long orderId) {
-        this.requestId = requestId;
-        this.orderId = orderId;
-        send(this::createCancelOrder);
-    }
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    // event factory methods
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    private IEvent createNewOrder(long eventId, long creationTime, IAsyncOrderListener asyncEventListener) {
-        return new NewOrder(
-                eventId,
-                creationTime,
-                requestId,
-                parentOrderId,
-                accountId,
-                symbol,
-                mic,
-                orderSide,
-                orderQuantity,
-                priceLimit,
-                orderer,
-                destination,
-                extendedAttributes,
-                asyncEventListener
-        );
-    }
-
-    private IEvent createAmendOrder(long eventId, long creationTime, IAsyncOrderListener asyncEventListener) {
-        return new AmendOrder(
-                eventId,
-                creationTime,
-                requestId,
-                orderId,
-                orderQuantity,
-                priceLimit,
-                extendedAttributes,
-                asyncEventListener
-        );
-    }
-
-    private IEvent createCancelOrder(long eventId, long creationTime, IAsyncOrderListener asyncEventListener) {
-        return new CancelOrder(
-                eventId,
-                creationTime,
-                requestId,
-                orderId,
-                asyncEventListener
+        send((eventId, creationTime, asyncEventListener) ->
+                new CancelOrder(
+                        eventId,
+                        creationTime,
+                        asyncEventListener,
+                        requestId,
+                        orderId
+                )
         );
     }
 }

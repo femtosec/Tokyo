@@ -11,11 +11,11 @@ public final class MarketDataRequest extends BaseEvent<IAsyncMarketDataRequestLi
 
     public MarketDataRequest(long eventId,
                              long creationTime,
+                             IAsyncMarketDataRequestListener eventListener,
                              long requestId,
                              long productId,
                              String symbol,
-                             String mic,
-                             IAsyncMarketDataRequestListener eventListener) {
+                             String mic) {
         super(eventId, creationTime, eventListener);
         this.requestId = requestId;
         this.productId = productId;

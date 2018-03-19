@@ -9,9 +9,9 @@ public final class AmendAck extends BaseEvent<IAsyncReportListener> {
 
     public AmendAck(long eventId,
                     long creationTime,
+                    IAsyncReportListener eventListener,
                     long requestId,
-                    long orderId,
-                    IAsyncReportListener eventListener) {
+                    long orderId) {
         super(eventId, creationTime, eventListener);
         this.requestId = requestId;
         this.orderId = orderId;

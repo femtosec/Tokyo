@@ -11,9 +11,9 @@ public final class FillEvent extends BaseEvent<IAsyncFillListener> {
 
     public FillEvent(long eventId,
                      long creationTime,
+                     IAsyncFillListener fillEventListener,
                      long orderId,
-                     BigDecimal execQuantity,
-                     IAsyncFillListener fillEventListener) {
+                     BigDecimal execQuantity) {
         super(eventId, creationTime, fillEventListener);
         this.orderId = orderId;
         this.execQuantity = execQuantity;

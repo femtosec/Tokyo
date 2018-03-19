@@ -16,12 +16,12 @@ public final class AmendOrder extends BaseEvent<IAsyncOrderListener> {
 
     public AmendOrder(long eventId,
                       long creationTime,
+                      IAsyncOrderListener eventListener,
                       long requestId,
                       long orderId,
                       BigDecimal orderQuantity,
                       BigDecimal priceLimit,
-                      Map<String, String> extendedAttributes,
-                      IAsyncOrderListener eventListener) {
+                      Map<String, String> extendedAttributes) {
         super(eventId, creationTime, eventListener);
         this.requestId = requestId;
         this.orderId = orderId;

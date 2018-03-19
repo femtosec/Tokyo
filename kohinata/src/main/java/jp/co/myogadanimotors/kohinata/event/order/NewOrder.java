@@ -24,6 +24,7 @@ public final class NewOrder extends BaseEvent<IAsyncOrderListener> {
 
     public NewOrder(long eventId,
                     long creationTime,
+                    IAsyncOrderListener eventListener,
                     long requestId,
                     long parentOrderId,
                     long accountId,
@@ -34,8 +35,7 @@ public final class NewOrder extends BaseEvent<IAsyncOrderListener> {
                     BigDecimal priceLimit,
                     Orderer orderer,
                     OrderDestination destination,
-                    Map<String, String> extendedAttributes,
-                    IAsyncOrderListener eventListener) {
+                    Map<String, String> extendedAttributes) {
         super(eventId, creationTime, eventListener);
         this.requestId = requestId;
         this.parentOrderId = parentOrderId;

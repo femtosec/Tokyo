@@ -11,7 +11,6 @@ import jp.co.myogadanimotors.bunkyo.master.product.IProduct
 import jp.co.myogadanimotors.bunkyo.master.product.ProductMaster
 import jp.co.myogadanimotors.bunkyo.timesource.ITimeSource
 import jp.co.myogadanimotors.kohinata.event.RequestIdGenerator
-import jp.co.myogadanimotors.kohinata.event.marketdata.IAsyncMarketDataListener
 import jp.co.myogadanimotors.kohinata.event.marketdata.IAsyncMarketDataRequestListener
 import jp.co.myogadanimotors.kohinata.event.order.*
 import jp.co.myogadanimotors.kohinata.event.report.IAsyncFillListener
@@ -23,7 +22,6 @@ import jp.co.myogadanimotors.kohinata.ordermanagement.order.IOrder
 import jp.co.myogadanimotors.kohinata.ordermanagement.order.Order
 import jp.co.myogadanimotors.kohinata.ordermanagement.order.OrderState
 import jp.co.myogadanimotors.kohinata.strategy.IStrategy
-import jp.co.myogadanimotors.kohinata.strategy.context.IStrategyContext
 import jp.co.myogadanimotors.kohinata.strategy.context.StrategyContext
 import jp.co.myogadanimotors.kohinata.strategy.validator.IValidator
 import org.testng.annotations.BeforeClass
@@ -50,7 +48,7 @@ class OrderValidatorTest {
         orderValidator = new OrderValidator(marketMaster, productMaster, extendedAttributeMaster)
     }
 
-    StrategyContext createStrategyContext(IOrder order) {
+    private static StrategyContext createStrategyContext(IOrder order) {
         return new StrategyContext(
                 new EventIdGenerator(),
                 new RequestIdGenerator(),
@@ -114,6 +112,7 @@ class OrderValidatorTest {
         def newOrderEvent = new NewOrder(
                 0L,
                 0L,
+                [ ] as IAsyncOrderListener,
                 requestId,
                 0L,
                 0L,
@@ -124,8 +123,7 @@ class OrderValidatorTest {
                 BigDecimal.ZERO,
                 orderer,
                 destination,
-                extendedAttributes,
-                [ ] as IAsyncOrderListener
+                extendedAttributes
         )
 
         def newOrder = new Order(
@@ -181,12 +179,12 @@ class OrderValidatorTest {
         def amendOrderEvent = new AmendOrder(
                 0L,
                 0L,
+                [ ] as IAsyncOrderListener,
                 requestId,
                 0L,
                 BigDecimal.ZERO,
                 BigDecimal.ZERO,
-                extendedAttributes,
-                [ ] as IAsyncOrderListener
+                extendedAttributes
         )
 
         def currentOrder = new Order(
@@ -234,9 +232,9 @@ class OrderValidatorTest {
         def cancelOrderEvent = new CancelOrder(
                 0L,
                 0L,
+                [ ] as IAsyncOrderListener,
                 requestId,
-                0L,
-                [ ] as IAsyncOrderListener
+                0L
         )
 
         def currentOrder = new Order(

@@ -18,6 +18,7 @@ public final class MarketData extends BaseEvent<IAsyncMarketDataListener> {
 
     public MarketData(long eventId,
                       long creationTime,
+                      IAsyncMarketDataListener eventListener,
                       long requestId,
                       long productId,
                       String symbol,
@@ -26,8 +27,7 @@ public final class MarketData extends BaseEvent<IAsyncMarketDataListener> {
                       BigDecimal lastPrice,
                       BigDecimal lastTradeVolume,
                       DepthEntry[] bidDepth,
-                      DepthEntry[] offerDepth,
-                      IAsyncMarketDataListener eventListener) {
+                      DepthEntry[] offerDepth) {
         super(eventId, creationTime, eventListener);
         this.requestId = requestId;
         this.productId = productId;

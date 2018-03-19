@@ -10,10 +10,10 @@ public final class TimerEvent extends BaseEvent<IAsyncTimerEventListener> {
 
     public TimerEvent(long eventId,
                       long creationTime,
+                      IAsyncTimerEventListener eventListener,
                       long orderId,
                       long timerTag,
-                      long timerEventTime,
-                      IAsyncTimerEventListener eventListener) {
+                      long timerEventTime) {
         super(eventId, creationTime, eventListener);
         this.orderId = orderId;
         this.timerTag = timerTag;

@@ -10,10 +10,10 @@ public final class TimerRegistration extends BaseEvent<IAsyncTimerRegistrationLi
 
     public TimerRegistration(long eventId,
                              long creationTime,
+                             IAsyncTimerRegistrationListener eventListener,
                              long orderId,
                              long timerTag,
-                             long timerEventTime,
-                             IAsyncTimerRegistrationListener eventListener) {
+                             long timerEventTime) {
         super(eventId, creationTime, eventListener);
         this.orderId = orderId;
         this.timerTag = timerTag;

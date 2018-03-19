@@ -9,9 +9,9 @@ public final class CancelOrder extends BaseEvent<IAsyncOrderListener> {
 
     public CancelOrder(long eventId,
                        long creationTime,
+                       IAsyncOrderListener eventListener,
                        long requestId,
-                       long orderId,
-                       IAsyncOrderListener eventListener) {
+                       long orderId) {
         super(eventId, creationTime, eventListener);
         this.requestId = requestId;
         this.orderId = orderId;

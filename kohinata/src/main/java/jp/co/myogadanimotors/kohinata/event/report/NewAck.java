@@ -9,9 +9,9 @@ public final class NewAck extends BaseEvent<IAsyncReportListener> {
 
     public NewAck(long eventId,
                   long creationTime,
+                  IAsyncReportListener eventListener,
                   long requestId,
-                  long orderId,
-                  IAsyncReportListener eventListener) {
+                  long orderId) {
         super(eventId, creationTime, eventListener);
         this.requestId = requestId;
         this.orderId = orderId;

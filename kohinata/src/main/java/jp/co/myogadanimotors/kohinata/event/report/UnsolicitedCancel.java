@@ -9,9 +9,9 @@ public final class UnsolicitedCancel extends BaseEvent<IAsyncReportListener> {
 
     public UnsolicitedCancel(long eventId,
                              long creationTime,
+                             IAsyncReportListener eventListener,
                              long orderId,
-                             String message,
-                             IAsyncReportListener eventListener) {
+                             String message) {
         super(eventId, creationTime, eventListener);
         this.orderId = orderId;
         this.message = message;

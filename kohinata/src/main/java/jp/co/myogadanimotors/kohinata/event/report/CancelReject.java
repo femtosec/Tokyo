@@ -10,10 +10,10 @@ public final class CancelReject extends BaseEvent<IAsyncReportListener> {
 
     public CancelReject(long eventId,
                         long creationTime,
+                        IAsyncReportListener eventListener,
                         long requestId,
                         long orderId,
-                        String message,
-                        IAsyncReportListener eventListener) {
+                        String message) {
         super(eventId, creationTime, eventListener);
         this.requestId = requestId;
         this.orderId = orderId;
