@@ -1,7 +1,6 @@
 package jp.co.myogadanimotors.kohinata.strategy.event.order;
 
 import jp.co.myogadanimotors.kohinata.strategy.context.OrderView;
-import jp.co.myogadanimotors.kohinata.strategy.context.StrategyContext;
 import jp.co.myogadanimotors.kohinata.strategy.event.IStrategyEventListener;
 import jp.co.myogadanimotors.kohinata.strategy.event.StrategyEventType;
 
@@ -9,9 +8,9 @@ public final class StrategyCancelAck extends BaseStrategyReportEvent {
 
     public StrategyCancelAck(long eventId,
                              long creationTime,
-                             StrategyContext context,
+                             IStrategyEventListener strategyEventListener,
                              OrderView orderView) {
-        super(eventId, creationTime, context, orderView);
+        super(eventId, creationTime, strategyEventListener, orderView);
     }
 
     @Override

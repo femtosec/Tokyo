@@ -138,8 +138,7 @@ class OrderValidatorTest {
                 orderer,
                 destination,
                 extendedAttributes,
-                null,
-                0
+                null
         )
 
         if (shouldSetStrategyContext) {
@@ -199,8 +198,7 @@ class OrderValidatorTest {
                 Orderer.EMS,
                 OrderDestination.Strategy,
                 extendedAttributes,
-                null,
-                0
+                null
         )
         currentOrder.setOrderState(orderState)
         assert orderValidator.isValidAmendOrder(amendOrderEvent, currentOrder) == expectedResult
@@ -249,8 +247,7 @@ class OrderValidatorTest {
                 Orderer.EMS,
                 OrderDestination.Strategy,
                 extendedAttributes,
-                null,
-                0
+                null
         )
         currentOrder.setOrderState(orderState)
         assert orderValidator.isValidCancelOrder(cancelOrderEvent, currentOrder) == expectedResult

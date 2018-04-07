@@ -18,6 +18,7 @@ import jp.co.myogadanimotors.kohinata.master.strategy.StrategyMaster;
 import jp.co.myogadanimotors.kohinata.ordermanagement.OrderManager;
 import jp.co.myogadanimotors.kohinata.strategy.IStrategyFactory;
 import jp.co.myogadanimotors.kohinata.strategy.context.StrategyContextFactory;
+import jp.co.myogadanimotors.kohinata.strategy.event.StrategyEventProcessor;
 import jp.co.myogadanimotors.kohinata.timereventsource.ITimerEventSource;
 import jp.co.myogadanimotors.kohinata.timereventsource.TimerEventSource;
 import org.apache.logging.log4j.LogManager;
@@ -66,7 +67,7 @@ public final class Kohinata implements Runnable {
 
         logger.info("initializing Kohinata. (environment: {})", environment);
 
-        // initialize config accessor
+        // initialize the config accessor
         ConfigAccessor configAccessor = new ConfigAccessor();
         try {
             configAccessor.parse(environment, getClass().getClassLoader().getResource("configuration.groovy"));
@@ -88,26 +89,28 @@ public final class Kohinata implements Runnable {
             return false;
         }
 
-        // create event queues
-        int numberOfStrategyThreads = configAccessor.getInt("kohinata.numberOfStrategyThreads", Constants.DEFAULT_NUMBER_OF_STRATEGY_THREADS);
-
-        logger.info("creating executor service. (numberOfStrategyThreads: {})", numberOfStrategyThreads);
-
+        // create the event queue for the order manager
         eventQueue = Executors.newSingleThreadExecutor();
+
+        // create strategy event queues and event processors
+        int numberOfStrategyThreads = configAccessor.getInt("kohinata.numberOfStrategyThreads", Constants.DEFAULT_NUMBER_OF_STRATEGY_THREADS);
         strategyEventQueues = new ExecutorService[numberOfStrategyThreads];
+        StrategyEventProcessor[] strategyEventProcessors = new StrategyEventProcessor[numberOfStrategyThreads];
         for (int i = 0; i < numberOfStrategyThreads; i++) {
             strategyEventQueues[i] = Executors.newSingleThreadExecutor();
+            strategyEventProcessors[i] = new StrategyEventProcessor();
         }
+        logger.info("strategy executor services and event processors created. (numberOfStrategyThreads: {})", numberOfStrategyThreads);
 
         // create ID generators
         EventIdGenerator eventIdGenerator = new EventIdGenerator(0);
         RequestIdGenerator requestIdGenerator = new RequestIdGenerator(0);
 
-        // create time source
+        // create the time source
         ITimeSource timeSource = new SystemTimeSource();
 
         try {
-            // create strategy context factory
+            // create the strategy context factory
             StrategyContextFactory strategyContextFactory = new StrategyContextFactory(
                     eventIdGenerator,
                     requestIdGenerator,
@@ -119,24 +122,24 @@ public final class Kohinata implements Runnable {
             );
             logger.info("strategy context factory created.");
 
-            // create EMS adapter
+            // create the EMS adapter
             emsAdapter = null;  // todo: to be implemented
             logger.info("EMS adapter created.");
 
-            // create Exchange adapter
+            // create the Exchange adapter
             exchangeAdapter = null;    // todo: to be implemented
             logger.info("exchange adapter created.");
 
-            // create market data provider
+            // create the market data provider
             marketDataProvider = null;  // todo: to be implemented
             logger.info("market data provider created.");
 
-            // create timer event source
+            // create the timer event source
             long timerEventResolution = configAccessor.getLong("timerSource.timerEventResolution", Constants.DEFAULT_TIMER_EVENT_RESOLUTION);
             timerEventSource = new TimerEventSource(eventIdGenerator, timeSource, timerEventResolution, eventQueue);
             logger.info("timer event source created.");
 
-            // create order manager
+            // create the order manager
             OrderManager orderManager = new OrderManager(
                     eventIdGenerator,
                     timeSource,
@@ -146,6 +149,7 @@ public final class Kohinata implements Runnable {
                     extendedAttributeMaster,
                     strategyMaster,
                     eventQueue,
+                    strategyEventProcessors,
                     strategyEventQueues
             );
             logger.info("order manager created.");
@@ -182,10 +186,10 @@ public final class Kohinata implements Runnable {
             return;
         }
 
-        // create executor service
+        // create the executor service
         ExecutorService executorService = Executors.newFixedThreadPool(4);
 
-        // start Kohinata
+        // start the Kohinata
         executorService.execute(emsAdapter);
         executorService.execute(exchangeAdapter);
         executorService.execute(marketDataProvider);

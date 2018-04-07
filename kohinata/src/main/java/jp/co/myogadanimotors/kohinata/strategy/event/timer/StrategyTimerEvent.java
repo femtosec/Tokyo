@@ -1,6 +1,5 @@
 package jp.co.myogadanimotors.kohinata.strategy.event.timer;
 
-import jp.co.myogadanimotors.kohinata.strategy.context.StrategyContext;
 import jp.co.myogadanimotors.kohinata.strategy.event.BaseStrategyEvent;
 import jp.co.myogadanimotors.kohinata.strategy.event.IStrategyEventListener;
 import jp.co.myogadanimotors.kohinata.strategy.event.StrategyEventType;
@@ -12,10 +11,10 @@ public final class StrategyTimerEvent extends BaseStrategyEvent {
 
     public StrategyTimerEvent(long eventId,
                               long creationTime,
-                              StrategyContext context,
+                              IStrategyEventListener strategyEventListener,
                               long timerTag,
                               long timerEventTime) {
-        super(eventId, creationTime, context);
+        super(eventId, creationTime, strategyEventListener);
         this.timerTag = timerTag;
         this.timerEventTime = timerEventTime;
     }

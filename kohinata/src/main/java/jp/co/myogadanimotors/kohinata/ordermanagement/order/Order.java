@@ -21,7 +21,6 @@ public final class Order implements IOrder {
     private final OrderDestination destination;
     private final Map<String, String> extendedAttributes = new ConcurrentHashMap<>();
     private final Order parentStrategyOrder;
-    private final int threadId;
 
     private BigDecimal orderQuantity;
     private BigDecimal execQuantity;
@@ -45,8 +44,7 @@ public final class Order implements IOrder {
                  Orderer orderer,
                  OrderDestination destination,
                  Map<String, String> extendedAttributes,
-                 Order parentStrategyOrder,
-                 int threadId) {
+                 Order parentStrategyOrder) {
         this.orderId = orderId;
         this.accountId = accountId;
         this.symbol = symbol;
@@ -64,7 +62,6 @@ public final class Order implements IOrder {
         this.destination = destination;
         this.extendedAttributes.putAll(extendedAttributes);
         this.parentStrategyOrder = parentStrategyOrder;
-        this.threadId = threadId;
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -213,10 +210,6 @@ public final class Order implements IOrder {
 
     public StrategyContext getStrategyContext() {
         return strategyContext;
-    }
-
-    public int getThreadId() {
-        return threadId;
     }
 
     @Override
